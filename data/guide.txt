@@ -1,0 +1,1 @@
+make separate folders for data set and store data set inside this folder

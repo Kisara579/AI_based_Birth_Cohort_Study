@@ -1,12 +1,13 @@
+
 # Python
+__pycache__/
 *.py[cod]
 *$py.class
-__pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -17,63 +18,50 @@ sdist/
 var/
 wheels/
 pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual Environment
+
+# Virtual Environments
+.venv/
 venv/
 env/
 ENV/
 env.bak/
 venv.bak/
-.venv/
 
-# PyCharm
-.idea/
 
-# VS Code
+# IDE / Editors
 .vscode/
+.idea/
 *.code-workspace
 
-# Jupyter Notebook
+
+# Jupyter
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
-# Environment variables
+
+# Environment Variables
 .env
 .env.local
 .env.*.local
 
-# Data files
-# data/*/raw/*.csv
-# data/*/raw/*.xlsx
-# data/*/raw/*.xls
-# data/*/processed/*.csv
-# data/*/processed/*.pkl
-# data/*/processed/*.parquet
 
-# Model files
-*.pkl
-*.joblib
-*.h5
-*.hdf5
-*.pb
-*.pth
-*.pt
-*.onnx
-backend/models/*.pkl
-backend/models/*.joblib
-backend/models/*.h5
-models/
+# Logs
+*.log
+logs/
+*.out
 
-# Training outputs
-training/logs/
-training/checkpoints/
-training/outputs/
 
+# Testing / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
 
 # System Files
 .DS_Store
@@ -83,17 +71,6 @@ desktop.ini
 *.swo
 *~
 
-# Logs
-*.log
-logs/
-*.out
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
 
 # Frontend (Node.js)
 frontend/node_modules/
@@ -104,3 +81,8 @@ frontend/.nuxt/
 frontend/.cache/
 frontend/package-lock.json
 frontend/yarn.lock
+
+# Training temp outputs only
+training/logs/
+training/checkpoints/
+training/outputs/

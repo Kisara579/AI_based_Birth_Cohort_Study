@@ -26,3 +26,4 @@ df.to_csv(os.path.join(processed_path, "lbw1_processed.csv"), index=False)
 
 print("Processed dataset saved.")
 
+print(df.columns)

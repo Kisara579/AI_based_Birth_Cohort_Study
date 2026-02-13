@@ -48,12 +48,12 @@ venv.bak/
 .env.*.local
 
 # Data files
-data/*/raw/*.csv
-data/*/raw/*.xlsx
-data/*/raw/*.xls
-data/*/processed/*.csv
-data/*/processed/*.pkl
-data/*/processed/*.parquet
+# data/*/raw/*.csv
+# data/*/raw/*.xlsx
+# data/*/raw/*.xls
+# data/*/processed/*.csv
+# data/*/processed/*.pkl
+# data/*/processed/*.parquet
 
 # Model files
 *.pkl

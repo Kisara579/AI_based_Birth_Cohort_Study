@@ -7,7 +7,6 @@ import PredictSelect from "../pages/PredictSelect.jsx";
 import PredictModel from "../pages/PredictModel.jsx";
 import ResultsSelect from "../pages/ResultsSelect.jsx";
 import ResultsModel from "../pages/ResultsModel.jsx";
-import Compare from "../pages/Compare.jsx";
 import About from "../pages/About.jsx";
 import NotFound from "../pages/NotFound.jsx";
 
@@ -19,12 +18,11 @@ export const router = createBrowserRouter([
       { index: true, element: <Overview /> },
 
       { path: "predict", element: <PredictSelect /> },
-      { path: "predict/:outcomeId/:modelId", element: <PredictModel /> },
+      { path: "predict/:outcomeId", element: <PredictModel /> },
 
       { path: "results", element: <ResultsSelect /> },
-      { path: "results/:outcomeId/:modelId", element: <ResultsModel /> },
+      { path: "results/:outcomeId", element: <ResultsModel /> },
 
-      { path: "compare", element: <Compare /> },
       { path: "about", element: <About /> },
 
       { path: "*", element: <NotFound /> },

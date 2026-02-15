@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import FormSection from "./FormSection.jsx";
 import Button from "../common/Button.jsx";
 
-// ---- simple validators ----
+// simple validators
 function validateField(field, rawValue) {
   const v = rawValue;
 
@@ -11,7 +11,7 @@ function validateField(field, rawValue) {
     if (empty) return "Required";
   }
 
-  // if empty and not required -> ok
+  // if empty and not required 
   if (v === undefined || v === null || String(v).trim() === "") return null;
 
   if (field.type === "number") {
@@ -72,7 +72,7 @@ export default function DynamicForm({ schema, onSubmit }) {
 
   function handleChange(name, value) {
     setValues((prev) => ({ ...prev, [name]: value }));
-    // live-clear error on change
+    // live clear error on change
     setErrors((prev) => ({ ...prev, [name]: null }));
   }
 

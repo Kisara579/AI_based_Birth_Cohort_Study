@@ -390,3 +390,20 @@ main.container {
   color: var(--text);
 }
 
+/* api status dot */
+.apiDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-left: 10px;
+  border: 1px solid var(--border);
+}
+
+.apiDotOk {
+  background: rgba(34, 197, 94, 0.9);
+}
+
+.apiDotBad {
+  background: rgba(239, 68, 68, 0.9);
+}

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List,Optional
 
 
 def get_outcomes() -> List[Dict[str, Any]]:
@@ -12,7 +12,7 @@ def get_outcomes() -> List[Dict[str, Any]]:
     ]
 
 
-def get_schema(outcome_id: str) -> Dict[str, Any]:
+def get_schema(outcome_id: str) -> Optional[Dict[str, Any]]:
     if outcome_id == "lbw":
         return {
             "title": "Low Birth Weight Inputs",
@@ -97,4 +97,4 @@ def get_schema(outcome_id: str) -> Dict[str, Any]:
             ],
         }
 
-    return {"error": "Schema not found"}
+    return None

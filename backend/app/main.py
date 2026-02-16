@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .config import APP_NAME, ENV
 from .schemas import PredictRequest, PredictResponse
@@ -32,8 +32,12 @@ def get_outcomes():
     return catalog_outcomes()
 
 @app.get("/schema/{outcome_id}")
-def get_schema(outcome_id: str):
-    return catalog_schema(outcome_id)
+def schema(outcome_id: str):
+    s = catalog_schema(outcome_id)
+    if s is None:
+        raise HTTPException(status_code=404, detail="Schema not found")
+    return s
+
 
 
 @app.post("/predict/{outcome_id}", response_model=PredictResponse)
@@ -42,4 +46,4 @@ def predict(outcome_id: str, request: PredictRequest):
         probability, risk_label = predict_lbw(request.data)
         return {"probability": probability, "risk_label": risk_label}
 
-    return {"probability": 0.0, "risk_label": "Not Implemented"}
+    raise HTTPException(status_code=501, detail="Prediction not implemented")

@@ -12,3 +12,4 @@ BASE_DIR = Path(__file__).resolve().parents[1]  # backend/
 MODELS_DIR = BASE_DIR / "models"
 
 LBW_MODEL_PATH = MODELS_DIR / "lbw_model.pkl"
+LBW_META_PATH = MODELS_DIR / "lbw_model.meta.json"

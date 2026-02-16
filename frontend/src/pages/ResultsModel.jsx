@@ -4,60 +4,87 @@ import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
-import { fetchOutcomes } from "../api/modelsApi.js";
-
-function mockPredictLBW(values) {
-  // Very simple fake scoring just for UI testing (NOT medical, NOT real model)
-  let score = 0;
-
-  if (values.mage !== null && values.mage < 18) score += 0.12;
-  if (values.meduc !== null && values.meduc < 10) score += 0.08;
-
-  if (values.cigs !== null) score += Math.min(0.25, values.cigs * 0.01);
-  if (values.drink === 1) score += 0.12;
-  if (values.monpre !== null && values.monpre > 3) score += 0.10;
-  if (values.npvis !== null && values.npvis < 4) score += 0.10;
-
-  // clamp into 0.05 - 0.95
-  return Math.max(0.05, Math.min(0.95, 0.15 + score));
-}
+import { fetchOutcomes, predictOutcome } from "../api/modelsApi.js";
 
 export default function ResultsModel() {
   const { outcomeId } = useParams();
   const location = useLocation();
 
+  // outcomes
   const [outcomes, setOutcomes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
+  const [loadingOutcomes, setLoadingOutcomes] = useState(true);
+  const [outcomesErr, setOutcomesErr] = useState("");
+
+  // prediction
+  const [predLoading, setPredLoading] = useState(false);
+  const [predErr, setPredErr] = useState("");
+  const [prediction, setPrediction] = useState(null);
 
   const outcome = useMemo(
     () => outcomes.find((o) => o.id === outcomeId),
     [outcomes, outcomeId]
   );
 
+  const formValues = location.state?.formValues;
+
+  // load outcomes (to display name/short)
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
-      setLoading(true);
-      setErr("");
+    async function loadOutcomes() {
+      setLoadingOutcomes(true);
+      setOutcomesErr("");
       try {
         const outs = await fetchOutcomes();
         if (!cancelled) setOutcomes(outs);
       } catch (e) {
-        if (!cancelled) setErr(e.message || "Failed to load outcomes");
+        if (!cancelled) setOutcomesErr(e.message || "Failed to load outcomes");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoadingOutcomes(false);
       }
     }
 
-    load();
+    loadOutcomes();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (loading) {
+  // call backend prediction when we have inputs
+  useEffect(() => {
+    let cancelled = false;
+
+    async function runPrediction() {
+      if (!formValues) return;
+
+      setPredLoading(true);
+      setPredErr("");
+      setPrediction(null);
+
+      try {
+        const res = await predictOutcome(outcomeId, formValues);
+
+        // backend might return {"error": "..."}
+        if (res?.error) throw new Error(res.error);
+
+        if (!cancelled) setPrediction(res);
+      } catch (e) {
+        if (!cancelled) setPredErr(e.message || "Prediction failed");
+      } finally {
+        if (!cancelled) setPredLoading(false);
+      }
+    }
+
+    runPrediction();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [outcomeId, formValues]);
+
+  // ui statuses
+
+  if (loadingOutcomes) {
     return (
       <div>
         <h1>Results</h1>
@@ -66,11 +93,11 @@ export default function ResultsModel() {
     );
   }
 
-  if (err) {
+  if (outcomesErr) {
     return (
       <div>
         <h1>Results</h1>
-        <ErrorBanner title="Could not load outcomes" message={err} />
+        <ErrorBanner title="Could not load outcomes" message={outcomesErr} />
         <div style={{ marginTop: 14 }}>
           <Link to="/">
             <Button variant="secondary">Back to Overview</Button>
@@ -97,8 +124,7 @@ export default function ResultsModel() {
     );
   }
 
-  const formValues = location.state?.formValues;
-
+  // If user opened results directly (no form values passed)
   if (!formValues) {
     return (
       <div>
@@ -112,14 +138,7 @@ export default function ResultsModel() {
           message="Please run a prediction first. This page expects form inputs from the Predict screen."
         />
 
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            marginTop: 14,
-            flexWrap: "wrap",
-          }}
-        >
+        <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="primary">Go to Predict</Button>
           </Link>
@@ -132,8 +151,44 @@ export default function ResultsModel() {
     );
   }
 
-  const prob = outcomeId === "lbw" ? mockPredictLBW(formValues) : 0.25;
-  const riskLabel = prob >= 0.5 ? "High Risk" : "Low Risk";
+  // Prediction loading / error
+  if (predLoading) {
+    return (
+      <div>
+        <h1>Results</h1>
+        <p className="muted">
+          Outcome: <b>{outcome.name}</b> ({outcome.short})
+        </p>
+        <LoadingSkeleton lines={5} />
+      </div>
+    );
+  }
+
+  if (predErr) {
+    return (
+      <div>
+        <h1>Results</h1>
+        <p className="muted">
+          Outcome: <b>{outcome.name}</b> ({outcome.short})
+        </p>
+
+        <ErrorBanner title="Prediction failed" message={predErr} />
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+          <Link to={`/predict/${outcome.id}`}>
+            <Button variant="secondary">Edit Inputs</Button>
+          </Link>
+
+          <Link to="/">
+            <Button variant="ghost">Back to Overview</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const prob = prediction?.probability ?? 0;
+  const riskLabel = prediction?.risk_label ?? "Unknown";
 
   return (
     <div>
@@ -142,7 +197,7 @@ export default function ResultsModel() {
         Outcome: <b>{outcome.name}</b> ({outcome.short})
       </p>
 
-      <Card title="Prediction Result" subtitle="Frontend mock (temporary)">
+      <Card title="Prediction Result" subtitle="From backend API">
         <div style={{ display: "grid", gap: 10 }}>
           <div>
             <div className="muted">Predicted probability</div>
@@ -170,7 +225,7 @@ export default function ResultsModel() {
 
       <Card
         title="Submitted Inputs"
-        subtitle="What you entered (debug only; later we remove)"
+        subtitle="Debug only; later we remove"
         className="mt16"
       >
         <pre className="codeBlock">{JSON.stringify(formValues, null, 2)}</pre>

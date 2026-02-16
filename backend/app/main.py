@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
 from .config import APP_NAME, ENV
 from .schemas import PredictRequest, PredictResponse
-from .predictor import predict_lbw
 from .catalog import get_outcomes as catalog_outcomes, get_schema as catalog_schema
+from .catalog import get_model_key
+from .predictor import predict_with_model_key
 
 
 
@@ -28,7 +30,7 @@ def health():
 
 # Example endpoint to return available outcomes for prediction
 @app.get("/outcomes")
-def get_outcomes():
+def outcomes():
     return catalog_outcomes()
 
 @app.get("/schema/{outcome_id}")
@@ -42,8 +44,9 @@ def schema(outcome_id: str):
 
 @app.post("/predict/{outcome_id}", response_model=PredictResponse)
 def predict(outcome_id: str, request: PredictRequest):
-    if outcome_id == "lbw":
-        probability, risk_label = predict_lbw(request.data)
-        return {"probability": probability, "risk_label": risk_label}
+    model_key = get_model_key(outcome_id)
+    if model_key is None:
+        raise HTTPException(status_code=404, detail="Unknown outcome")
 
-    raise HTTPException(status_code=501, detail="Prediction not implemented")
+    probability, risk_label = predict_with_model_key(model_key, request.data)
+    return {"probability": probability, "risk_label": risk_label}

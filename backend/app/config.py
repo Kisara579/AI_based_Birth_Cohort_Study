@@ -13,3 +13,9 @@ MODELS_DIR = BASE_DIR / "models"
 
 LBW_MODEL_PATH = MODELS_DIR / "lbw_model.pkl"
 LBW_META_PATH = MODELS_DIR / "lbw_model.meta.json"
+
+
+def model_paths(model_key: str):
+    model_path = MODELS_DIR / f"{model_key}_model.pkl"
+    meta_path = MODELS_DIR / f"{model_key}_model.meta.json"
+    return model_path, meta_path

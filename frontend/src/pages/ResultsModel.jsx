@@ -1,17 +1,16 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
-import { outcomes } from "../data/mockOutcomes.js";
+import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
+import { fetchOutcomes } from "../api/modelsApi.js";
 
 function mockPredictLBW(values) {
-  // Very simple fake scoring just for UI testing
-  // (not medical, not real model)
+  // Very simple fake scoring just for UI testing (NOT medical, NOT real model)
   let score = 0;
 
   if (values.mage !== null && values.mage < 18) score += 0.12;
-  if (values.meduce !== null && values.meduce < 10) score += 0.08; // if typo later, ignore
   if (values.meduc !== null && values.meduc < 10) score += 0.08;
 
   if (values.cigs !== null) score += Math.min(0.25, values.cigs * 0.01);
@@ -27,10 +26,59 @@ export default function ResultsModel() {
   const { outcomeId } = useParams();
   const location = useLocation();
 
+  const [outcomes, setOutcomes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+
   const outcome = useMemo(
     () => outcomes.find((o) => o.id === outcomeId),
-    [outcomeId]
+    [outcomes, outcomeId]
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setErr("");
+      try {
+        const outs = await fetchOutcomes();
+        if (!cancelled) setOutcomes(outs);
+      } catch (e) {
+        if (!cancelled) setErr(e.message || "Failed to load outcomes");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <h1>Results</h1>
+        <LoadingSkeleton lines={5} />
+      </div>
+    );
+  }
+
+  if (err) {
+    return (
+      <div>
+        <h1>Results</h1>
+        <ErrorBanner title="Could not load outcomes" message={err} />
+        <div style={{ marginTop: 14 }}>
+          <Link to="/">
+            <Button variant="secondary">Back to Overview</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!outcome) {
     return (
@@ -64,10 +112,18 @@ export default function ResultsModel() {
           message="Please run a prediction first. This page expects form inputs from the Predict screen."
         />
 
-        <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            marginTop: 14,
+            flexWrap: "wrap",
+          }}
+        >
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="primary">Go to Predict</Button>
           </Link>
+
           <Link to="/">
             <Button variant="ghost">Back to Overview</Button>
           </Link>
@@ -76,10 +132,7 @@ export default function ResultsModel() {
     );
   }
 
-  // temporary: outcome-specific mock predictor
-  const prob =
-    outcomeId === "lbw" ? mockPredictLBW(formValues) : 0.25;
-
+  const prob = outcomeId === "lbw" ? mockPredictLBW(formValues) : 0.25;
   const riskLabel = prob >= 0.5 ? "High Risk" : "Low Risk";
 
   return (
@@ -117,7 +170,7 @@ export default function ResultsModel() {
 
       <Card
         title="Submitted Inputs"
-        subtitle="What you entered (for debugging now, later remove)"
+        subtitle="What you entered (debug only; later we remove)"
         className="mt16"
       >
         <pre className="codeBlock">{JSON.stringify(formValues, null, 2)}</pre>

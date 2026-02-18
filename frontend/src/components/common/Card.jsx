@@ -1,7 +1,7 @@
 
-export default function Card({ title, subtitle, children, classname = "" }) {
+export default function Card({ title, subtitle, children, classname = "", className = "" }) {
   return (
-    <section className={`card ${classname}`}>
+    <section className={`card ${classname} ${className}`.trim()}>
       {(title || subtitle) && (
         <header className="cardHeader">
           {title && <h2 className="cardTitle">{title}</h2>}

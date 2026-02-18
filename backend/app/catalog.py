@@ -1,6 +1,70 @@
 from typing import Any, Dict, List, Optional
 
 OUTCOMES: Dict[str, Dict[str, Any]] = {
+    "pph": {
+        "id": "pph",
+        "name": "Postpartum haemorrhage  ",
+        "short": "PPH",
+        "description": "Predict risk of heavy bleeding after delivery.",
+        "model_key": "pph",
+        "schema": {"title": "PPH Inputs", "sections": []}
+    },
+
+    "preeclampsia": {
+        "id": "preeclampsia",
+        "name": "Preeclampsia",
+        "short": "PE",
+        "description": "Predict risk of hypertensive disorder during pregnancy.",
+        "model_key": "preeclampsia",
+        "schema": {"title": "Preeclampsia Inputs", "sections": []}
+    },
+
+    "iugr": {
+        "id": "iugr",
+        "name": "Intrauterine Growth Restriction",
+        "short": "IUGR",
+        "description": "Predict risk of intrauterine growth restriction.",
+        "model_key": "iugr",
+        "schema": {"title": "IUGR Inputs", "sections": []}
+    },
+
+    "gdm": {
+        "id": "gdm",
+        "name": "Gestational Diabetes",
+        "short": "GDM",
+        "description": "Predict risk of diabetes during pregnancy.",
+        "model_key": "gdm",
+        "schema": {"title": "GDM Inputs", "sections": []}
+    },
+
+    "iol": {
+        "id": "iol",
+        "name": "Women requiring induction of labor",
+        "short": "IOL",
+        "description": "Predict risk of intrauterine onset of labor.",
+        "model_key": "iol",
+        "schema": {"title": "IOL Inputs", "sections": []}
+    },
+
+    "c_section": {
+        "id": "c_section",
+        "name": "Caesarean Section",
+        "short": "CS",
+        "description": "Predict likelihood of cesarean delivery.",
+        "model_key": "c_section",
+        "schema": {"title": "C-Section Inputs", "sections": []}
+    },
+
+    "postpartum": {
+        "id": "postpartum",
+        "name": "Postpartum depression",
+        "short": "PPD",
+        "description": "Predict likelihood of postpartum depression.",
+        "model_key": "postpartum",
+        "schema": {"title": "Postpartum Depression Inputs", "sections": []}
+    },
+
+
     "lbw": {
         "id": "lbw",
         "name": "Low Birth Weight",
@@ -32,6 +96,8 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
             ],
         },
     },
+
+
     "preterm": {
         "id": "preterm",
         "name": "Preterm Birth",
@@ -41,86 +107,25 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "schema": {"title": "Preterm Birth Inputs", "sections": []}
     },
 
-    "preeclampsia": {
-        "id": "preeclampsia",
-        "name": "Preeclampsia",
-        "short": "PE",
-        "description": "Predict risk of hypertensive disorder during pregnancy.",
-        "model_key": "preeclampsia",
-        "schema": {"title": "Preeclampsia Inputs", "sections": []}
-    },
-
-    "gdm": {
-        "id": "gdm",
-        "name": "Gestational Diabetes",
-        "short": "GDM",
-        "description": "Predict risk of diabetes during pregnancy.",
-        "model_key": "gdm",
-        "schema": {"title": "GDM Inputs", "sections": []}
-    },
-
-    "c_section": {
-        "id": "c_section",
-        "name": "C-Section Delivery",
-        "short": "CS",
-        "description": "Predict likelihood of cesarean delivery.",
-        "model_key": "c_section",
-        "schema": {"title": "C-Section Inputs", "sections": []}
-    },
-
+    
     "nicu": {
         "id": "nicu",
-        "name": "NICU Admission",
+        "name": "Neonatal Intensive Care Unit Admission",
         "short": "NICU",
         "description": "Predict probability of NICU admission.",
         "model_key": "nicu",
         "schema": {"title": "NICU Inputs", "sections": []}
     },
 
-    "stillbirth": {
-        "id": "stillbirth",
-        "name": "Stillbirth",
-        "short": "SB",
-        "description": "Predict risk of stillbirth.",
-        "model_key": "stillbirth",
-        "schema": {"title": "Stillbirth Inputs", "sections": []}
-    },
-
-    "pph": {
-        "id": "pph",
-        "name": "Postpartum Hemorrhage",
-        "short": "PPH",
-        "description": "Predict risk of heavy bleeding after delivery.",
-        "model_key": "pph",
-        "schema": {"title": "PPH Inputs", "sections": []}
-    },
-
-    "neonatal_mortality": {
-        "id": "neonatal_mortality",
-        "name": "Neonatal Mortality",
-        "short": "NM",
-        "description": "Predict risk of neonatal death within 28 days.",
-        "model_key": "neonatal_mortality",
-        "schema": {"title": "Neonatal Mortality Inputs", "sections": []}
-    },
-
-    "congenital_anomaly": {
-        "id": "congenital_anomaly",
-        "name": "Congenital Anomaly",
-        "short": "CA",
-        "description": "Predict likelihood of congenital anomalies.",
-        "model_key": "congenital_anomaly",
-        "schema": {"title": "Congenital Anomaly Inputs", "sections": []}
-    },
-
-    "sga": {
-        "id": "sga",
-        "name": "Small for Gestational Age",
-        "short": "SGA",
-        "description": "Predict risk of small for gestational age.",
-        "model_key": "sga",
-        "schema": {"title": "SGA Inputs", "sections": []}
-    }
+    
+    "feeding": {
+        "id": "feeding",
+        "name": "Feeding Problems",
+        "short": "FP",
+        "description": "Predict risk of feeding problems in newborns.",
+        "model_key": "feeding",
+        "schema": {"title": "Feeding Problems Inputs", "sections": []}
+    }, 
 
 }
 

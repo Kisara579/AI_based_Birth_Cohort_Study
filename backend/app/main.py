@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
+import json
 
 from .config import APP_NAME, ENV
 from .schemas import PredictRequest, PredictResponse
@@ -50,3 +52,15 @@ def predict(outcome_id: str, request: PredictRequest):
 
     probability, risk_label = predict_with_model_key(model_key, request.data)
     return {"probability": probability, "risk_label": risk_label}
+
+
+@app.get("/metrics/{outcome_id}")
+def metrics(outcome_id: str):
+    
+    BASE_DIR = Path(__file__).resolve().parents[1]
+    metrics_path = BASE_DIR / "models" / f"{outcome_id}_metrics.json"
+
+    if not metrics_path.exists():
+        raise HTTPException(status_code=404, detail="Metrics not found. Train model first.")
+
+    return json.loads(metrics_path.read_text(encoding="utf-8"))

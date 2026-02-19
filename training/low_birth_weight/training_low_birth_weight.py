@@ -4,7 +4,7 @@ import joblib
 import json
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score,classification_report, confusion_matrix
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
@@ -65,11 +65,20 @@ y_pred = pipeline.predict(X_test)
 y_prob = pipeline.predict_proba(X_test)[:, 1]
 
 metrics = {
-    "accuracy": float(accuracy_score(y_test, y_pred)),
-    "precision": float(precision_score(y_test, y_pred)),
-    "recall": float(recall_score(y_test, y_pred)),
-    "f1_score": float(f1_score(y_test, y_pred)),
-    "roc_auc": float(roc_auc_score(y_test, y_prob))
+    "Accuracy": float(accuracy_score(y_test, y_pred)),
+    "Precision": float(precision_score(y_test, y_pred)),
+    "Recall": float(recall_score(y_test, y_pred)),
+    "F1 Score": float(f1_score(y_test, y_pred)),
+    "ROC AUC": float(roc_auc_score(y_test, y_prob))
+}
+
+report = classification_report(y_test, y_pred, output_dict=True)
+cm = confusion_matrix(y_test, y_pred).tolist()
+
+metrics_payload = {
+    "metrics": metrics,
+    "classification_report": report,
+    "confusion_matrix": cm
 }
 
 
@@ -104,7 +113,7 @@ META_PATH.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
 # save metrics 
 METRICS_PATH = MODEL_DIR / "lbw_metrics.json"
-METRICS_PATH.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+METRICS_PATH.write_text(json.dumps(metrics_payload, indent=2), encoding="utf-8")
 
 print("\nSaved:")
 print(" -", MODEL_PATH)

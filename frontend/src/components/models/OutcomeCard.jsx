@@ -13,9 +13,22 @@ export default function OutcomeCard({ outcome }) {
     >
       <div className="outcomeFooter">
         <span className="muted">{outcome.short}</span>
-        <Button variant="primary" onClick={() => navigate(`/predict/${outcome.id}`)}>
-          Predict
-        </Button>
+
+        <div className="outcomeActions">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(`/metrics/${outcome.id}`)}
+          >
+            Metrics
+          </Button>
+
+          <Button
+            variant="primary"
+            onClick={() => navigate(`/predict/${outcome.id}`)}
+          >
+            Predict
+          </Button>
+        </div>
       </div>
     </Card>
   );

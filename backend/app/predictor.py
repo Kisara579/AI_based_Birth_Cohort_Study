@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from pyexpat import model
 from typing import Any, Dict, Tuple, Optional
 from pathlib import Path
 import json
@@ -70,14 +70,30 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any]) -> Tuple[floa
         raise HTTPException(status_code=400, detail=f"Missing required features: {', '.join(missing)}")
 
     # Build a 1-row dataframe in the exact feature order
-    row_dict = {f: (0 if values.get(f) is None else values.get(f)) for f in feature_order}
+    row_dict = {f: ("" if values.get(f) is None else values.get(f)) for f in feature_order}
     X_df = pd.DataFrame([row_dict], columns=feature_order)
 
-    # sklearn-style predict_proba expected
+    # Coerce types (prevents isnan error in XGBoost)
+    categorical = set(meta.get("categorical_features", []))
+
+    # Ensure categorical columns are strings
+    for c in categorical:
+        if c in X_df.columns:
+            X_df[c] = X_df[c].astype(str)
+
+    # Convert everything else to numeric
+    for c in feature_order:
+        if c not in categorical:
+            X_df[c] = pd.to_numeric(X_df[c], errors="coerce")
+
+    # Replace NaNs from coercion with 0 (safe default; your training had no missing)
+    X_df = X_df.fillna(0)
+
     try:
         proba = model.predict_proba(X_df)[0][1]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Model predict_proba failed for {model_key}: {e}")
+
 
     probability = float(proba)
     risk_label = "High Risk" if probability >= threshold else "Low Risk"

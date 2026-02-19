@@ -97,7 +97,8 @@ meta = {
     "positive_label": "Low Birth Weight (<2500g)",
     "negative_label": "Normal Birth Weight",
     "feature_order": X.columns.tolist(),
-    "threshold": 0.5
+    "threshold": 0.5,
+    "categorical_features": categorical_features
 }
 META_PATH.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 

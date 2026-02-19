@@ -80,9 +80,9 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                     "fields": [
                         {"name": "MAGER", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
                         {"name": "FAGECOMB", "label": "Father age (years)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 30"},
-                        {"name": "MEDUC", "label": "Mother education level(coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
-                        {"name": "FEDUC", "label": "Father education level(coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
-                        {"name":"DMAR","label":"Marital status","type":"select","required":True,"options":[{"value":"1","label":"Married"},{"value":"2","label":"Not married"}]},
+                        {"name": "MEDUC", "label": "Mother education level", "type": "select", "required": True, "options": [{"value": 1, "label": "No formal education / Primary"},{"value": 2, "label": "Grade 6–11"},{"value": 3, "label": "Passed O/L"},{"value": 4, "label": "Passed A/L"},{"value": 5, "label": "Diploma / Associate"},{"value": 6, "label": "Degree"},{"value": 7, "label": "Postgraduate"},{"value": 8, "label": "Doctorate"},{"value": 9, "label": "Unknown"}]},
+                        {"name": "FEDUC", "label": "Father education level", "type": "select", "required": True, "options": [{"value": 1, "label": "No formal education / Primary"},{"value": 2, "label": "Grade 6–11"},{"value": 3, "label": "Passed O/L"},{"value": 4, "label": "Passed A/L"},{"value": 5, "label": "Diploma / Associate"},{"value": 6, "label": "Degree"},{"value": 7, "label": "Postgraduate"},{"value": 8, "label": "Doctorate"},{"value": 9, "label": "Unknown"}]},
+                        {"name": "DMAR","label": "Marital Status","type": "select","required": True,"options": [{"value": "1", "label": "Married"},{"value": "2", "label": "Not Married"},{"value": "", "label": "Unknown"}]},
                         {"name": "MBSTATE_REC", "label": "Mother nativity (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"}
                     ],
                 },

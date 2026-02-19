@@ -80,9 +80,9 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                     "fields": [
                         {"name": "MAGER", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
                         {"name": "FAGECOMB", "label": "Father age (years)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 30"},
-                        {"name": "MEDUC", "label": "Mother education (coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
-                        {"name": "FEDUC", "label": "Father education (coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
-                        {"name": "DMAR", "label": "Marital status", "type": "text", "required": True, "placeholder": "e.g., 1 or blank/unknown based on dataset"},
+                        {"name": "MEDUC", "label": "Mother education level(coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
+                        {"name": "FEDUC", "label": "Father education level(coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
+                        {"name":"DMAR","label":"Marital status","type":"select","required":True,"options":[{"value":"1","label":"Married"},{"value":"2","label":"Not married"}]},
                         {"name": "MBSTATE_REC", "label": "Mother nativity (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"}
                     ],
                 },
@@ -98,7 +98,8 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                         {"name": "NO_INFEC", "label": "No infections reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
                         {"name": "NO_MMORB", "label": "No maternal morbidity reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
                         {"name": "NO_RISKS", "label": "No risk factors reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
-                        {"name": "RF_CESAR", "label": "Previous cesarean (Y/N)", "type": "text", "required": True, "placeholder": "e.g., Y or N"},
+                        {"name":"RF_CESAR","label":"Previous cesarean","type":"select","required":True,"options":[{"value":"Y","label":"Yes"},{"value":"N","label":"No"}]},
+
                         {"name": "RF_CESARN", "label": "Number of previous cesareans", "type": "number", "min": 0, "max": 10, "required": True, "placeholder": "e.g., 0"}
                     ],
                 },
@@ -110,7 +111,8 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                         {"name": "PREVIS", "label": "Number of prenatal visits", "type": "number", "min": 0, "max": 50, "required": True, "placeholder": "e.g., 10"},
                         {"name": "ATTEND", "label": "Attendant at birth (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
                         {"name": "BFACIL", "label": "Birth facility / place (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
-                        {"name": "LD_INDL", "label": "Induction of labor (coded)", "type": "text", "required": True, "placeholder": "e.g., Y/N or code"}
+                        {"name":"LD_INDL","label":"Induction of labor","type":"select","required":True,"options":[{"value":"Y","label":"Yes"},{"value":"N","label":"No"}]}
+
                     ],
                 },
                 {
@@ -120,7 +122,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                         {"name": "PRIORLIVE", "label": "Prior births now living", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
                         {"name": "PRIORDEAD", "label": "Prior births now dead", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
                         {"name": "PRIORTERM", "label": "Prior other terminations", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "ILLB_R", "label": "Interval since last live birth (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"},
+                        {"name": "ILLB_R", "label": "Interval since last live birth (code)", "type": "number", "required": True, "placeholder": "e.g., 0"},
                         {"name": "ILOP_R", "label": "Interval since last other pregnancy outcome (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"},
                         {"name": "ILP_R", "label": "Interval since last pregnancy (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"}
                     ],
@@ -136,9 +138,9 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                 },
                 {
                     "id": "baby",
-                    "title": "Infant Information",
+                    "title": "child Information",
                     "fields": [
-                        {"name": "SEX", "label": "Infant sex (M/F)", "type": "text", "required": True, "placeholder": "e.g., M or F"}
+                        {"name": "SEX", "label": "sex", "type": "select", "required": True, "options": [{"value":"M","label":"Male"}, {"value":"F","label":"Female"}]}
                     ],
                 }
             ],

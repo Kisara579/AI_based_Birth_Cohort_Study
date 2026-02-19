@@ -15,18 +15,9 @@ DATA_PATH = Path("data/low_birth_weight/processed/lbw_train_processed.csv")
 
 df = pd.read_csv(DATA_PATH)
 
-# print("Shape:", df.shape)
-# print("Columns:", df.columns.tolist())
-# print("\nTarget distribution:\n", df["low_birth_weight"].value_counts())
-
 # Separate features and target variable
 X = df.drop(columns=["low_birth_weight"])
 y = df["low_birth_weight"]
-
-# print("x shape:", x.shape)
-# print("y shape:", y.shape)
-# print("First 5",x.head(5))
-# print("First 5",y.head(5).to_list())
 
 # spilt data into train and test
 X_train, X_test, y_train, y_test = train_test_split(
@@ -37,26 +28,9 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-# print("X_train shape:", X_train.shape)
-# print("X_test shape:", X_test.shape)
-
-# print("\nTrain LBW distribution:")
-# print(y_train.value_counts(normalize=True))
-
-# print("\nTest LBW distribution:")
-# print(y_test.value_counts(normalize=True))
-
-
 # identify numeric and categorical features
 numeric_features = X_train.select_dtypes(include=["int64", "float64"]).columns.tolist()
 categorical_features = X_train.select_dtypes(include=["object","string"]).columns.tolist()
-
-# print("Numeric features count:", len(numeric_features))
-# print("Categorical features count:", len(categorical_features))
-
-# print("\nCategorical features:")
-# print(categorical_features)
-
 
 # preprocessing
 preprocessor = ColumnTransformer(
@@ -122,7 +96,6 @@ meta = {
     "target": "low_birth_weight",
     "positive_label": "Low Birth Weight (<2500g)",
     "negative_label": "Normal Birth Weight",
-    # IMPORTANT: backend expects THIS KEY
     "feature_order": X.columns.tolist(),
     "threshold": 0.5
 }

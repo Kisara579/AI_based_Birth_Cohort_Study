@@ -69,33 +69,82 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "id": "lbw",
         "name": "Low Birth Weight",
         "short": "LBW",
-        "description": "Predict risk of low birth weight based on maternal factors.",
+        "description": "Predict risk of low birth weight based on maternal and delivery factors.",
         "model_key": "lbw",
         "schema": {
             "title": "Low Birth Weight Inputs",
             "sections": [
                 {
-                    "id": "maternal",
-                    "title": "Maternal Information",
+                    "id": "demographics",
+                    "title": "Demographics",
                     "fields": [
-                        {"name": "mage", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
-                        {"name": "meduc", "label": "Mother education (years)", "type": "number", "min": 0, "max": 25, "required": True, "placeholder": "e.g., 12"},
-                        {"name": "cigs", "label": "Cigarettes per day", "type": "number", "min": 0, "max": 60, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "drink", "label": "Alcohol use", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "MAGER", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "FAGECOMB", "label": "Father age (years)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 30"},
+                        {"name": "MEDUC", "label": "Mother education (coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
+                        {"name": "FEDUC", "label": "Father education (coded)", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 12"},
+                        {"name": "DMAR", "label": "Marital status", "type": "text", "required": True, "placeholder": "e.g., 1 or blank/unknown based on dataset"},
+                        {"name": "MBSTATE_REC", "label": "Mother nativity (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"}
                     ],
                 },
                 {
-                    "id": "pregnancy",
-                    "title": "Pregnancy Care",
+                    "id": "maternal_health",
+                    "title": "Maternal Health",
                     "fields": [
-                        {"name": "monpre", "label": "Month prenatal care started", "type": "number", "min": 1, "max": 9, "required": True, "placeholder": "e.g., 2"},
-                        {"name": "npvis", "label": "Number of prenatal visits", "type": "number", "min": 0, "max": 40, "required": True, "placeholder": "e.g., 8"},
-                        {"name": "male", "label": "Baby sex", "type": "select", "required": True, "options": [{"value": 1, "label": "Male"}, {"value": 0, "label": "Female"}]},
+                        {"name": "BMI", "label": "Body Mass Index (BMI)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 23.4"},
+                        {"name": "PWgt_R", "label": "Pre-pregnancy weight (coded)", "type": "number", "required": True, "placeholder": "e.g., 120"},
+                        {"name": "M_Ht_In", "label": "Mother height (inches)", "type": "number", "min": 40, "max": 84, "required": True, "placeholder": "e.g., 62"},
+                        {"name": "WTGAIN", "label": "Weight gain during pregnancy (lbs)", "type": "number", "min": 0, "max": 100, "required": True, "placeholder": "e.g., 25"},
+                        {"name": "CIG_0", "label": "Cigarettes before pregnancy (per day)", "type": "number", "min": 0, "max": 60, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "NO_INFEC", "label": "No infections reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
+                        {"name": "NO_MMORB", "label": "No maternal morbidity reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
+                        {"name": "NO_RISKS", "label": "No risk factors reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
+                        {"name": "RF_CESAR", "label": "Previous cesarean (Y/N)", "type": "text", "required": True, "placeholder": "e.g., Y or N"},
+                        {"name": "RF_CESARN", "label": "Number of previous cesareans", "type": "number", "min": 0, "max": 10, "required": True, "placeholder": "e.g., 0"}
                     ],
                 },
+                {
+                    "id": "prenatal_care",
+                    "title": "Prenatal Care",
+                    "fields": [
+                        {"name": "PRECARE", "label": "Month prenatal care began (coded)", "type": "number", "min": 0, "max": 9, "required": True, "placeholder": "e.g., 2"},
+                        {"name": "PREVIS", "label": "Number of prenatal visits", "type": "number", "min": 0, "max": 50, "required": True, "placeholder": "e.g., 10"},
+                        {"name": "ATTEND", "label": "Attendant at birth (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
+                        {"name": "BFACIL", "label": "Birth facility / place (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
+                        {"name": "LD_INDL", "label": "Induction of labor (coded)", "type": "text", "required": True, "placeholder": "e.g., Y/N or code"}
+                    ],
+                },
+                {
+                    "id": "history",
+                    "title": "Pregnancy History",
+                    "fields": [
+                        {"name": "PRIORLIVE", "label": "Prior births now living", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "PRIORDEAD", "label": "Prior births now dead", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "PRIORTERM", "label": "Prior other terminations", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "ILLB_R", "label": "Interval since last live birth (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"},
+                        {"name": "ILOP_R", "label": "Interval since last other pregnancy outcome (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"},
+                        {"name": "ILP_R", "label": "Interval since last pregnancy (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"}
+                    ],
+                },
+                {
+                    "id": "admin",
+                    "title": "Administrative / Coverage",
+                    "fields": [
+                        {"name": "PAY", "label": "Payment source for delivery (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
+                        {"name": "PAY_REC", "label": "Payment recode (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
+                        {"name": "RESTATUS", "label": "Residence status (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"}
+                    ],
+                },
+                {
+                    "id": "baby",
+                    "title": "Infant Information",
+                    "fields": [
+                        {"name": "SEX", "label": "Infant sex (M/F)", "type": "text", "required": True, "placeholder": "e.g., M or F"}
+                    ],
+                }
             ],
         },
     },
+
 
 
     "preterm": {

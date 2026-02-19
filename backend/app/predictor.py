@@ -4,6 +4,7 @@ from typing import Any, Dict, Tuple, Optional
 from pathlib import Path
 import json
 import joblib
+import pandas as pd
 
 from fastapi import HTTPException
 from .config import model_paths
@@ -68,11 +69,13 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any]) -> Tuple[floa
     if missing:
         raise HTTPException(status_code=400, detail=f"Missing required features: {', '.join(missing)}")
 
-    row = [(0 if values.get(f) is None else values.get(f)) for f in feature_order]
+    # Build a 1-row dataframe in the exact feature order
+    row_dict = {f: (0 if values.get(f) is None else values.get(f)) for f in feature_order}
+    X_df = pd.DataFrame([row_dict], columns=feature_order)
 
     # sklearn-style predict_proba expected
     try:
-        proba = model.predict_proba([row])[0][1]
+        proba = model.predict_proba(X_df)[0][1]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Model predict_proba failed for {model_key}: {e}")
 

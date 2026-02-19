@@ -1,29 +1,138 @@
 import pandas as pd
-import numpy as np
-import os
+from pathlib import Path
+import joblib
+import json
+
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
+
+from xgboost import XGBClassifier
+
+DATA_PATH = Path("data/low_birth_weight/processed/lbw_train_processed.csv")
+
+df = pd.read_csv(DATA_PATH)
+
+# print("Shape:", df.shape)
+# print("Columns:", df.columns.tolist())
+# print("\nTarget distribution:\n", df["low_birth_weight"].value_counts())
+
+# Separate features and target variable
+X = df.drop(columns=["low_birth_weight"])
+y = df["low_birth_weight"]
+
+# print("x shape:", x.shape)
+# print("y shape:", y.shape)
+# print("First 5",x.head(5))
+# print("First 5",y.head(5).to_list())
+
+# spilt data into train and test
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+# print("X_train shape:", X_train.shape)
+# print("X_test shape:", X_test.shape)
+
+# print("\nTrain LBW distribution:")
+# print(y_train.value_counts(normalize=True))
+
+# print("\nTest LBW distribution:")
+# print(y_test.value_counts(normalize=True))
 
 
-#load dataset
-DATA_PATH = "data/low_birth_weight/raw/lbw1.xlsx"
+# identify numeric and categorical features
+numeric_features = X_train.select_dtypes(include=["int64", "float64"]).columns.tolist()
+categorical_features = X_train.select_dtypes(include=["object","string"]).columns.tolist()
 
-df = pd.read_excel(DATA_PATH)
+# print("Numeric features count:", len(numeric_features))
+# print("Categorical features count:", len(categorical_features))
 
-print("Original shape:", df.shape)
+# print("\nCategorical features:")
+# print(categorical_features)
 
 
-#create target variable
+# preprocessing
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)
+    ],
+    remainder="passthrough"
+)
 
-df["low_birth_weight"] = (df["bwght"] < 2500).astype(int)
 
-print("Class distribution:")
-print(df["low_birth_weight"].value_counts())
+# xgboost model
+model = XGBClassifier(
+    n_estimators=200,
+    max_depth=5,
+    learning_rate=0.1,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    scale_pos_weight=(y_train.value_counts()[0] / y_train.value_counts()[1]),
+    random_state=42,
+    eval_metric="logloss"
+)
 
-# processed dataset path
-processed_path = "data/low_birth_weight/processed"
-os.makedirs(processed_path, exist_ok=True)
 
-df.to_csv(os.path.join(processed_path, "lbw1_processed.csv"), index=False)
+pipeline = Pipeline(steps=[
+    ("preprocess", preprocessor),
+    ("model", model)
+])
 
-print("Processed dataset saved.")
+pipeline.fit(X_train,y_train)
 
-print(df.columns)
+y_pred = pipeline.predict(X_test)
+y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+metrics = {
+    "accuracy": float(accuracy_score(y_test, y_pred)),
+    "precision": float(precision_score(y_test, y_pred)),
+    "recall": float(recall_score(y_test, y_pred)),
+    "f1_score": float(f1_score(y_test, y_pred)),
+    "roc_auc": float(roc_auc_score(y_test, y_prob))
+}
+
+
+print("\nModel Metrics:")
+for k, v in metrics.items():
+    print(f"{k}: {v:.4f}")
+
+
+
+# Save the model
+
+MODEL_DIR = Path("backend/models")
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
+MODEL_PATH = MODEL_DIR / "lbw_model.pkl"
+joblib.dump(pipeline, MODEL_PATH)
+
+
+# Save meta for backend
+META_PATH = MODEL_DIR / "lbw_model.meta.json"
+meta = {
+    "outcome_id": "lbw",
+    "model_type": "xgboost",
+    "target": "low_birth_weight",
+    "positive_label": "Low Birth Weight (<2500g)",
+    "negative_label": "Normal Birth Weight",
+    # IMPORTANT: backend expects THIS KEY
+    "feature_order": X.columns.tolist(),
+    "threshold": 0.5
+}
+META_PATH.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+# save metrics 
+METRICS_PATH = MODEL_DIR / "lbw_metrics.json"
+METRICS_PATH.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+
+print("\nSaved:")
+print(" -", MODEL_PATH)
+print(" -", META_PATH)
+print(" -", METRICS_PATH)

@@ -79,7 +79,6 @@ frontend/build/
 frontend/.next/
 frontend/.nuxt/
 frontend/.cache/
-frontend/package-lock.json
 frontend/yarn.lock
 
 # Training temp outputs only

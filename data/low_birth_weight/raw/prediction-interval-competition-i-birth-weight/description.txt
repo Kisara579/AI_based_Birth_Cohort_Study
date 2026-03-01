@@ -1,0 +1,61 @@
+Carl McBride Ellis, Lucas Morin, and predict_addict. Prediction interval competition I: Birth weight. https://kaggle.com/competitions/prediction-interval-competition-i-birth-weight, 2023. Kaggle.
+
+@misc{prediction-interval-competition-i-birth-weight,
+    author = {Carl McBride Ellis and Lucas Morin and predict_addict},
+    title = {Prediction interval competition I: Birth weight},
+    year = {2023},
+    howpublished = {\url{https://kaggle.com/competitions/prediction-interval-competition-i-birth-weight}},
+    note = {Kaggle}
+}
+
+
+
+Dataset Description
+Files
+train.csv - the training set
+test.csv - the test set
+sample_submission.csv - a sample submission file in the correct format
+Columns
+The target column is DBWT - Birth Weight – Detail in Grams (only present in the train.csv file)
+
+ATTEND - Attendant at Birth
+BFACIL - Birth Place
+BMI - Body Mass Index
+CIG_0 - Cigarettes Before Pregnancy
+DLMP_MM - Last Normal Menses Month
+DMAR - Marital Status
+DOB_MM - Birth Month
+DOB_TT - Time of Birth
+DOB_WK - Birth Day of Week
+FAGECOMB - Father’s Combined Age
+FEDUC - Father’s Education
+ILLB_R - Interval Since Last Live Birth Recode
+ILOP_R - Interval Since Last Other Pregnancy Recode
+ILP_R - Interval Since Last Other Pregnancy Recode
+LD_INDL - Induction of Labor
+MAGER - Mother’s Single Years of Age
+MBSTATE_REC - Mother’s Nativity
+MEDUC - Mother’s Education
+M_Ht_In - Mother’s Height in Total Inches
+NO_INFEC - No Infections Reported
+NO_MMORB - No Maternal Morbidity Reported
+NO_RISKS - No Risk Factors Reported
+PAY - Payment Source for Delivery
+PAY_REC - Payment Recode
+PRECARE - Month Prenatal Care Began
+PREVIS - Number of Prenatal Visits
+PRIORDEAD - Prior Births Now Dead
+PRIORLIVE - Prior Births Now Living
+PRIORTERM - Prior Other Terminations
+PWgt_R - Pre-pregnancy Weight Recode
+RDMETH_REC - Delivery Method Recode
+RESTATUS - Residence Status
+RF_CESAR - Previous Cesarean
+RF_CESARN - Number of Previous Cesareans
+SEX - Sex of Infant
+WTGAIN - Weight Gain
+For more details see the "User Guide" (pdf) associated with the dataset.
+
+Data citation:
+
+Centers for Disease Control and Prevention, National Center for Health Statistics. National Vital Statistics System, Natality on CDC WONDER Online Database. Data are from the Natality Records 2007-2022, as compiled from data provided by the 57 vital statistics jurisdictions through the Vital Statistics Cooperative Progra

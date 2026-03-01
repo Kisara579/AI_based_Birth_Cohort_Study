@@ -1,0 +1,36 @@
+credit:SOLADOYE Afeez Adekunle
+
+
+About Dataset
+This dataset is designed to facilitate the development and evaluation of machine learning models for predicting the risk and potential characteristics of epilepsy. It compiles a rich set of features, including patient history, demographic information, and clinical indicators, to provide a comprehensive foundation for predictive analysis.
+
+Key Features:
+
+Gender:Patient's gender.
+Age_Onset_Symptoms:Age at which initial symptoms appeared.
+Socioeconomic_Status: A categorical or numerical representation of the patient's socioeconomic background.
+History_Birth_Asphyxia: Indicates a history of birth asphyxia.
+History_Premature_Birth: Indicates a history of premature birth.
+History_Low_Birth_Weight: Indicates a history of low birth weight.
+History_Family_Epilepsy: Indicates a family history of epilepsy.
+History_Cerebral_Malaria: Indicates a history of cerebral malaria.
+History_Meningitis_Encephalitis: Indicates a history of meningitis or encephalitis.
+History_Severe_Head_Trauma: Indicates a history of severe head trauma.
+Intellectual_Disability: Indicates the presence of intellectual disability.
+Autism_Spectrum_Disorder: Indicates the presence of autism spectrum disorder.
+Imaging_Abnormalities: Indicates abnormalities found during medical imaging.
+EEG_Abnormalities_Baseline: Indicates abnormalities in baseline EEG readings.
+History_Stroke_Brain_Tumor: Indicates a history of stroke or brain tumor.
+Calculated_Risk_Score: A pre-calculated risk score based on various factors.
+Predicted_Prob_Epilepsy: The predicted probability of epilepsy.
+Seizure_Type_if_Diagnosed: The specific type of seizure if a diagnosis is present.
+Epilepsy_Diagnosis: The target variable
+Potential Uses:
+
+This dataset can be used by researchers and data scientists to:
+
+Build and benchmark classification models to predict epilepsy risk.
+Explore correlations between clinical history and the likelihood of developing epilepsy.
+Develop tools for early risk stratification in clinical settings.
+Analyze the impact of different features on the final risk score.
+Design predictive models for identifying specific seizure types.

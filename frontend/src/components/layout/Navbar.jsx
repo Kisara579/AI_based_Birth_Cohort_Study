@@ -25,6 +25,24 @@ export default function Navbar() {
     <header className="navBar">
       <div className="container navInner">
         <NavLink to="/" className="brand">
+          {/*icon */}
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ flexShrink: 0 }}
+          >
+            <path d="M12 2a7 7 0 0 1 7 7c0 4-3 7-7 7s-7-3-7-7a7 7 0 0 1 7-7z" />
+            <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="10" y1="11" x2="14" y2="11" />
+          </svg>
           <span className="brandText">AI Birth Cohort Study</span>
           <ApiStatusDot />
         </NavLink>
@@ -41,7 +59,9 @@ export default function Navbar() {
             className="themeToggle"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
           >
             {theme === "dark" ? (
               <svg

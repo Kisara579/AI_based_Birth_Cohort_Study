@@ -22,7 +22,7 @@ export default function ResultsModel() {
 
   const outcome = useMemo(
     () => outcomes.find((o) => o.id === outcomeId),
-    [outcomes, outcomeId]
+    [outcomes, outcomeId],
   );
 
   const formValues = location.state?.formValues;
@@ -87,7 +87,14 @@ export default function ResultsModel() {
   if (loadingOutcomes) {
     return (
       <div>
-        <h1>Results</h1>
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Results</span>
+        </nav>
+        <h2 className="pageTitle">Prediction Results</h2>
         <LoadingSkeleton lines={5} />
       </div>
     );
@@ -96,7 +103,13 @@ export default function ResultsModel() {
   if (outcomesErr) {
     return (
       <div>
-        <h1>Results</h1>
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Results</span>
+        </nav>
         <ErrorBanner title="Could not load outcomes" message={outcomesErr} />
         <div style={{ marginTop: 14 }}>
           <Link to="/">
@@ -110,7 +123,13 @@ export default function ResultsModel() {
   if (!outcome) {
     return (
       <div>
-        <h1>Results</h1>
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Results</span>
+        </nav>
         <ErrorBanner
           title="Unknown outcome"
           message={`No outcome found for id: "${outcomeId}"`}
@@ -128,21 +147,31 @@ export default function ResultsModel() {
   if (!formValues) {
     return (
       <div>
-        <h1>Results</h1>
-        <p className="muted">
-          Outcome: <b>{outcome.name}</b> ({outcome.short})
-        </p>
-
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Results</span>
+        </nav>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Prediction Results</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcome.name}</b>
+            </p>
+          </div>
+        </div>
         <ErrorBanner
           title="No input data"
           message="Please run a prediction first. This page expects form inputs from the Predict screen."
         />
-
-        <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+        <div
+          style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}
+        >
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="primary">Go to Predict</Button>
           </Link>
-
           <Link to="/">
             <Button variant="ghost">Back to Overview</Button>
           </Link>
@@ -155,9 +184,16 @@ export default function ResultsModel() {
   if (predLoading) {
     return (
       <div>
-        <h1>Results</h1>
-        <p className="muted">
-          Outcome: <b>{outcome.name}</b> ({outcome.short})
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Results</span>
+        </nav>
+        <h2 className="pageTitle">Prediction Results</h2>
+        <p className="pageSubtitle">
+          Outcome: <b>{outcome.name}</b>
         </p>
         <LoadingSkeleton lines={5} />
       </div>
@@ -167,14 +203,22 @@ export default function ResultsModel() {
   if (predErr) {
     return (
       <div>
-        <h1>Results</h1>
-        <p className="muted">
-          Outcome: <b>{outcome.name}</b> ({outcome.short})
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Results</span>
+        </nav>
+        <h2 className="pageTitle">Prediction Results</h2>
+        <p className="pageSubtitle" style={{ marginBottom: 14 }}>
+          Outcome: <b>{outcome.name}</b>
         </p>
-
         <ErrorBanner title="Prediction failed" message={predErr} />
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+        <div
+          style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}
+        >
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="secondary">Edit Inputs</Button>
           </Link>
@@ -189,46 +233,132 @@ export default function ResultsModel() {
 
   const prob = prediction?.probability ?? 0;
   const riskLabel = prediction?.risk_label ?? "Unknown";
+  const pct = prob * 100;
+
+  // SVG circle gauge
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (pct / 100) * circumference;
+
+  // Colour band
+  let gaugeColor = "#4ade80"; // green
+  let riskClass = "riskLow";
+  if (pct >= 70) {
+    gaugeColor = "#f87171";
+    riskClass = "riskHigh";
+  } else if (pct >= 40) {
+    gaugeColor = "#fb923c";
+    riskClass = "riskMedium";
+  }
 
   return (
     <div>
-      <h1>Results</h1>
-      <p className="muted">
-        Outcome: <b>{outcome.name}</b> ({outcome.short})
-      </p>
+      {/* Breadcrumb */}
+      <nav className="breadcrumb">
+        <a href="/" className="breadcrumbLink">
+          Overview
+        </a>
+        <span className="breadcrumbSep">›</span>
+        <a href={`/predict/${outcome.id}`} className="breadcrumbLink">
+          Predict
+        </a>
+        <span className="breadcrumbSep">›</span>
+        <span className="breadcrumbCurrent">Results</span>
+      </nav>
 
-      <Card title="Prediction Result" subtitle="From backend API">
-        <div style={{ display: "grid", gap: 10 }}>
-          <div>
-            <div className="muted">Predicted probability</div>
-            <div style={{ fontSize: 28, fontWeight: 800 }}>
-              {(prob * 100).toFixed(1)}%
-            </div>
-          </div>
-
-          <div>
-            <div className="muted">Risk category</div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>{riskLabel}</div>
-          </div>
+      <div className="pageHeader">
+        <div>
+          <h2 className="pageTitle">Prediction Results</h2>
+          <p className="pageSubtitle">
+            Outcome: <b>{outcome.name}</b>{" "}
+            <span className="tag tagBlue" style={{ marginLeft: 6 }}>
+              {outcome.short}
+            </span>
+          </p>
         </div>
-
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+        <div style={{ display: "flex", gap: 10 }}>
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="secondary">Edit Inputs</Button>
           </Link>
-
           <Link to="/">
-            <Button variant="ghost">Back to Overview</Button>
+            <Button variant="ghost">Overview</Button>
           </Link>
+        </div>
+      </div>
+
+      <Card title="Prediction Result" subtitle="Model output from backend API">
+        <div className="resultHero">
+          {/* Circular gauge */}
+          <div className="probCircleWrap">
+            <svg className="probCircleSvg" viewBox="0 0 110 110">
+              <circle className="probCircleBg" cx="55" cy="55" r={radius} />
+              <circle
+                className="probCircleFill"
+                cx="55"
+                cy="55"
+                r={radius}
+                stroke={gaugeColor}
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+              />
+            </svg>
+            <div className="probCircleText">
+              <span className="probCirclePct" style={{ color: gaugeColor }}>
+                {pct.toFixed(1)}%
+              </span>
+              <span className="probCircleSmall">probability</span>
+            </div>
+          </div>
+
+          {/* Meta */}
+          <div className="resultMeta">
+            <div className="resultMetaRow">
+              <span className="resultMetaLabel">Risk Category</span>
+              <span className={`riskBadge ${riskClass}`}>
+                {riskClass === "riskHigh"
+                  ? "⚠ "
+                  : riskClass === "riskMedium"
+                    ? "◐ "
+                    : "✓ "}
+                {riskLabel}
+              </span>
+            </div>
+
+            <div className="resultMetaRow">
+              <span className="resultMetaLabel">Predicted Probability</span>
+              <span className="resultMetaValue">{pct.toFixed(2)}%</span>
+              <div className="progressBarWrap">
+                <div
+                  className="progressBarFill"
+                  style={{ width: `${pct}%`, background: gaugeColor }}
+                />
+              </div>
+            </div>
+
+            <div className="resultMetaRow">
+              <span className="resultMetaLabel">Outcome Model</span>
+              <span className="resultMetaValue" style={{ fontSize: 15 }}>
+                {outcome.name}
+              </span>
+            </div>
+          </div>
         </div>
       </Card>
 
+      {/* Submitted inputs - clean grid instead of raw JSON */}
       <Card
         title="Submitted Inputs"
-        subtitle="Debug only; later we remove"
+        subtitle="Values sent to the prediction model"
         className="mt16"
       >
-        <pre className="codeBlock">{JSON.stringify(formValues, null, 2)}</pre>
+        <div className="inputsGrid">
+          {Object.entries(formValues).map(([k, v]) => (
+            <div key={k} className="inputCell">
+              <div className="inputCellKey">{k.replace(/_/g, " ")}</div>
+              <div className="inputCellVal">{String(v)}</div>
+            </div>
+          ))}
+        </div>
       </Card>
     </div>
   );

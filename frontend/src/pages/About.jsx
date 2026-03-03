@@ -64,7 +64,6 @@ export default function About() {
       {/* hero */}
       <div className="heroSection">
         <div className="heroBadge">
-          <span className="heroBadgeDot" />
           Research Dashboard
         </div>
         <h1 className="heroTitle">About This Project</h1>

@@ -35,11 +35,22 @@ export default function Overview() {
 
   return (
     <div>
-      <h1>Overview</h1>
-      <p className="muted">Select an outcome to start a prediction.</p>
+      <div className="pageHeader">
+        <div>
+          <h1 className="pageTitle">Overview</h1>
+          <p className="pageSubtitle">
+            Select an outcome to start a prediction.
+          </p>
+        </div>
+        <Button variant="ghost" onClick={() => window.location.reload()}>
+          ↻ Refresh
+        </Button>
+      </div>
 
       {loading ? (
-        <LoadingSkeleton lines={6} />
+        <Card>
+          <LoadingSkeleton lines={6} />
+        </Card>
       ) : err ? (
         <ErrorBanner title="Could not load outcomes" message={err} />
       ) : (

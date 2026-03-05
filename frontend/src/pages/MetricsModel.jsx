@@ -67,7 +67,6 @@ export default function MetricsModel() {
 
   const reportRowsOrder = ["0", "1", "macro avg", "weighted avg"];
 
-  // Pick key metrics to show as highlight stat cards
   const HIGHLIGHT = ["accuracy", "roc_auc", "f1", "precision", "recall", "auc"];
   const statEntries = Object.entries(metrics).filter(([k]) =>
     HIGHLIGHT.some((h) => k.toLowerCase().includes(h)),
@@ -116,7 +115,7 @@ export default function MetricsModel() {
         </div>
       )}
 
-      {/* Summary metrics */}
+      {/* Summary metrics
       <Card title="Summary Metrics" subtitle="Overall performance on test set">
         <table className="table">
           <thead>
@@ -134,7 +133,7 @@ export default function MetricsModel() {
             ))}
           </tbody>
         </table>
-      </Card>
+      </Card> */}
 
       {/* Classification report */}
       {report && (

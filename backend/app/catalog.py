@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
         "id": "pph",
-        "name": "Postpartum haemorrhage  ",
+        "name": "Postpartum haemorrhage",
         "short": "PPH",
         "description": "Predict risk of heavy bleeding after delivery.",
         "model_key": "pph",

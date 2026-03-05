@@ -101,10 +101,26 @@ export default function PredictModel() {
 
   return (
     <div>
-      <h1>Predict</h1>
-      <p className="muted">
-        Outcome: <b>{outcome.name}</b> ({outcome.short})
-      </p>
+      {/* Breadcrumb */}
+      <nav className="breadcrumb">
+        <a href="/" className="breadcrumbLink">
+          Overview
+        </a>
+        <span className="breadcrumbSep">›</span>
+        <span className="breadcrumbCurrent">Predict</span>
+      </nav>
+
+      <div className="pageHeader">
+        <div>
+          <h2 className="pageTitle">Predict</h2>
+          <p className="pageSubtitle">
+            Outcome: <b>{outcomeId.toUpperCase()}</b>
+          </p>
+        </div>
+        <Button variant="ghost" onClick={() => navigate(-1)}>
+          ← Back
+        </Button>
+      </div>
 
       <Card title={schema?.title || "Inputs"}>
         <DynamicForm schema={schema} onSubmit={handleSubmit} />

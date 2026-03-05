@@ -19,42 +19,25 @@ const SVG_ICON = (
 export default function OutcomeCard({ outcome }) {
   const navigate = useNavigate();
 
+  const name = (outcome?.name ?? "").trim();
+  const desc = (outcome?.description ?? "").trim();
+  const short = (outcome?.short ?? "").toString().trim();
+
   return (
     <div className="card outcomeCard">
-      {/* icon */}
-      <div className="outcomeIconWrap outcomeIconBlue">{SVG_ICON}</div>
+      <div className="outcomeTop">
+        {/* icon */}
+        <div className="outcomeIconWrap outcomeIconBlue">{SVG_ICON}</div>
 
-      {/* title */}
-      <h2
-        className="cardTitle"
-        style={{
-          margin: "10px 0 4px",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {outcome.name}
-      </h2>
-
-      <p
-        className="cardSubtitle"
-        style={{
-          lineHeight: "1.5",
-          minHeight: "3em",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-          margin: 0,
-        }}
-      >
-        {outcome.description}
-      </p>
+        {/* title */}
+        <h2 className="cardTitle outcomeTitle">{name}</h2>
+        
+        <p className="cardSubtitle outcomeDesc">{desc}</p>
+      </div>
 
       {/* footer */}
       <div className="outcomeFooter">
-        <span className="tag tagBlue">{outcome.short}</span>
+        <span className="tag tagBlue">{short}</span>
 
         <div className="outcomeActions">
           <Button

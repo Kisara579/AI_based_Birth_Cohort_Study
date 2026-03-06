@@ -120,12 +120,35 @@ print(" -", MODEL_PATH)
 print(" -", META_PATH)
 print(" -", METRICS_PATH)
 
-# Update registry — mark this algorithm as trained
+# Update registry — mark this algorithm as trained and active
 REGISTRY_PATH = Path("backend/models/low_birth_weight/registry.json")
+
 if REGISTRY_PATH.exists():
     registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
-    for entry in registry.get("models", []):
-        if entry.get("algorithm") == ALGORITHM:
-            entry["trained"] = True
-    REGISTRY_PATH.write_text(json.dumps(registry, indent=2), encoding="utf-8")
-    print(" -", REGISTRY_PATH)
+else:
+    registry = {
+        "outcome": "low_birth_weight",
+        "outcome_id": "lbw",
+        "active": ALGORITHM,
+        "models": []
+    }
+
+registry["active"] = ALGORITHM
+
+found = False
+for entry in registry.get("models", []):
+    if entry.get("algorithm") == ALGORITHM:
+        entry["trained"] = True
+        found = True
+        break
+
+if not found:
+    registry.setdefault("models", []).append({
+        "algorithm": ALGORITHM,
+        "label": ALGORITHM.title(),
+        "description": f"{ALGORITHM} model",
+        "trained": True
+    })
+
+REGISTRY_PATH.write_text(json.dumps(registry, indent=2), encoding="utf-8")
+print(" -", REGISTRY_PATH)

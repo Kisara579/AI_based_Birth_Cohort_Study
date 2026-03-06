@@ -35,14 +35,15 @@ def model_paths(model_key: str, algorithm: str | None = None):
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
         if algorithm is None:
             algorithm = registry.get("active", "xgboost")
+
         algo_dir = outcome_dir / algorithm
+
         return (
             algo_dir / "model.pkl",
             algo_dir / "meta.json",
             algo_dir / "metrics.json",
         )
 
-    # Legacy flat layout fallback
     return (
         MODELS_DIR / f"{model_key}_model.pkl",
         MODELS_DIR / f"{model_key}_model.meta.json",

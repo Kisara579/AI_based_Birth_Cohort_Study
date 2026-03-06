@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import ApiStatusDot from "./ApiStatusDot.jsx";
 import { useEffect, useState } from "react";
+import "./Navbar.css";
 
 const linkClass = ({ isActive }) =>
   "navLink" + (isActive ? " navLinkActive" : "");

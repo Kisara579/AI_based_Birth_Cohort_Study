@@ -9,6 +9,7 @@ import {
   fetchModels,
   predictOutcome,
 } from "../api/modelsApi.js";
+import "./ResultsModel.css";
 
 export default function ResultsModel() {
   const { outcomeId } = useParams();

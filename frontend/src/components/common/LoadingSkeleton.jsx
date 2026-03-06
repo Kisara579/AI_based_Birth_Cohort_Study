@@ -1,3 +1,5 @@
+import "./LoadingSkeleton.css";
+
 export default function LoadingSkeleton({ lines = 3, className = "" }) {
   return (
     <div className={`skeletonWrap ${className}`}>
@@ -7,4 +9,3 @@ export default function LoadingSkeleton({ lines = 3, className = "" }) {
     </div>
   );
 }
-

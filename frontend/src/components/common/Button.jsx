@@ -1,3 +1,5 @@
+import "./Button.css";
+
 export default function Button({
   children,
   onClick,
@@ -17,9 +19,13 @@ export default function Button({
     .join(" ");
 
   return (
-    <button type={type} className={classes} onClick={onClick} disabled={disabled}>
+    <button
+      type={type}
+      className={classes}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {children}
     </button>
   );
 }
-

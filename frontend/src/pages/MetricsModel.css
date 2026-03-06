@@ -1,0 +1,236 @@
+/* table */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* confusion matrix */
+.matrixTable {
+  width: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.matrixTable td {
+  padding: 12px 16px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+}
+
+.matrixTable tr:last-child td {
+  border-bottom: none;
+}
+
+.matrixTable td:last-child {
+  border-right: none;
+}
+
+.cmWrap {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  justify-items: center;
+}
+
+.cmTopLabel {
+  width: 100%;
+  max-width: 390px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cmGrid {
+  width: fit-content;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 110px 140px 140px;
+  grid-template-rows: 44px 54px 54px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* top-left corner cell */
+.cmCorner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.03);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.cmHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.cmHeadRight {
+  border-right: none;
+}
+
+.cmCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.cmCellRight {
+  border-right: none;
+}
+
+.cmRowLast {
+  border-bottom: none;
+}
+
+.cmDiag {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.2);
+}
+
+/* page header row */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pageTitle {
+  margin: 0;
+}
+
+.pageSubtitle {
+  margin: 6px 0 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Stat summary cards (metrics)  */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 30px 0;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s ease;
+}
+
+.statCard:hover {
+  border-color: var(--border2);
+}
+
+.statCardValue {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.statCardLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.statCardAccent {
+  border-top: 2px solid var(--accent);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.breadcrumbLink {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+  color: var(--text);
+}
+
+.breadcrumbSep {
+  opacity: 0.4;
+}
+
+.breadcrumbCurrent {
+  color: var(--text);
+  font-weight: 600;
+}
+
+body[data-theme="light"] .statCard {
+  background: rgba(2, 6, 23, 0.02);
+}
+
+body[data-theme="light"] .cmDiag {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.2);
+}

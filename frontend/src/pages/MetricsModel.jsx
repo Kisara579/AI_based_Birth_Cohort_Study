@@ -5,6 +5,7 @@ import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
 import { fetchMetrics, fetchModels } from "../api/modelsApi.js";
+import "./MetricsModel.css";
 
 export default function MetricsModel() {
   const { outcomeId } = useParams();
@@ -47,7 +48,10 @@ export default function MetricsModel() {
       setData(null);
 
       try {
-        const payload = await fetchMetrics(outcomeId, selectedModel || undefined);
+        const payload = await fetchMetrics(
+          outcomeId,
+          selectedModel || undefined,
+        );
         if (!cancelled) setData(payload);
       } catch (e) {
         if (!cancelled) setErr(e.message || "Failed to load metrics");

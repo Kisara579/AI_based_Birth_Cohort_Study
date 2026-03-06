@@ -1,3 +1,5 @@
+import "./About.css";
+
 export default function About() {
   const features = [
     {
@@ -63,9 +65,7 @@ export default function About() {
     <div>
       {/* hero */}
       <div className="heroSection">
-        <div className="heroBadge">
-          Research Dashboard
-        </div>
+        <div className="heroBadge">Research Dashboard</div>
         <h1 className="heroTitle">About This Project</h1>
         <p className="heroSubtitle">
           An AI-powered perinatal outcome prediction platform built for birth

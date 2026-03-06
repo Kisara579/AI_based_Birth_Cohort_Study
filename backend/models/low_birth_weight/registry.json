@@ -1,0 +1,19 @@
+{
+  "outcome": "low_birth_weight",
+  "outcome_id": "lbw",
+  "active": "xgboost",
+  "models": [
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "Gradient-boosted tree classifier trained on CDC Natality data.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Ensemble of decision trees trained on CDC Natality data.",
+      "trained": false
+    }
+  ]
+}

@@ -89,19 +89,19 @@ for k, v in metrics.items():
 
 
 # Save the model
-
-MODEL_DIR = Path("backend/models")
+ALGORITHM = "xgboost"
+MODEL_DIR = Path("backend/models/low_birth_weight") / ALGORITHM
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
-MODEL_PATH = MODEL_DIR / "lbw_model.pkl"
+MODEL_PATH = MODEL_DIR / "model.pkl"
 joblib.dump(pipeline, MODEL_PATH)
 
 
 # Save meta for backend
-META_PATH = MODEL_DIR / "lbw_model.meta.json"
+META_PATH = MODEL_DIR / "meta.json"
 meta = {
     "outcome_id": "lbw",
-    "model_type": "xgboost",
+    "model_type": ALGORITHM,
     "target": "low_birth_weight",
     "positive_label": "Low Birth Weight (<2500g)",
     "negative_label": "Normal Birth Weight",
@@ -111,11 +111,21 @@ meta = {
 }
 META_PATH.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
-# save metrics 
-METRICS_PATH = MODEL_DIR / "lbw_metrics.json"
+# save metrics
+METRICS_PATH = MODEL_DIR / "metrics.json"
 METRICS_PATH.write_text(json.dumps(metrics_payload, indent=2), encoding="utf-8")
 
 print("\nSaved:")
 print(" -", MODEL_PATH)
 print(" -", META_PATH)
 print(" -", METRICS_PATH)
+
+# Update registry — mark this algorithm as trained
+REGISTRY_PATH = Path("backend/models/low_birth_weight/registry.json")
+if REGISTRY_PATH.exists():
+    registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+    for entry in registry.get("models", []):
+        if entry.get("algorithm") == ALGORITHM:
+            entry["trained"] = True
+    REGISTRY_PATH.write_text(json.dumps(registry, indent=2), encoding="utf-8")
+    print(" -", REGISTRY_PATH)

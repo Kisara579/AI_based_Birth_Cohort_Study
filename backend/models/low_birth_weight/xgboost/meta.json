@@ -38,10 +38,5 @@
     "WTGAIN"
   ],
   "threshold": 0.5,
-  "categorical_features": [
-    "DMAR",
-    "LD_INDL",
-    "RF_CESAR",
-    "SEX"
-  ]
+  "categorical_features": ["DMAR", "LD_INDL", "RF_CESAR", "SEX"]
 }

@@ -182,7 +182,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
 
 
 def get_outcomes() -> List[Dict[str, Any]]:
-    # Return only public fields (don’t expose schema here)
+    # Return only public fields 
     return [
         {k: v for k, v in data.items() if k in ["id", "name", "short", "description"]}
         for data in OUTCOMES.values()
@@ -200,4 +200,3 @@ def get_model_key(outcome_id: str) -> Optional[str]:
     if not outcome:
         return None
     return outcome.get("model_key")
-

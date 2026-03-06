@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import json
 
-from .config import APP_NAME, ENV, model_paths
+from .config import APP_NAME, ENV, model_paths, OUTCOME_FOLDER,MODELS_DIR
 from .schemas import PredictRequest, PredictResponse
 from .catalog import get_outcomes as catalog_outcomes, get_schema as catalog_schema
 from .catalog import get_model_key
@@ -64,3 +64,25 @@ def metrics(outcome_id: str, model: str | None = Query(default=None)):
         raise HTTPException(status_code=404, detail="Metrics not found. Train model first.")
 
     return json.loads(metrics_path.read_text(encoding="utf-8"))
+
+
+@app.get("/models/{outcome_id}")
+def models(outcome_id: str):
+    model_key = get_model_key(outcome_id)
+    if model_key is None:
+        raise HTTPException(status_code=404, detail="Unknown outcome")
+
+    outcome_folder = OUTCOME_FOLDER.get(model_key, model_key)
+    reg_path = MODELS_DIR / outcome_folder / "registry.json"
+
+    if not reg_path.exists():
+        return {
+            "active": None,
+            "models": []
+        }
+
+    registry = json.loads(reg_path.read_text(encoding="utf-8"))
+    return {
+        "active": registry.get("active"),
+        "models": registry.get("models", [])
+    }

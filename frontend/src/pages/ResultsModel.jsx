@@ -229,7 +229,7 @@ export default function ResultsModel() {
         <p className="pageSubtitle" style={{ marginBottom: 14 }}>
           Outcome: <b>{outcome.name}</b>
         </p>
-        <ErrorBanner title="Prediction failed" message={predErr} />
+        <ErrorBanner title="Prediction unavailable" message={predErr} />
 
         <div
           style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}

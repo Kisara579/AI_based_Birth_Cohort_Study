@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
         "id": "pph",
-        "name": "Postpartum haemorrhage",
+        "name": "Postpartum Haemorrhage",
         "short": "PPH",
         "description": "Predict risk of heavy bleeding after delivery.",
         "model_key": "pph",
@@ -11,7 +11,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
     },
 
     "preeclampsia": {
-        "id": "preeclampsia",
+        "id": "Preeclampsia ",
         "name": "Preeclampsia",
         "short": "PE",
         "description": "Predict risk of hypertensive disorder during pregnancy.",
@@ -39,7 +39,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
 
     "iol": {
         "id": "iol",
-        "name": "Women requiring induction of labor",
+        "name": "Women Requiring Induction Of Labor",
         "short": "IOL",
         "description": "Predict risk of intrauterine onset of labor.",
         "model_key": "iol",
@@ -57,7 +57,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
 
     "postpartum": {
         "id": "postpartum",
-        "name": "Postpartum depression",
+        "name": "Postpartum Depression",
         "short": "PPD",
         "description": "Predict likelihood of postpartum depression.",
         "model_key": "postpartum",
@@ -138,9 +138,9 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                 },
                 {
                     "id": "baby",
-                    "title": "child Information",
+                    "title": "Child Information",
                     "fields": [
-                        {"name": "SEX", "label": "sex", "type": "select", "required": True, "options": [{"value":"M","label":"Male"}, {"value":"F","label":"Female"}]}
+                        {"name": "SEX", "label": "Sex", "type": "select", "required": True, "options": [{"value":"M","label":"Male"}, {"value":"F","label":"Female"}]}
                     ],
                 }
             ],
@@ -149,13 +149,13 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
 
 
 
-    "preterm": {
-        "id": "preterm",
-        "name": "Preterm Birth",
-        "short": "PTB",
+    "pd": {
+        "id": "pd",
+        "name": "Premature Delivery",
+        "short": "PD",
         "description": "Predict likelihood of delivery before 37 weeks.",
-        "model_key": "preterm",
-        "schema": {"title": "Preterm Birth Inputs", "sections": []}
+        "model_key": "pd",
+        "schema": {"title": "Premature Delivery Inputs", "sections": []}
     },
 
     

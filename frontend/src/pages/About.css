@@ -30,3 +30,17 @@
   line-height: 1.6;
   margin: 0;
 }
+
+.aboutTechSection {
+  margin-top: 32px;
+}
+
+.aboutTechSection .aboutCardTitle {
+  margin-bottom: 10px;
+}
+
+.aboutTechTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

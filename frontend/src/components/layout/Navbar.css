@@ -101,3 +101,7 @@ body[data-theme="light"] .themeToggle:hover {
   background: rgba(22, 163, 74, 0.12);
   border-color: rgba(22, 163, 74, 0.25);
 }
+
+.brandIcon {
+  flex-shrink: 0;
+}

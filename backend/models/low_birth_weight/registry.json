@@ -1,7 +1,7 @@
 {
   "outcome": "low_birth_weight",
   "outcome_id": "lbw",
-  "active": "logisticregression",
+  "active": "xgboost",
   "models": [
     {
       "algorithm": "xgboost",

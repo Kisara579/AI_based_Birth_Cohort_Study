@@ -82,3 +82,7 @@ body[data-theme="light"] select.formInput option {
   background-color: #ffffff;
   color: var(--text);
 }
+
+.muted {
+  color: var(--muted);
+}

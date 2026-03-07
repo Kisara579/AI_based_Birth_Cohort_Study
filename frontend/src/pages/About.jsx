@@ -91,12 +91,12 @@ export default function About() {
         ))}
       </div>
 
-      <div style={{ marginTop: 32 }}>
+      <div className="aboutTechSection">
         <div className="card">
-          <h3 className="aboutCardTitle" style={{ marginBottom: 10 }}>
+          <h3 className="aboutCardTitle">
             Tech Stack
           </h3>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div className="aboutTechTags">
             {[
               "Python 3.11",
               "FastAPI",

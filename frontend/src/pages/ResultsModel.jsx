@@ -127,7 +127,7 @@ export default function ResultsModel() {
           <span className="breadcrumbCurrent">Results</span>
         </nav>
         <ErrorBanner title="Could not load outcomes" message={outcomesErr} />
-        <div style={{ marginTop: 14 }}>
+        <div className="resultsBackWrap">
           <Link to="/">
             <Button variant="secondary">Back to Overview</Button>
           </Link>
@@ -150,7 +150,7 @@ export default function ResultsModel() {
           title="Unknown outcome"
           message={`No outcome found for id: "${outcomeId}"`}
         />
-        <div style={{ marginTop: 14 }}>
+        <div className="resultsBackWrap">
           <Link to="/">
             <Button variant="secondary">Back to Overview</Button>
           </Link>
@@ -182,9 +182,7 @@ export default function ResultsModel() {
           title="No input data"
           message="Please run a prediction first. This page expects form inputs from the Predict screen."
         />
-        <div
-          style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}
-        >
+        <div className="resultsActionRow">
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="primary">Go to Predict</Button>
           </Link>
@@ -227,14 +225,12 @@ export default function ResultsModel() {
           <span className="breadcrumbCurrent">Results</span>
         </nav>
         <h2 className="pageTitle">Prediction Results</h2>
-        <p className="pageSubtitle" style={{ marginBottom: 14 }}>
+        <p className="pageSubtitle pageSubtitleMb">
           Outcome: <b>{outcome.name}</b>
         </p>
         <ErrorBanner title="Prediction unavailable" message={predErr} />
 
-        <div
-          style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}
-        >
+        <div className="resultsActionRow">
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="secondary">Edit Inputs</Button>
           </Link>
@@ -257,13 +253,10 @@ export default function ResultsModel() {
   const offset = circumference - (pct / 100) * circumference;
 
   // Colour band
-  let gaugeColor = "#34ff7f";
   let riskClass = "riskLow";
   if (pct >= 70) {
-    gaugeColor = "#ff2c2c";
     riskClass = "riskHigh";
   } else if (pct >= 40) {
-    gaugeColor = "#ff8d2f";
     riskClass = "riskMedium";
   }
 
@@ -293,12 +286,10 @@ export default function ResultsModel() {
           <h2 className="pageTitle">Prediction Results</h2>
           <p className="pageSubtitle">
             Outcome: <b>{outcome.name}</b>{" "}
-            <span className="tag tagBlue" style={{ marginLeft: 6 }}>
-              {outcome.short}
-            </span>
+            <span className="tag tagBlue tagMl">{outcome.short}</span>
           </p>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div className="resultsHeaderActions">
           <Link to={`/predict/${outcome.id}`}>
             <Button variant="secondary">Edit Inputs</Button>
           </Link>
@@ -315,17 +306,16 @@ export default function ResultsModel() {
             <svg className="probCircleSvg" viewBox="0 0 110 110">
               <circle className="probCircleBg" cx="55" cy="55" r={radius} />
               <circle
-                className="probCircleFill"
+                className={`probCircleFill stroke-${riskClass}`}
                 cx="55"
                 cy="55"
                 r={radius}
-                stroke={gaugeColor}
                 strokeDasharray={circumference}
                 strokeDashoffset={offset}
               />
             </svg>
             <div className="probCircleText">
-              <span className="probCirclePct" style={{ color: gaugeColor }}>
+              <span className={`probCirclePct text-${riskClass}`}>
                 {pct.toFixed(1)}%
               </span>
               <span className="probCircleSmall">probability</span>
@@ -350,23 +340,23 @@ export default function ResultsModel() {
               <span className="resultMetaLabel">Predicted Probability</span>
               <span className="resultMetaValue">{pct.toFixed(2)}%</span>
               <div className="progressBarWrap">
+                <style>{`.dynamic-bar { width: ${pct}%; }`}</style>
                 <div
-                  className="progressBarFill"
-                  style={{ width: `${pct}%`, background: gaugeColor }}
+                  className={`progressBarFill bg-${riskClass} dynamic-bar`}
                 />
               </div>
             </div>
 
             <div className="resultMetaRow">
               <span className="resultMetaLabel">Outcome Model</span>
-              <span className="resultMetaValue" style={{ fontSize: 15 }}>
+              <span className="resultMetaValue resultMetaValueSm">
                 {outcome.name}
               </span>
             </div>
 
             <div className="resultMetaRow">
               <span className="resultMetaLabel">Algorithm</span>
-              <span className="resultMetaValue" style={{ fontSize: 15 }}>
+              <span className="resultMetaValue resultMetaValueSm">
                 {modelLabel}
               </span>
             </div>
@@ -378,7 +368,7 @@ export default function ResultsModel() {
       <Card
         title="Submitted Inputs"
         subtitle="Values sent to the prediction model"
-        className="mt16"
+        className="resultsSectionSpacing"
       >
         <div className="inputsGrid">
           {Object.entries(formValues).map(([k, v]) => (

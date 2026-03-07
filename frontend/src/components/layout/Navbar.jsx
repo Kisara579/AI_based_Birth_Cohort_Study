@@ -37,7 +37,7 @@ export default function Navbar() {
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
-            style={{ flexShrink: 0 }}
+            className="brandIcon"
           >
             <path d="M12 2a7 7 0 0 1 7 7c0 4-3 7-7 7s-7-3-7-7a7 7 0 0 1 7-7z" />
             <path d="M9 17v1a3 3 0 0 0 6 0v-1" />

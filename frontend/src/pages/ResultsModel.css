@@ -122,6 +122,36 @@
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
+.text-riskHigh {
+  color: #ff2c2c;
+}
+.text-riskMedium {
+  color: #ff8d2f;
+}
+.text-riskLow {
+  color: #34ff7f;
+}
+
+.bg-riskHigh {
+  background-color: #ff2c2c;
+}
+.bg-riskMedium {
+  background-color: #ff8d2f;
+}
+.bg-riskLow {
+  background-color: #34ff7f;
+}
+
+.stroke-riskHigh {
+  stroke: #ff2c2c;
+}
+.stroke-riskMedium {
+  stroke: #ff8d2f;
+}
+.stroke-riskLow {
+  stroke: #34ff7f;
+}
+
 /* Progress bar  */
 .progressBarWrap {
   height: 6px;
@@ -179,4 +209,32 @@ body[data-theme="light"] .riskHigh {
 body[data-theme="light"] .riskLow {
   background: rgba(22, 163, 74, 0.08);
   color: #16a34a;
+}
+
+.resultsBackWrap {
+  margin-top: 14px;
+}
+
+.resultsActionRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pageSubtitleMb {
+  margin-bottom: 14px;
+}
+
+.tagMl {
+  margin-left: 6px;
+}
+
+.resultsHeaderActions {
+  display: flex;
+  gap: 10px;
+}
+
+.resultMetaValueSm {
+  font-size: 15px;
 }

@@ -78,7 +78,7 @@ export default function MetricsModel() {
           <span className="breadcrumbCurrent">Model Metrics</span>
         </nav>
         <ErrorBanner message={err} />
-        <div style={{ marginTop: 12 }}>
+        <div className="metricsBackWrap">
           <Button variant="ghost" onClick={() => navigate(-1)}>
             ← Back
           </Button>
@@ -154,7 +154,7 @@ export default function MetricsModel() {
           title="Model Selection"
           subtitle="Choose algorithm for metrics view"
         >
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="modelSelectGrid">
             <label htmlFor="model-select" className="formLabel">
               Algorithm
             </label>

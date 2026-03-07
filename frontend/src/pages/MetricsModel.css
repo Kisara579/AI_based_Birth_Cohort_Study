@@ -229,6 +229,15 @@ body[data-theme="light"] .statCard {
   background: rgba(2, 6, 23, 0.02);
 }
 
+.metricsBackWrap {
+  margin-top: 12px;
+}
+
+.modelSelectGrid {
+  display: grid;
+  gap: 10px;
+}
+
 body[data-theme="light"] .cmDiag {
   background: rgba(22, 163, 74, 0.1);
   border-color: rgba(22, 163, 74, 0.2);

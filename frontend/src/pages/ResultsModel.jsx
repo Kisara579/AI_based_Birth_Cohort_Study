@@ -33,7 +33,6 @@ export default function ResultsModel() {
   );
 
   const formValues = location.state?.formValues;
-  const selectedModel = location.state?.selectedModel;
 
   // load outcomes (to display name/short)
   useEffect(() => {
@@ -76,7 +75,7 @@ export default function ResultsModel() {
       setPrediction(null);
 
       try {
-        const effectiveModel = selectedModel || modelsInfo?.active;
+        const effectiveModel = modelsInfo?.active;
         const res = await predictOutcome(outcomeId, formValues, effectiveModel);
 
         if (res?.error) throw new Error(res.error);
@@ -96,7 +95,7 @@ export default function ResultsModel() {
     return () => {
       cancelled = true;
     };
-  }, [outcomeId, formValues, selectedModel, modelsInfo, loadingOutcomes]);
+  }, [outcomeId, formValues, modelsInfo, loadingOutcomes]);
 
   // ui statuses
 
@@ -110,7 +109,12 @@ export default function ResultsModel() {
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Results</span>
         </nav>
-        <h2 className="pageTitle">Prediction Results</h2>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Prediction Results</h2>
+            <p className="pageSubtitle">Loading outcomes...</p>
+          </div>
+        </div>
         <LoadingSkeleton lines={5} />
       </div>
     );
@@ -126,12 +130,18 @@ export default function ResultsModel() {
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Results</span>
         </nav>
-        <ErrorBanner title="Could not load outcomes" message={outcomesErr} />
-        <div className="resultsBackWrap">
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Prediction Results</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcomeId.toUpperCase()}</b>
+            </p>
+          </div>
           <Link to="/">
-            <Button variant="secondary">Back to Overview</Button>
+            <Button variant="ghost">← Back to Overview</Button>
           </Link>
         </div>
+        <ErrorBanner title="Could not load outcomes" message={outcomesErr} />
       </div>
     );
   }
@@ -146,15 +156,21 @@ export default function ResultsModel() {
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Results</span>
         </nav>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Prediction Results</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcomeId.toUpperCase()}</b>
+            </p>
+          </div>
+          <Link to="/">
+            <Button variant="ghost">← Back to Overview</Button>
+          </Link>
+        </div>
         <ErrorBanner
           title="Unknown outcome"
           message={`No outcome found for id: "${outcomeId}"`}
         />
-        <div className="resultsBackWrap">
-          <Link to="/">
-            <Button variant="secondary">Back to Overview</Button>
-          </Link>
-        </div>
       </div>
     );
   }
@@ -205,10 +221,14 @@ export default function ResultsModel() {
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Results</span>
         </nav>
-        <h2 className="pageTitle">Prediction Results</h2>
-        <p className="pageSubtitle">
-          Outcome: <b>{outcome.name}</b>
-        </p>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Prediction Results</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcome.name}</b>
+            </p>
+          </div>
+        </div>
         <LoadingSkeleton lines={5} />
       </div>
     );
@@ -224,10 +244,14 @@ export default function ResultsModel() {
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Results</span>
         </nav>
-        <h2 className="pageTitle">Prediction Results</h2>
-        <p className="pageSubtitle pageSubtitleMb">
-          Outcome: <b>{outcome.name}</b>
-        </p>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Prediction Results</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcome.name}</b>
+            </p>
+          </div>
+        </div>
         <ErrorBanner title="Prediction unavailable" message={predErr} />
 
         <div className="resultsActionRow">
@@ -260,7 +284,7 @@ export default function ResultsModel() {
     riskClass = "riskMedium";
   }
 
-  const effectiveModel = selectedModel || modelsInfo?.active || "";
+  const effectiveModel = modelsInfo?.active || "";
   const modelLabel =
     modelsInfo?.models?.find((m) => m.algorithm === effectiveModel)?.label ||
     effectiveModel ||
@@ -340,9 +364,9 @@ export default function ResultsModel() {
               <span className="resultMetaLabel">Predicted Probability</span>
               <span className="resultMetaValue">{pct.toFixed(2)}%</span>
               <div className="progressBarWrap">
-                <style>{`.dynamic-bar { width: ${pct}%; }`}</style>
                 <div
-                  className={`progressBarFill bg-${riskClass} dynamic-bar`}
+                  className={`progressBarFill bg-${riskClass}`}
+                  style={{ width: `${pct}%` }}
                 />
               </div>
             </div>
@@ -355,7 +379,7 @@ export default function ResultsModel() {
             </div>
 
             <div className="resultMetaRow">
-              <span className="resultMetaLabel">Algorithm</span>
+              <span className="resultMetaLabel">Active Algorithm Used</span>
               <span className="resultMetaValue resultMetaValueSm">
                 {modelLabel}
               </span>

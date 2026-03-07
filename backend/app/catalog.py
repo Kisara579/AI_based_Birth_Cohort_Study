@@ -11,7 +11,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
     },
 
     "preeclampsia": {
-        "id": "Preeclampsia ",
+        "id": "preeclampsia",
         "name": "Preeclampsia",
         "short": "PE",
         "description": "Predict risk of hypertensive disorder during pregnancy.",

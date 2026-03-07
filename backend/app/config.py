@@ -15,7 +15,7 @@ MODELS_DIR = BASE_DIR / "models"
 # Maps catalog model_key → subdirectory name under MODELS_DIR
 OUTCOME_FOLDER: dict[str, str] = {
     "lbw": "low_birth_weight",
-    "preterm": "premature_delivery",
+    "pd": "premature_delivery",
 }
 
 

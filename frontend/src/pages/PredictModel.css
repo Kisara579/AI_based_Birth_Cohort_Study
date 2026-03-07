@@ -2,7 +2,33 @@
   margin-top: 14px;
 }
 
-.predictModelSelectWrap {
-  display: grid;
-  gap: 10px;
+.predictModelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.predictModelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.predictModelLabel {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.predictModelValue {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  background: rgba(96,165,250,0.12);
+  border: 1px solid rgba(96,165,250,0.25);
+  padding: 4px 10px;
+  border-radius: 999px;
 }

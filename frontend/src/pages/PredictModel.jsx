@@ -171,9 +171,9 @@ export default function PredictModel() {
             <span className="predictModelLabel">Active Algorithm</span>
             <span className="predictModelValue">
               {modelsInfo?.models?.find(
-                (m) => m.algorithm === modelsInfo?.active,
+                (m) => m.algorithm === modelsInfo?.active_model,
               )?.label ||
-                modelsInfo?.active ||
+                modelsInfo?.active_model ||
                 "Not available"}
             </span>
           </div>

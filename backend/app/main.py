@@ -5,7 +5,7 @@ import json
 from .config import APP_NAME, ENV, model_paths, OUTCOME_FOLDER,MODELS_DIR
 from .schemas import PredictRequest, PredictResponse
 from .catalog import get_outcomes as catalog_outcomes, get_schema as catalog_schema
-from .catalog import get_model_key
+from .catalog import get_model_key,select_best_model
 from .predictor import predict_with_model_key
 
 
@@ -57,7 +57,10 @@ def metrics(outcome_id: str, model: str | None = Query(default=None)):
     model_key = get_model_key(outcome_id)
     if model_key is None:
         raise HTTPException(status_code=404, detail="Unknown outcome")
-    
+
+    if model is None:
+        model = select_best_model(model_key)
+
     _, _, metrics_path = model_paths(model_key, algorithm=model)
 
     if not metrics_path.exists():
@@ -72,17 +75,19 @@ def models(outcome_id: str):
     if model_key is None:
         raise HTTPException(status_code=404, detail="Unknown outcome")
 
+    select_best_model(model_key)
+
     outcome_folder = OUTCOME_FOLDER.get(model_key, model_key)
     reg_path = MODELS_DIR / outcome_folder / "registry.json"
 
     if not reg_path.exists():
         return {
-            "active": None,
+            "active_model": None,
             "models": []
         }
 
     registry = json.loads(reg_path.read_text(encoding="utf-8"))
     return {
-        "active": registry.get("active"),
+        "active_model": registry.get("active_model"),
         "models": registry.get("models", [])
     }

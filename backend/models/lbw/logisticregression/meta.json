@@ -1,7 +1,7 @@
 {
-  "outcome": "low_birth_weight",
+  "outcome": "lbw",
   "outcome_id": "lbw",
-  "algorithm": "xgboost",
+  "algorithm": "logisticregression",
   "target_column": "low_birth_weight",
   "positive_label": "Low Birth Weight (<2500g)",
   "negative_label": "Normal Birth Weight",

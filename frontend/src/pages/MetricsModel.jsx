@@ -48,7 +48,7 @@ export default function MetricsModel() {
                 algorithm: model.algorithm,
                 label: model.label || model.algorithm,
                 trained: model.trained,
-                isActive: info?.active === model.algorithm,
+                isActive: info?.active_model === model.algorithm,
                 data: payload,
                 error: "",
               };
@@ -57,7 +57,7 @@ export default function MetricsModel() {
                 algorithm: model.algorithm,
                 label: model.label || model.algorithm,
                 trained: model.trained,
-                isActive: info?.active === model.algorithm,
+                isActive: info?.active_model === model.algorithm,
                 data: null,
                 error: e.message || "Failed to load metrics",
               };
@@ -103,9 +103,9 @@ export default function MetricsModel() {
   const pageSubtitle = useMemo(() => {
     const activeLabel =
       modelsData.find((m) => m.isActive)?.label ||
-      modelsInfo?.models?.find((m) => m.algorithm === modelsInfo?.active)
+      modelsInfo?.models?.find((m) => m.algorithm === modelsInfo?.active_model)
         ?.label ||
-      modelsInfo?.active ||
+      modelsInfo?.active_model ||
       "None";
 
     const hasActive = modelsData.some((m) => m.isActive);
@@ -246,7 +246,7 @@ export default function MetricsModel() {
                     </p>
                   </div>
 
-                  <div className="modelHeaderRight">
+                  {/* <div className="modelHeaderRight">
                     <div className="modelHeaderMeta">
                       <span className="modelHeaderMetaLabel">Status</span>
                       <span
@@ -255,7 +255,7 @@ export default function MetricsModel() {
                         {modelItem.isActive ? "Deployed" : "Available"}
                       </span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {modelItem.error ? (

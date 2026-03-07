@@ -1,4 +1,6 @@
 from typing import Any, Dict, List, Optional
+import json
+from pathlib import Path
 
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
@@ -200,3 +202,57 @@ def get_model_key(outcome_id: str) -> Optional[str]:
     if not outcome:
         return None
     return outcome.get("model_key")
+
+
+# select best algorithm 
+MODELS_ROOT = Path(__file__).resolve().parents[1] / "models"
+
+def select_best_model(outcome: str):
+
+    outcome_dir = MODELS_ROOT / outcome
+    registry_path = outcome_dir / "registry.json"
+
+    if not registry_path.exists():
+        raise FileNotFoundError(f"Registry not found for outcome: {outcome}")
+
+    registry = json.loads(registry_path.read_text())
+
+    if registry.get("selection_mode") != "auto":
+        return registry.get("active_model")
+
+    metric_name = registry.get("selection_metric", "f1")
+
+    best_model = None
+    best_score = -1
+
+    for model in registry.get("models", []):
+
+        if not model.get("trained"):
+            continue
+
+        algo = model["algorithm"]
+
+        metrics_path = outcome_dir / algo / "metrics.json"
+
+        if not metrics_path.exists():
+            continue
+
+        metrics_data = json.loads(metrics_path.read_text())
+
+        score = metrics_data["metrics"].get(metric_name)
+
+        if score is None:
+            continue
+
+        if score > best_score:
+            best_score = score
+            best_model = algo
+
+    if best_model is None:
+        raise RuntimeError("No valid trained model found")
+
+    # update registry
+    registry["active_model"] = best_model
+    registry_path.write_text(json.dumps(registry, indent=2))
+
+    return best_model

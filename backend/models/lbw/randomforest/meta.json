@@ -1,5 +1,5 @@
 {
-  "outcome": "low_birth_weight",
+  "outcome": "lbw",
   "outcome_id": "lbw",
   "algorithm": "randomforest",
   "target_column": "low_birth_weight",

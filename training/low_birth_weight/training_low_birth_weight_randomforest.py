@@ -101,7 +101,7 @@ from shared.model_artifacts import save_model_artifacts
 
 save_model_artifacts(
     pipeline=pipeline,
-    outcome="low_birth_weight",
+    outcome="lbw",
     outcome_id="lbw",
     algorithm="randomforest",
     label="Random Forest",

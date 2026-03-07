@@ -90,6 +90,10 @@
   color: var(--text);
 }
 
+.resultsSectionSpacing {
+  margin-top: 16px;
+}
+
 .riskBadge {
   display: inline-flex;
   align-items: center;

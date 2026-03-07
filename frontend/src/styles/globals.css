@@ -44,16 +44,6 @@ textarea {
   margin: 0 auto;
 }
 
-.appShell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-main.container {
-  flex: 1;
-  padding: 24px 0;
-}
-
 /* api status dot */
 .apiDot {
   width: 10px;

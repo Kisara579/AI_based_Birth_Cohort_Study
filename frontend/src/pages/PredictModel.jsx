@@ -6,6 +6,7 @@ import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
 import DynamicForm from "../components/forms/DynamicForm.jsx";
 import { fetchOutcomes, fetchSchema, fetchModels } from "../api/modelsApi.js";
+import "./PredictModel.css";
 
 export default function PredictModel() {
   const { outcomeId } = useParams();
@@ -77,7 +78,7 @@ export default function PredictModel() {
       <div>
         <h1>Predict</h1>
         <ErrorBanner title="Could not load prediction form" message={err} />
-        <div style={{ marginTop: 14 }}>
+        <div className="predictActions">
           <Link to="/">
             <Button variant="secondary">Back to Overview</Button>
           </Link>
@@ -94,7 +95,7 @@ export default function PredictModel() {
           title="Unknown outcome"
           message={`No outcome found for id: "${outcomeId}"`}
         />
-        <div style={{ marginTop: 14 }}>
+        <div className="predictActions">
           <Link to="/">
             <Button variant="secondary">Back to Overview</Button>
           </Link>
@@ -133,7 +134,7 @@ export default function PredictModel() {
           title="Model Selection"
           subtitle="Choose algorithm for prediction"
         >
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="predictModelSelectWrap">
             <label htmlFor="predict-model-select" className="formLabel">
               Algorithm
             </label>

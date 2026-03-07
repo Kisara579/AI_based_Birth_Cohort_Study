@@ -1,0 +1,8 @@
+.predictActions {
+  margin-top: 14px;
+}
+
+.predictModelSelectWrap {
+  display: grid;
+  gap: 10px;
+}

@@ -378,7 +378,7 @@ export default function ResultsModel() {
       <Card
         title="Submitted Inputs"
         subtitle="Values sent to the prediction model"
-        className="mt16"
+        className="resultsSectionSpacing"
       >
         <div className="inputsGrid">
           {Object.entries(formValues).map(([k, v]) => (

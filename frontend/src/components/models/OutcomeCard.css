@@ -1,7 +1,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
   margin-top: 16px;
   align-items: stretch;
 }
@@ -26,32 +26,43 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  border-radius: 14px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
   transition:
-    box-shadow 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .outcomeCard:hover {
   border-color: var(--border2);
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .outcomeTop {
-  min-height: 130px;
+  min-height: 120px;
 }
 
 .outcomeTitle {
-  margin: 10px 0 4px;
+  margin: 10px 0 6px;
+  font-size: 17px;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.25;
+  color: var(--text);
 }
 
 .outcomeDesc {
   margin: 0;
-  line-height: 1.5;
-  height: calc(1.5em * 2);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+  height: calc(1.55em * 2);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -60,26 +71,27 @@
 
 .outcomeFooter {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .outcomeActions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
-/* Tags / badges  */
+/* Tags / badges */
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 5px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
@@ -111,21 +123,21 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-/* OutcomeCard icon  */
+/* OutcomeCard icon */
 .outcomeIconWrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .outcomeIconBlue {
-  background: rgba(96, 165, 250, 0.12);
-  border: 1px solid rgba(96, 165, 250, 0.2);
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.18);
   color: #60a5fa;
 }
 
@@ -139,6 +151,19 @@
   background: rgba(251, 146, 60, 0.1);
   border: 1px solid rgba(251, 146, 60, 0.2);
   color: #fb923c;
+}
+
+/* Light theme */
+body[data-theme="light"] .outcomeCard {
+  background: rgba(2, 6, 23, 0.02);
+}
+
+body[data-theme="light"] .outcomeCard:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+body[data-theme="light"] .outcomeFooter {
+  border-top-color: rgba(0, 0, 0, 0.04);
 }
 
 body[data-theme="light"] .outcomeIconBlue {

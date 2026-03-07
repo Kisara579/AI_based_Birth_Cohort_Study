@@ -323,7 +323,11 @@ export default function ResultsModel() {
         </div>
       </div>
 
-      <Card title="Prediction Result" subtitle="Model output from backend API">
+      <Card
+        title="Prediction Result"
+        subtitle="Model output from backend API"
+        className="resultPredictionCard"
+      >
         <div className="resultHero">
           {/* Circular gauge */}
           <div className="probCircleWrap">
@@ -392,7 +396,7 @@ export default function ResultsModel() {
       <Card
         title="Submitted Inputs"
         subtitle="Values sent to the prediction model"
-        className="resultsSectionSpacing"
+        className="resultInputsCard resultsSectionSpacing"
       >
         <div className="inputsGrid">
           {Object.entries(formValues).map(([k, v]) => (

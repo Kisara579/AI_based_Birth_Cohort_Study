@@ -165,6 +165,7 @@ export default function PredictModel() {
       <Card
         title="Prediction Model"
         subtitle="Default algorithm currently used for prediction"
+        className="predictModelPanel"
       >
         <div className="predictModelInfo">
           <div className="predictModelRow">
@@ -180,7 +181,7 @@ export default function PredictModel() {
         </div>
       </Card>
 
-      <Card title={schema?.title || "Inputs"}>
+      <Card title={schema?.title || "Inputs"} className="predictFormCard">
         <DynamicForm schema={schema} onSubmit={handleSubmit} />
       </Card>
     </div>

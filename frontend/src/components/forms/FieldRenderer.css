@@ -1,0 +1,84 @@
+.formField {
+  display: grid;
+  gap: 6px;
+}
+
+.formLabel {
+  font-weight: 600;
+}
+
+.req {
+  color: rgba(239, 68, 68, 0.9);
+  margin-left: 6px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  outline: none;
+  background: #182238;
+}
+
+.formInput::placeholder {
+  color: rgba(156, 163, 175, 0.75);
+}
+
+.formInput:focus {
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.14);
+}
+
+.formInputError {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.formInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.formError {
+  color: rgba(239, 68, 68, 0.95);
+  font-size: 13px;
+}
+
+input[type="number"] {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 1px solid var(--border);
+  color-scheme: dark;
+}
+
+select.formInput,
+select.formInput option {
+  background-color: #141b2a;
+  color: var(--text);
+}
+
+select.formInput option:checked,
+select.formInput option:hover {
+  background-color: rgba(96, 165, 250, 0.22);
+}
+
+body[data-theme="light"] .formInput:focus {
+  box-shadow: none;
+}
+
+body[data-theme="light"] .formInputError {
+  box-shadow: none;
+}
+
+body[data-theme="light"] .formInput {
+  background: rgba(2, 6, 23, 0.03);
+}
+
+body[data-theme="light"] select.formInput,
+body[data-theme="light"] select.formInput option {
+  background-color: #ffffff;
+  color: var(--text);
+}

@@ -5,6 +5,7 @@ import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import OutcomeCard from "../components/models/OutcomeCard.jsx";
 import { fetchOutcomes } from "../api/modelsApi.js";
+import "./Overview.css";
 
 export default function Overview() {
   const [outcomes, setOutcomes] = useState([]);

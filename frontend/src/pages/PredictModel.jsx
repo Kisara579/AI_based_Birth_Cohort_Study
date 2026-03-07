@@ -5,7 +5,7 @@ import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
 import DynamicForm from "../components/forms/DynamicForm.jsx";
-import { fetchOutcomes, fetchSchema } from "../api/modelsApi.js";
+import { fetchOutcomes, fetchSchema, fetchModels } from "../api/modelsApi.js";
 
 export default function PredictModel() {
   const { outcomeId } = useParams();
@@ -13,6 +13,8 @@ export default function PredictModel() {
 
   const [outcomes, setOutcomes] = useState([]);
   const [schema, setSchema] = useState(null);
+  const [modelsInfo, setModelsInfo] = useState(null);
+  const [selectedModel, setSelectedModel] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -28,18 +30,19 @@ export default function PredictModel() {
       setLoading(true);
       setErr("");
       try {
-        // We load outcomes too so we can show name/short on this page
-        const [outs, sch] = await Promise.all([
+        const [outs, sch, modelInfo] = await Promise.all([
           fetchOutcomes(),
           fetchSchema(outcomeId),
+          fetchModels(outcomeId),
         ]);
 
-        // backend returns {"error":"Schema not found"} sometimes
         if (sch?.error) throw new Error(sch.error);
 
         if (!cancelled) {
           setOutcomes(outs);
           setSchema(sch);
+          setModelsInfo(modelInfo);
+          setSelectedModel(modelInfo?.active || "");
         }
       } catch (e) {
         if (!cancelled) setErr(e.message || "Failed to load schema");
@@ -55,8 +58,9 @@ export default function PredictModel() {
   }, [outcomeId]);
 
   function handleSubmit(values) {
-    // Later we will POST to backend /predict
-    navigate(`/results/${outcomeId}`, { state: { formValues: values } });
+    navigate(`/results/${outcomeId}`, {
+      state: { formValues: values, selectedModel },
+    });
   }
 
   if (loading) {
@@ -99,6 +103,8 @@ export default function PredictModel() {
     );
   }
 
+  const availableModels = modelsInfo?.models || [];
+
   return (
     <div>
       {/* Breadcrumb */}
@@ -121,6 +127,36 @@ export default function PredictModel() {
           ← Back
         </Button>
       </div>
+
+      {availableModels.length > 0 && (
+        <Card
+          title="Model Selection"
+          subtitle="Choose algorithm for prediction"
+        >
+          <div style={{ display: "grid", gap: 10 }}>
+            <label htmlFor="predict-model-select" className="formLabel">
+              Algorithm
+            </label>
+            <select
+              id="predict-model-select"
+              className="formInput"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+            >
+              {availableModels.map((m) => (
+                <option
+                  key={m.algorithm}
+                  value={m.algorithm}
+                  disabled={m.trained === false}
+                >
+                  {m.label}
+                  {m.trained === false ? " (not trained)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </Card>
+      )}
 
       <Card title={schema?.title || "Inputs"}>
         <DynamicForm schema={schema} onSubmit={handleSubmit} />

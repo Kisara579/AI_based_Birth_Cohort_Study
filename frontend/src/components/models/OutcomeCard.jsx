@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../common/Button.jsx";
+import "./OutcomeCard.css";
 
 const SVG_ICON = (
   <svg

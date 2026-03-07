@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
+import { fetchMetrics, fetchModels } from "../api/modelsApi.js";
+import "./MetricsModel.css";
 
 export default function MetricsModel() {
   const { outcomeId } = useParams();
@@ -11,20 +13,59 @@ export default function MetricsModel() {
 
   const [data, setData] = useState(null);
   const [err, setErr] = useState("");
+  const [modelsInfo, setModelsInfo] = useState(null);
+  const [selectedModel, setSelectedModel] = useState("");
 
   useEffect(() => {
-    setErr("");
-    setData(null);
+    let cancelled = false;
 
-    fetch(`http://127.0.0.1:8000/metrics/${outcomeId}`)
-      .then(async (r) => {
-        const payload = await r.json();
-        if (!r.ok) throw new Error(payload.detail || "Failed to load metrics");
-        return payload;
-      })
-      .then(setData)
-      .catch((e) => setErr(e.message));
+    async function loadModels() {
+      try {
+        const info = await fetchModels(outcomeId);
+        if (cancelled) return;
+
+        setModelsInfo(info);
+        setSelectedModel(info?.active || "");
+      } catch (e) {
+        if (cancelled) return;
+
+        setModelsInfo({ active: "", models: [] });
+        setSelectedModel("");
+      }
+    }
+
+    loadModels();
+    return () => {
+      cancelled = true;
+    };
   }, [outcomeId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMetrics() {
+      setErr("");
+      setData(null);
+
+      try {
+        const payload = await fetchMetrics(
+          outcomeId,
+          selectedModel || undefined,
+        );
+        if (!cancelled) setData(payload);
+      } catch (e) {
+        if (!cancelled) setErr(e.message || "Failed to load metrics");
+      }
+    }
+
+    loadMetrics();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [outcomeId, selectedModel]);
+
+  const availableModels = useMemo(() => modelsInfo?.models || [], [modelsInfo]);
 
   if (err) {
     return (
@@ -71,8 +112,10 @@ export default function MetricsModel() {
   const statEntries = Object.entries(metrics).filter(([k]) =>
     HIGHLIGHT.some((h) => k.toLowerCase().includes(h)),
   );
+
   const fmtKey = (k) =>
     k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
   const fmtVal = (v) =>
     typeof v === "number"
       ? v <= 1
@@ -80,9 +123,12 @@ export default function MetricsModel() {
         : v.toFixed(4)
       : String(v);
 
+  const currentModelLabel =
+    availableModels.find((m) => m.algorithm === selectedModel)?.label ||
+    selectedModel;
+
   return (
     <div>
-      {/* Breadcrumb */}
       <nav className="breadcrumb">
         <a href="/" className="breadcrumbLink">
           Overview
@@ -103,43 +149,54 @@ export default function MetricsModel() {
         </Button>
       </div>
 
-      {/* Highlight stat cards */}
-      {statEntries.length > 0 && (
-        <div className="statGrid">
-          {statEntries.map(([k, v]) => (
-            <div key={k} className="statCard statCardAccent">
-              <span className="statCardValue">{fmtVal(v)}</span>
-              <span className="statCardLabel">{fmtKey(k)}</span>
-            </div>
-          ))}
-        </div>
+      {availableModels.length > 0 && (
+        <Card
+          title="Model Selection"
+          subtitle="Choose algorithm for metrics view"
+        >
+          <div style={{ display: "grid", gap: 10 }}>
+            <label htmlFor="model-select" className="formLabel">
+              Algorithm
+            </label>
+            <select
+              id="model-select"
+              className="formInput"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+            >
+              {availableModels.map((m) => (
+                <option
+                  key={m.algorithm}
+                  value={m.algorithm}
+                  disabled={m.trained === false}
+                >
+                  {m.label}
+                  {m.trained === false ? " (not trained)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </Card>
       )}
 
-      {/* Summary metrics
-      <Card title="Summary Metrics" subtitle="Overall performance on test set">
-        <table className="table">
-          <thead>
-            <tr>
-              <th align="left">Metric</th>
-              <th align="left">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(metrics).map(([k, v]) => (
-              <tr key={k}>
-                <td>{fmtKey(k)}</td>
-                <td>{typeof v === "number" ? v.toFixed(4) : String(v)}</td>
-              </tr>
+      <Card>
+        <h2>Model Statistics</h2>
+        {statEntries.length > 0 && (
+          <div className="statGrid">
+            {statEntries.map(([k, v]) => (
+              <div key={k} className="statCard statCardAccent">
+                <span className="statCardValue">{fmtVal(v)}</span>
+                <span className="statCardLabel">{fmtKey(k)}</span>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </Card> */}
+          </div>
+        )}
+      </Card>
 
-      {/* Classification report */}
       {report && (
         <Card
           title="Classification Report"
-          subtitle="Per-class precision/recall/F1"
+          subtitle={`Per-class precision/recall/F1 • ${currentModelLabel}`}
         >
           <table className="table">
             <thead>
@@ -171,11 +228,10 @@ export default function MetricsModel() {
         </Card>
       )}
 
-      {/* Confusion matrix */}
       {cm && (
         <Card
           title="Confusion Matrix"
-          subtitle="Actual (rows) vs Predicted (columns)"
+          subtitle={`Actual (rows) vs Predicted (columns) • ${currentModelLabel}`}
         >
           <div className="cmWrap">
             <div className="cmTopLabel">Predicted →</div>

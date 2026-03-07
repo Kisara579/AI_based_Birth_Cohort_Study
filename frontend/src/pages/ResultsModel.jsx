@@ -4,7 +4,12 @@ import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
-import { fetchOutcomes, predictOutcome } from "../api/modelsApi.js";
+import {
+  fetchOutcomes,
+  fetchModels,
+  predictOutcome,
+} from "../api/modelsApi.js";
+import "./ResultsModel.css";
 
 export default function ResultsModel() {
   const { outcomeId } = useParams();
@@ -14,6 +19,8 @@ export default function ResultsModel() {
   const [outcomes, setOutcomes] = useState([]);
   const [loadingOutcomes, setLoadingOutcomes] = useState(true);
   const [outcomesErr, setOutcomesErr] = useState("");
+
+  const [modelsInfo, setModelsInfo] = useState(null);
 
   // prediction
   const [predLoading, setPredLoading] = useState(false);
@@ -26,17 +33,24 @@ export default function ResultsModel() {
   );
 
   const formValues = location.state?.formValues;
+  const selectedModel = location.state?.selectedModel;
 
   // load outcomes (to display name/short)
   useEffect(() => {
     let cancelled = false;
 
-    async function loadOutcomes() {
+    async function loadBasics() {
       setLoadingOutcomes(true);
       setOutcomesErr("");
       try {
-        const outs = await fetchOutcomes();
-        if (!cancelled) setOutcomes(outs);
+        const [outs, modelInfo] = await Promise.all([
+          fetchOutcomes(),
+          fetchModels(outcomeId),
+        ]);
+        if (!cancelled) {
+          setOutcomes(outs);
+          setModelsInfo(modelInfo);
+        }
       } catch (e) {
         if (!cancelled) setOutcomesErr(e.message || "Failed to load outcomes");
       } finally {
@@ -44,11 +58,11 @@ export default function ResultsModel() {
       }
     }
 
-    loadOutcomes();
+    loadBasics();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [outcomeId]);
 
   // call backend prediction when we have inputs
   useEffect(() => {
@@ -62,9 +76,9 @@ export default function ResultsModel() {
       setPrediction(null);
 
       try {
-        const res = await predictOutcome(outcomeId, formValues);
+        const effectiveModel = selectedModel || modelsInfo?.active;
+        const res = await predictOutcome(outcomeId, formValues, effectiveModel);
 
-        // backend might return {"error": "..."}
         if (res?.error) throw new Error(res.error);
 
         if (!cancelled) setPrediction(res);
@@ -75,12 +89,14 @@ export default function ResultsModel() {
       }
     }
 
-    runPrediction();
+    if (formValues && !loadingOutcomes) {
+      runPrediction();
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [outcomeId, formValues]);
+  }, [outcomeId, formValues, selectedModel, modelsInfo, loadingOutcomes]);
 
   // ui statuses
 
@@ -214,7 +230,7 @@ export default function ResultsModel() {
         <p className="pageSubtitle" style={{ marginBottom: 14 }}>
           Outcome: <b>{outcome.name}</b>
         </p>
-        <ErrorBanner title="Prediction failed" message={predErr} />
+        <ErrorBanner title="Prediction unavailable" message={predErr} />
 
         <div
           style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}
@@ -241,15 +257,21 @@ export default function ResultsModel() {
   const offset = circumference - (pct / 100) * circumference;
 
   // Colour band
-  let gaugeColor = "#4ade80"; // green
+  let gaugeColor = "#34ff7f";
   let riskClass = "riskLow";
   if (pct >= 70) {
-    gaugeColor = "#f87171";
+    gaugeColor = "#ff2c2c";
     riskClass = "riskHigh";
   } else if (pct >= 40) {
-    gaugeColor = "#fb923c";
+    gaugeColor = "#ff8d2f";
     riskClass = "riskMedium";
   }
+
+  const effectiveModel = selectedModel || modelsInfo?.active || "";
+  const modelLabel =
+    modelsInfo?.models?.find((m) => m.algorithm === effectiveModel)?.label ||
+    effectiveModel ||
+    "Active Model";
 
   return (
     <div>
@@ -339,6 +361,13 @@ export default function ResultsModel() {
               <span className="resultMetaLabel">Outcome Model</span>
               <span className="resultMetaValue" style={{ fontSize: 15 }}>
                 {outcome.name}
+              </span>
+            </div>
+
+            <div className="resultMetaRow">
+              <span className="resultMetaLabel">Algorithm</span>
+              <span className="resultMetaValue" style={{ fontSize: 15 }}>
+                {modelLabel}
               </span>
             </div>
           </div>

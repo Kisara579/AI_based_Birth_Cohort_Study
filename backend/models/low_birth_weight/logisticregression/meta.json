@@ -1,7 +1,8 @@
 {
+  "outcome": "low_birth_weight",
   "outcome_id": "lbw",
-  "model_type": "logisticregression",
-  "target": "low_birth_weight",
+  "algorithm": "logisticregression",
+  "target_column": "low_birth_weight",
   "positive_label": "Low Birth Weight (<2500g)",
   "negative_label": "Normal Birth Weight",
   "feature_order": [
@@ -37,11 +38,11 @@
     "SEX",
     "WTGAIN"
   ],
-  "threshold": 0.5,
   "categorical_features": [
     "DMAR",
     "LD_INDL",
     "RF_CESAR",
     "SEX"
-  ]
+  ],
+  "threshold": 0.5
 }

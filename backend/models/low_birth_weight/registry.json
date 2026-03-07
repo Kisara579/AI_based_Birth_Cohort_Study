@@ -1,7 +1,9 @@
 {
   "outcome": "low_birth_weight",
   "outcome_id": "lbw",
-  "active": "xgboost",
+  "selection_mode": "auto",
+  "selection_metric": "f1",
+  "active_model": null,
   "models": [
     {
       "algorithm": "xgboost",
@@ -10,15 +12,15 @@
       "trained": true
     },
     {
-      "algorithm": "randomforest",
-      "label": "Random Forest",
-      "description": "Ensemble of decision trees trained on CDC Natality data.",
-      "trained": true
-    },
-    {
       "algorithm": "logisticregression",
       "label": "Logistic Regression",
       "description": "Linear baseline classifier trained on CDC Natality data.",
+      "trained": true
+    },
+    {
+      "algorithm": "randomforest",
+      "label": "Random Forest",
+      "description": "Ensemble of decision trees trained on CDC Natality data.",
       "trained": true
     }
   ]

@@ -7,6 +7,7 @@ import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
 import {
   fetchOutcomes,
   fetchModels,
+  fetchSchema,
   predictOutcome,
 } from "../api/modelsApi.js";
 import "./ResultsModel.css";
@@ -21,6 +22,7 @@ export default function ResultsModel() {
   const [outcomesErr, setOutcomesErr] = useState("");
 
   const [modelsInfo, setModelsInfo] = useState(null);
+  const [schema, setSchema] = useState(null);
 
   // prediction
   const [predLoading, setPredLoading] = useState(false);
@@ -34,6 +36,35 @@ export default function ResultsModel() {
 
   const formValues = location.state?.formValues;
 
+  // Map field.name -> field.label
+  const fieldLabelMap = useMemo(() => {
+    const map = {};
+    for (const section of schema?.sections ?? []) {
+      for (const field of section.fields ?? []) {
+        map[field.name] = field.label || field.name;
+      }
+    }
+    return map;
+  }, [schema]);
+
+  // Map field.name -> Map(optionValue -> optionLabel)
+  const fieldOptionMap = useMemo(() => {
+    const map = {};
+    for (const section of schema?.sections ?? []) {
+      for (const field of section.fields ?? []) {
+        if (field.options?.length) {
+          const optMap = {};
+          for (const opt of field.options) {
+            // store both string and original key for safe lookup
+            optMap[String(opt.value)] = opt.label;
+          }
+          map[field.name] = optMap;
+        }
+      }
+    }
+    return map;
+  }, [schema]);
+
   // load outcomes (to display name/short)
   useEffect(() => {
     let cancelled = false;
@@ -42,13 +73,15 @@ export default function ResultsModel() {
       setLoadingOutcomes(true);
       setOutcomesErr("");
       try {
-        const [outs, modelInfo] = await Promise.all([
+        const [outs, modelInfo, schemaData] = await Promise.all([
           fetchOutcomes(),
           fetchModels(outcomeId),
+          fetchSchema(outcomeId),
         ]);
         if (!cancelled) {
           setOutcomes(outs);
           setModelsInfo(modelInfo);
+          setSchema(schemaData);
         }
       } catch (e) {
         if (!cancelled) setOutcomesErr(e.message || "Failed to load outcomes");
@@ -399,12 +432,19 @@ export default function ResultsModel() {
         className="resultInputsCard resultsSectionSpacing"
       >
         <div className="inputsGrid">
-          {Object.entries(formValues).map(([k, v]) => (
-            <div key={k} className="inputCell">
-              <div className="inputCellKey">{k.replace(/_/g, " ")}</div>
-              <div className="inputCellVal">{String(v)}</div>
-            </div>
-          ))}
+          {Object.entries(formValues).map(([k, v]) => {
+            const label = fieldLabelMap[k] || k.replace(/_/g, " ");
+            const optMap = fieldOptionMap[k];
+            const display = optMap
+              ? (optMap[String(v)] ?? String(v))
+              : String(v);
+            return (
+              <div key={k} className="inputCell">
+                <div className="inputCellKey">{label}</div>
+                <div className="inputCellVal">{display}</div>
+              </div>
+            );
+          })}
         </div>
       </Card>
     </div>

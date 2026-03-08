@@ -164,7 +164,7 @@ export default function PredictModel() {
 
       <Card
         title="Prediction Model"
-        subtitle="Default algorithm currently used for prediction"
+        subtitle="Best-performing algorithm selected by F1 score"
         className="predictModelPanel"
       >
         <div className="predictModelInfo">

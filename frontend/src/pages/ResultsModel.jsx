@@ -284,7 +284,7 @@ export default function ResultsModel() {
     riskClass = "riskMedium";
   }
 
-  const effectiveModel = modelsInfo?.active || "";
+  const effectiveModel = modelsInfo?.active_model || "";
   const modelLabel =
     modelsInfo?.models?.find((m) => m.algorithm === effectiveModel)?.label ||
     effectiveModel ||

@@ -146,7 +146,7 @@ save_model_artifacts(
     pipeline=pipeline,
     outcome="pd",
     outcome_id="pd",
-    algorithm="linear_svm",
+    algorithm="linearsvm",
     label="Linear SVM",
     description="Linear SVM classifier trained on birth dataset",
     target_column="premature_delivery",

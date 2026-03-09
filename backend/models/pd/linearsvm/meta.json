@@ -1,7 +1,7 @@
 {
   "outcome": "pd",
   "outcome_id": "pd",
-  "algorithm": "linear_svm",
+  "algorithm": "linearsvm",
   "target_column": "premature_delivery",
   "positive_label": "premature delivery(week < 37)",
   "negative_label": "full-term delivery(week >= 37)",

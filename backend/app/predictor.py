@@ -71,7 +71,7 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
 
     threshold = meta.get("threshold", 0.5)
     try:
-        threshold = float(threshold)
+        threshold = round(float(threshold), 2)
     except Exception:
         threshold = 0.5
 
@@ -91,7 +91,15 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
         if c not in categorical:
             X_df[c] = pd.to_numeric(X_df[c], errors="coerce")
 
-    X_df = X_df.fillna(0)
+    invalid_numeric = [
+        c for c in feature_order
+        if c not in categorical and X_df[c].isna().any()
+    ]
+    if invalid_numeric:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid numeric values for: {', '.join(invalid_numeric)}"
+        )
 
     try:
         proba = model.predict_proba(X_df)[0][1]

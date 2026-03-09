@@ -3,7 +3,7 @@
   "outcome_id": "lbw",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "randomforest",
+  "active_model": "xgboost",
   "models": [
     {
       "algorithm": "logisticregression",

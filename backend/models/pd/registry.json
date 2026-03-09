@@ -3,7 +3,7 @@
   "outcome_id": "pd",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "randomforest",
+  "active_model": "xgboost",
   "models": [
     {
       "algorithm": "linearsvm",

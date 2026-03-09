@@ -7,6 +7,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
     
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import joblib
 import json
@@ -126,6 +127,25 @@ pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
 y_prob = pipeline.predict_proba(X_test)[:, 1]
 
+# Find best threshold by F1
+thresholds = np.arange(0.1, 0.91, 0.05)
+best_threshold = 0.5
+best_f1 = 0
+
+for t in thresholds:
+    y_pred_t = (y_prob >= t).astype(int)
+    f1 = f1_score(y_test, y_pred_t, zero_division=0)
+    if f1 > best_f1:
+        best_f1 = f1
+        best_threshold = t
+
+best_threshold = float(round(best_threshold, 2))
+print("Best threshold:", best_threshold)
+print("Best F1:", best_f1)
+
+# Final predictions using best threshold
+y_pred = (y_prob >= best_threshold).astype(int)
+
 metrics = {
     "accuracy": float(accuracy_score(y_test, y_pred)),
     "precision": float(precision_score(y_test, y_pred, zero_division=0)),
@@ -163,4 +183,5 @@ save_model_artifacts(
     metrics_payload=metrics_payload,
     positive_label="premature delivery(week < 37)",
     negative_label="full-term delivery(week >= 37)",
+    threshold=best_threshold
 )

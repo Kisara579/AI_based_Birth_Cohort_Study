@@ -16,7 +16,7 @@ def save_model_artifacts(
     metrics_payload,
     positive_label,
     negative_label,
-    threshold=0.5,
+    threshold,
 ):
 
     base_dir = Path("backend/models") / outcome
@@ -40,7 +40,7 @@ def save_model_artifacts(
         "negative_label": negative_label,
         "feature_order": feature_order,
         "categorical_features": categorical_features,
-        "threshold": threshold,
+        "threshold": float(round(threshold, 2)),
     }
 
     meta_path = model_dir / "meta.json"

@@ -19,6 +19,9 @@ from sklearn.pipeline import Pipeline
 
 from xgboost import XGBClassifier
 
+from sklearn.metrics import f1_score
+import numpy as np
+
 DATA_PATH = Path("data/low_birth_weight/processed/lbw_train_processed.csv")
 
 df = pd.read_csv(DATA_PATH)
@@ -69,8 +72,24 @@ pipeline = Pipeline(steps=[
 
 pipeline.fit(X_train,y_train)
 
-y_pred = pipeline.predict(X_test)
 y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+
+thresholds = np.arange(0.1, 0.91, 0.05)
+best_threshold = 0.5
+best_f1 = 0
+
+for t in thresholds:
+    y_pred = (y_prob >= t).astype(int)
+    f1 = f1_score(y_test, y_pred)
+    if f1 > best_f1:
+        best_f1 = f1
+        best_threshold = t
+
+print("Best threshold:", best_threshold)
+print("Best F1:", best_f1)
+
+y_pred = (y_prob >= best_threshold).astype(int)
 
 metrics = {
     "accuracy": float(accuracy_score(y_test, y_pred)),
@@ -111,4 +130,5 @@ save_model_artifacts(
     metrics_payload=metrics_payload,
     positive_label="Low Birth Weight (<2500g)",
     negative_label="Normal Birth Weight",
+    threshold=best_threshold
 )

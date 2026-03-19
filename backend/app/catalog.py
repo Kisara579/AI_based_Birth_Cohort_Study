@@ -1,4 +1,6 @@
 from typing import Any, Dict, List, Optional
+import json
+from pathlib import Path
 
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
@@ -11,7 +13,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
     },
 
     "preeclampsia": {
-        "id": "Preeclampsia ",
+        "id": "preeclampsia",
         "name": "Preeclampsia",
         "short": "PE",
         "description": "Predict risk of hypertensive disorder during pregnancy.",
@@ -155,7 +157,255 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "PD",
         "description": "Predict likelihood of delivery before 37 weeks.",
         "model_key": "pd",
-        "schema": {"title": "Premature Delivery Inputs", "sections": []}
+        "schema": {"title": "Premature Delivery Inputs", 
+                   "sections": [
+                       {
+                "id": "demographics",
+                "title": "Demographics",
+                "fields": [
+                    {
+                        "name": "SEX",
+                        "label": "Sex of baby",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            {"value": 1, "label": "Male"},
+                            {"value": 2, "label": "Female"}
+                        ]
+                    },
+                    {
+                        "name": "MARITAL",
+                        "label": "Marital status of parents",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            {"value": 1, "label": "Married"},
+                            {"value": 2, "label": "Unmarried"}
+                        ]
+                    },
+                    {
+                        "name": "FAGE",
+                        "label": "Father age",
+                        "type": "number",
+                        "min": 10,
+                        "max": 90,
+                        "required": True,
+                        "placeholder": "e.g., 30"
+                    },
+                    {
+                        "name": "MAGE",
+                        "label": "Mother age",
+                        "type": "number",
+                        "min": 10,
+                        "max": 60,
+                        "required": True,
+                        "placeholder": "e.g., 28"
+                    },
+                    {
+                        "name": "FEDUC",
+                        "label": "Father education years",
+                        "type": "number",
+                        "min": 0,
+                        "max": 30,
+                        "required": True,
+                        "placeholder": "e.g., 12"
+                    },
+                    {
+                        "name": "MEDUC",
+                        "label": "Mother education years",
+                        "type": "number",
+                        "min": 0,
+                        "max": 30,
+                        "required": True,
+                        "placeholder": "e.g., 12"
+                    },
+                    {
+                        "name": "RACEMOM",
+                        "label": "Mother race",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            {"value": 0, "label": "Unknown"},
+                            {"value": 1, "label": "Other Non-White"},
+                            {"value": 2, "label": "White"},
+                            {"value": 3, "label": "Black"},
+                            {"value": 4, "label": "American Indian"},
+                            {"value": 5, "label": "Chinese"},
+                            {"value": 6, "label": "Japanese"},
+                            {"value": 7, "label": "Hawaiian"},
+                            {"value": 8, "label": "Filipino"},
+                            {"value": 9, "label": "Other Asian"}
+                        ]
+                    },
+                    {
+                        "name": "RACEDAD",
+                        "label": "Father race",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            {"value": 0, "label": "Unknown"},
+                            {"value": 1, "label": "Other Non-White"},
+                            {"value": 2, "label": "White"},
+                            {"value": 3, "label": "Black"},
+                            {"value": 4, "label": "American Indian"},
+                            {"value": 5, "label": "Chinese"},
+                            {"value": 6, "label": "Japanese"},
+                            {"value": 7, "label": "Hawaiian"},
+                            {"value": 8, "label": "Filipino"},
+                            {"value": 9, "label": "Other Asian"}
+                        ]
+                    },
+                    {
+                        "name": "HISPMOM",
+                        "label": "Mother Hispanic group",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            {"value": "C", "label": "Cuban"},
+                            {"value": "M", "label": "Mexican"},
+                            {"value": "N", "label": "No"},
+                            {"value": "O", "label": "Colombian"},
+                            {"value": "P", "label": "Peruvian"},
+                            {"value": "S", "label": "Salvadoran"},
+                            {"value": "U", "label": "Guatemalan"}
+                        ]
+                    },
+                    {
+                        "name": "HISPDAD",
+                        "label": "Father Hispanic group",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            {"value": "C", "label": "Cuban"},
+                            {"value": "M", "label": "Mexican"},
+                            {"value": "N", "label": "No"},
+                            {"value": "O", "label": "Colombian"},
+                            {"value": "P", "label": "Peruvian"},
+                            {"value": "S", "label": "Salvadoran"},
+                            {"value": "U", "label": "Guatemalan"}
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "pregnancy_and_history",
+                "title": "Pregnancy and History",
+                "fields": [
+                    {
+                        "name": "GAINED",
+                        "label": "Weight gained during pregnancy",
+                        "type": "number",
+                        "min": 0,
+                        "max": 100,
+                        "required": True,
+                        "placeholder": "e.g., 25"
+                    },
+                    {
+                        "name": "VISITS",
+                        "label": "Prenatal visits",
+                        "type": "number",
+                        "min": 0,
+                        "max": 50,
+                        "required": True,
+                        "placeholder": "e.g., 10"
+                    },
+                    {
+                        "name": "TOTALP",
+                        "label": "Total pregnancies",
+                        "type": "number",
+                        "min": 0,
+                        "max": 20,
+                        "required": True,
+                        "placeholder": "e.g., 2"
+                    },
+                    {
+                        "name": "BDEAD",
+                        "label": "Children born alive now dead",
+                        "type": "number",
+                        "min": 0,
+                        "max": 20,
+                        "required": True,
+                        "placeholder": "e.g., 0"
+                    },
+                    {
+                        "name": "TERMS",
+                        "label": "Other terminations",
+                        "type": "number",
+                        "min": 0,
+                        "max": 20,
+                        "required": True,
+                        "placeholder": "e.g., 0"
+                    },
+                    {
+                        "name": "LOUTCOME",
+                        "label": "Outcome of last delivery",
+                        "type": "number",
+                        "min": 0,
+                        "max": 10,
+                        "required": True,
+                        "placeholder": "e.g., 1"
+                    },
+                    {
+                        "name": "PRETERM",
+                        "label": "Previous preterm or small infant",
+                        "type": "select",
+                        "required": True,
+                        "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]
+                    },
+                    {
+                        "name": "PINFANT",
+                        "label": "Previous infant over 4000 grams",
+                        "type": "select",
+                        "required": True,
+                        "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]
+                    }
+                ]
+            },
+            {
+                "id": "lifestyle",
+                "title": "Lifestyle Factors",
+                "fields": [
+                    {
+                        "name": "CIGNUM",
+                        "label": "Average cigarettes per day",
+                        "type": "number",
+                        "min": 0,
+                        "max": 60,
+                        "required": True,
+                        "placeholder": "e.g., 0"
+                    },
+                    {
+                        "name": "DRINKNUM",
+                        "label": "Average drinks per day",
+                        "type": "number",
+                        "min": 0,
+                        "max": 20,
+                        "required": True,
+                        "placeholder": "e.g., 0"
+                    }
+                ]
+            },
+            {
+                "id": "maternal_conditions",
+                "title": "Maternal Conditions",
+                "fields": [
+                    {"name": "ANEMIA", "label": "Anemia", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "CARDIAC", "label": "Cardiac disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "ACLUNG", "label": "Acute or chronic lung disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "DIABETES", "label": "Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "HERPES", "label": "Genital herpes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "HYDRAM", "label": "Hydramnios / Oligohydramnios", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "HEMOGLOB", "label": "Hemoglobinopathy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "HYPERCH", "label": "Chronic hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "HYPERPR", "label": "Pregnancy hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "ECLAMP", "label": "Eclampsia", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "CERVIX", "label": "Incompetent cervix", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "RENAL", "label": "Renal disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "RHSEN", "label": "Rh sensitization", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                    {"name": "UTERINE", "label": "Uterine bleeding", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
+                ]
+            }
+                   ]}
     },
 
     
@@ -200,3 +450,57 @@ def get_model_key(outcome_id: str) -> Optional[str]:
     if not outcome:
         return None
     return outcome.get("model_key")
+
+
+# select best algorithm 
+MODELS_ROOT = Path(__file__).resolve().parents[1] / "models"
+
+def select_best_model(outcome: str):
+
+    outcome_dir = MODELS_ROOT / outcome
+    registry_path = outcome_dir / "registry.json"
+
+    if not registry_path.exists():
+        raise FileNotFoundError(f"Registry not found for outcome: {outcome}")
+
+    registry = json.loads(registry_path.read_text())
+
+    if registry.get("selection_mode") != "auto":
+        return registry.get("active_model")
+
+    metric_name = registry.get("selection_metric", "f1")
+
+    best_model = None
+    best_score = -1
+
+    for model in registry.get("models", []):
+
+        if not model.get("trained"):
+            continue
+
+        algo = model["algorithm"]
+
+        metrics_path = outcome_dir / algo / "metrics.json"
+
+        if not metrics_path.exists():
+            continue
+
+        metrics_data = json.loads(metrics_path.read_text())
+
+        score = metrics_data["metrics"].get(metric_name)
+
+        if score is None:
+            continue
+
+        if score > best_score:
+            best_score = score
+            best_model = algo
+
+    if best_model is None:
+        raise RuntimeError("No valid trained model found")
+
+    # update registry
+    registry["active_model"] = best_model
+    registry_path.write_text(json.dumps(registry, indent=2))
+
+    return best_model

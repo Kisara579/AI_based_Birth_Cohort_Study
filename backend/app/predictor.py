@@ -7,6 +7,7 @@ import pandas as pd
 
 from fastapi import HTTPException
 from .config import model_paths
+from .catalog import select_best_model
 
 
 _MODEL_CACHE: Dict[str, Any] = {}
@@ -21,7 +22,8 @@ def _load_meta(meta_path: Path) -> dict:
         raise HTTPException(status_code=500, detail=f"Invalid meta JSON: {meta_path.name} ({e})")
 
 def _load_model(model_key: str, algorithm: str | None = None) -> Any:
-    cache_key = f"{model_key}:{algorithm or 'active'}"
+    cache_key = f"{model_key}:{algorithm}"
+
     if cache_key in _MODEL_CACHE:
         return _MODEL_CACHE[cache_key]
 
@@ -48,7 +50,17 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
     If algorithm is None, the active model from registry.json is used.
     Returns probability + risk label using threshold from meta.json.
     """
+
+    if algorithm is None:
+        algorithm = select_best_model(model_key)
+
     model_path, meta_path, _ = model_paths(model_key, algorithm=algorithm)
+
+    if not model_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Algorithm '{algorithm}' not available for outcome '{model_key}'"
+    )
 
     model = _load_model(model_key, algorithm=algorithm)
     meta = _load_meta(meta_path)
@@ -59,7 +71,7 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
 
     threshold = meta.get("threshold", 0.5)
     try:
-        threshold = float(threshold)
+        threshold = round(float(threshold), 2)
     except Exception:
         threshold = 0.5
 
@@ -79,7 +91,15 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
         if c not in categorical:
             X_df[c] = pd.to_numeric(X_df[c], errors="coerce")
 
-    X_df = X_df.fillna(0)
+    invalid_numeric = [
+        c for c in feature_order
+        if c not in categorical and X_df[c].isna().any()
+    ]
+    if invalid_numeric:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid numeric values for: {', '.join(invalid_numeric)}"
+        )
 
     try:
         proba = model.predict_proba(X_df)[0][1]
@@ -89,3 +109,6 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
     probability = float(proba)
     risk_label = "High Risk" if probability >= threshold else "Low Risk"
     return probability, risk_label
+
+
+

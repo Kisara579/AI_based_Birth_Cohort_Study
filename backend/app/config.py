@@ -14,8 +14,8 @@ MODELS_DIR = BASE_DIR / "models"
 
 # Maps catalog model_key → subdirectory name under MODELS_DIR
 OUTCOME_FOLDER: dict[str, str] = {
-    "lbw": "low_birth_weight",
-    "preterm": "premature_delivery",
+    "lbw": "lbw",
+    "pd": "pd",
 }
 
 
@@ -33,10 +33,14 @@ def model_paths(model_key: str, algorithm: str | None = None):
 
     if registry_path.exists():
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
-        if algorithm is None:
-            algorithm = registry.get("active", "xgboost")
 
-        algo_dir = outcome_dir / algorithm
+        resolved_algorithm = algorithm or registry.get("active_model")
+        if not resolved_algorithm:
+            raise FileNotFoundError(
+                f"No active model configured for outcome '{model_key}'."
+            )
+
+        algo_dir = outcome_dir / resolved_algorithm
 
         return (
             algo_dir / "model.pkl",

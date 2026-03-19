@@ -1,3 +1,4 @@
+/* Code block */
 .codeBlock {
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border);
@@ -8,30 +9,82 @@
   color: var(--text);
 }
 
+/* Override Card to styled panels */
+.resultPredictionCard.card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent, #3b82f6);
+  border-radius: 14px;
+  padding: 28px 32px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.resultPredictionCard.card:hover {
+  box-shadow: none;
+  border-color: var(--border);
+  border-left-color: var(--accent, #3b82f6);
+}
+
+.resultPredictionCard .cardTitle {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.resultPredictionCard .cardSubtitle {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.resultInputsCard.card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.resultInputsCard.card:hover {
+  box-shadow: none;
+}
+
+.resultInputsCard .cardTitle {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.resultInputsCard .cardSubtitle {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* Hero section — circular gauge + meta */
 .resultHero {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 36px;
   flex-wrap: wrap;
-  padding: 8px 0 16px;
+  padding: 12px 0 8px;
 }
 
+/* Probability circle */
 .probCircleWrap {
   position: relative;
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   flex-shrink: 0;
 }
 
 .probCircleSvg {
   transform: rotate(-90deg);
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
 }
 
 .probCircleBg {
   fill: none;
-  stroke: var(--border);
+  stroke: rgba(255, 255, 255, 0.06);
   stroke-width: 8;
 }
 
@@ -49,11 +102,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 2px;
 }
 
 .probCirclePct {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1;
 }
@@ -61,26 +114,30 @@
 .probCircleSmall {
   font-size: 11px;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
 }
 
+/* Meta rows beside gauge */
 .resultMeta {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .resultMetaRow {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .resultMetaLabel {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.06em;
   color: var(--muted);
 }
 
@@ -90,10 +147,15 @@
   color: var(--text);
 }
 
+.resultMetaValueSm {
+  font-size: 15px;
+}
+
 .resultsSectionSpacing {
   margin-top: 16px;
 }
 
+/* Risk badges */
 .riskBadge {
   display: inline-flex;
   align-items: center;
@@ -102,6 +164,7 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
+  width: fit-content;
 }
 
 .riskHigh {
@@ -152,7 +215,7 @@
   stroke: #34ff7f;
 }
 
-/* Progress bar  */
+/* Progress bar */
 .progressBarWrap {
   height: 6px;
   background: rgba(255, 255, 255, 0.06);
@@ -167,34 +230,70 @@
   transition: width 0.6s ease;
 }
 
-/* Info rows for submitted inputs */
+/* Submitted inputs grid */
 .inputsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-  margin-top: 4px;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .inputCell {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 12px 14px;
+  transition: border-color 0.15s ease;
+}
+
+.inputCell:hover {
+  border-color: var(--border2);
 }
 
 .inputCellKey {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  font-weight: 600;
-  margin-bottom: 3px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .inputCellVal {
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
+}
+
+/* Action rows */
+.resultsBackWrap {
+  margin-top: 14px;
+}
+
+.resultsActionRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.resultsHeaderActions {
+  display: flex;
+  gap: 10px;
+}
+
+.pageSubtitleMb {
+  margin-bottom: 14px;
+}
+
+.tagMl {
+  margin-left: 6px;
+}
+
+/* Light theme */
+body[data-theme="light"] .resultPredictionCard.card,
+body[data-theme="light"] .resultInputsCard.card {
+  background: rgba(2, 6, 23, 0.02);
 }
 
 body[data-theme="light"] .inputCell {
@@ -211,30 +310,6 @@ body[data-theme="light"] .riskLow {
   color: #16a34a;
 }
 
-.resultsBackWrap {
-  margin-top: 14px;
-}
-
-.resultsActionRow {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-
-.pageSubtitleMb {
-  margin-bottom: 14px;
-}
-
-.tagMl {
-  margin-left: 6px;
-}
-
-.resultsHeaderActions {
-  display: flex;
-  gap: 10px;
-}
-
-.resultMetaValueSm {
-  font-size: 15px;
+body[data-theme="light"] .probCircleBg {
+  stroke: var(--border);
 }

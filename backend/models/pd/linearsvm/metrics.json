@@ -42,5 +42,67 @@
       1450,
       919
     ]
+  ],
+  "feature_importance": [
+    {
+      "feature": "RACEDAD_9",
+      "importance": 1.0
+    },
+    {
+      "feature": "HISPDAD",
+      "importance": 0.9551
+    },
+    {
+      "feature": "RACEDAD_6",
+      "importance": 0.9376
+    },
+    {
+      "feature": "RACEDAD_5",
+      "importance": 0.8898
+    },
+    {
+      "feature": "HISPMOM",
+      "importance": 0.8146
+    },
+    {
+      "feature": "RACEDAD_3",
+      "importance": 0.5614
+    },
+    {
+      "feature": "RACEDAD_2",
+      "importance": 0.5198
+    },
+    {
+      "feature": "RACEDAD_1",
+      "importance": 0.5165
+    },
+    {
+      "feature": "RACEMOM_6",
+      "importance": 0.4254
+    },
+    {
+      "feature": "RACEDAD_8",
+      "importance": 0.3846
+    },
+    {
+      "feature": "RACEMOM_0",
+      "importance": 0.3825
+    },
+    {
+      "feature": "RACEDAD_7",
+      "importance": 0.3746
+    },
+    {
+      "feature": "RACEMOM_7",
+      "importance": 0.3683
+    },
+    {
+      "feature": "RACEDAD_0",
+      "importance": 0.3501
+    },
+    {
+      "feature": "RACEMOM_5",
+      "importance": 0.2043
+    }
   ]
 }

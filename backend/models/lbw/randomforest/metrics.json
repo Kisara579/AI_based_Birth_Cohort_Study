@@ -42,5 +42,67 @@
       1179,
       589
     ]
+  ],
+  "feature_importance": [
+    {
+      "feature": "PREVIS",
+      "importance": 1.0
+    },
+    {
+      "feature": "ILLB_R",
+      "importance": 0.595
+    },
+    {
+      "feature": "ILP_R",
+      "importance": 0.4692
+    },
+    {
+      "feature": "WTGAIN",
+      "importance": 0.3421
+    },
+    {
+      "feature": "NO_RISKS",
+      "importance": 0.2943
+    },
+    {
+      "feature": "PRECARE",
+      "importance": 0.2022
+    },
+    {
+      "feature": "PWgt_R",
+      "importance": 0.194
+    },
+    {
+      "feature": "ATTEND",
+      "importance": 0.1676
+    },
+    {
+      "feature": "BMI",
+      "importance": 0.1593
+    },
+    {
+      "feature": "FAGECOMB",
+      "importance": 0.1346
+    },
+    {
+      "feature": "RF_CESAR",
+      "importance": 0.1141
+    },
+    {
+      "feature": "M_Ht_In",
+      "importance": 0.1139
+    },
+    {
+      "feature": "DMAR",
+      "importance": 0.1112
+    },
+    {
+      "feature": "MAGER",
+      "importance": 0.1028
+    },
+    {
+      "feature": "PRIORLIVE",
+      "importance": 0.0817
+    }
   ]
 }

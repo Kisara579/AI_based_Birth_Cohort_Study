@@ -42,5 +42,67 @@
       1365,
       1004
     ]
+  ],
+  "feature_importance": [
+    {
+      "feature": "VISITS",
+      "importance": 1.0
+    },
+    {
+      "feature": "GAINED",
+      "importance": 0.5756
+    },
+    {
+      "feature": "MAGE",
+      "importance": 0.3091
+    },
+    {
+      "feature": "FAGE",
+      "importance": 0.3025
+    },
+    {
+      "feature": "HYPERPR",
+      "importance": 0.2754
+    },
+    {
+      "feature": "MEDUC",
+      "importance": 0.2042
+    },
+    {
+      "feature": "FEDUC",
+      "importance": 0.2014
+    },
+    {
+      "feature": "TOTALP",
+      "importance": 0.1926
+    },
+    {
+      "feature": "RACEMOM",
+      "importance": 0.1265
+    },
+    {
+      "feature": "RACEDAD",
+      "importance": 0.107
+    },
+    {
+      "feature": "LOUTCOME",
+      "importance": 0.0963
+    },
+    {
+      "feature": "TERMS",
+      "importance": 0.0949
+    },
+    {
+      "feature": "HISPMOM",
+      "importance": 0.0939
+    },
+    {
+      "feature": "HISPDAD",
+      "importance": 0.0904
+    },
+    {
+      "feature": "PRETERM",
+      "importance": 0.0898
+    }
   ]
 }

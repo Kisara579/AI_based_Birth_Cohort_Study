@@ -42,5 +42,67 @@
       1118,
       650
     ]
+  ],
+  "feature_importance": [
+    {
+      "feature": "RF_CESAR",
+      "importance": 1.0
+    },
+    {
+      "feature": "LD_INDL",
+      "importance": 0.5628
+    },
+    {
+      "feature": "NO_RISKS",
+      "importance": 0.5131
+    },
+    {
+      "feature": "DMAR",
+      "importance": 0.4893
+    },
+    {
+      "feature": "PWgt_R",
+      "importance": 0.3224
+    },
+    {
+      "feature": "SEX",
+      "importance": 0.2441
+    },
+    {
+      "feature": "ATTEND",
+      "importance": 0.2241
+    },
+    {
+      "feature": "WTGAIN",
+      "importance": 0.213
+    },
+    {
+      "feature": "BMI",
+      "importance": 0.1928
+    },
+    {
+      "feature": "PRECARE",
+      "importance": 0.1646
+    },
+    {
+      "feature": "FAGECOMB",
+      "importance": 0.1615
+    },
+    {
+      "feature": "M_Ht_In",
+      "importance": 0.1427
+    },
+    {
+      "feature": "RESTATUS",
+      "importance": 0.1366
+    },
+    {
+      "feature": "PREVIS",
+      "importance": 0.1255
+    },
+    {
+      "feature": "CIG_0",
+      "importance": 0.0936
+    }
   ]
 }

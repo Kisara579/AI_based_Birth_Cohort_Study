@@ -42,5 +42,67 @@
       1343,
       1026
     ]
+  ],
+  "feature_importance": [
+    {
+      "feature": "HISPMOM",
+      "importance": 1.0
+    },
+    {
+      "feature": "HYPERPR",
+      "importance": 0.9188
+    },
+    {
+      "feature": "HISPDAD",
+      "importance": 0.9013
+    },
+    {
+      "feature": "PRETERM",
+      "importance": 0.6716
+    },
+    {
+      "feature": "CERVIX",
+      "importance": 0.5629
+    },
+    {
+      "feature": "ECLAMP",
+      "importance": 0.528
+    },
+    {
+      "feature": "VISITS",
+      "importance": 0.4286
+    },
+    {
+      "feature": "HYPERCH",
+      "importance": 0.4173
+    },
+    {
+      "feature": "UTERINE",
+      "importance": 0.383
+    },
+    {
+      "feature": "HYDRAM",
+      "importance": 0.2357
+    },
+    {
+      "feature": "LOUTCOME",
+      "importance": 0.2245
+    },
+    {
+      "feature": "BDEAD",
+      "importance": 0.219
+    },
+    {
+      "feature": "RACEMOM",
+      "importance": 0.2122
+    },
+    {
+      "feature": "GAINED",
+      "importance": 0.1856
+    },
+    {
+      "feature": "TOTALP",
+      "importance": 0.169
+    }
   ]
 }

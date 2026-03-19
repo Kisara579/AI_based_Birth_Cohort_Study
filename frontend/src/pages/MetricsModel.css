@@ -1,4 +1,8 @@
-/*  Breadcrumb */
+/* ================================================================
+   MetricsModel.css  -  Model performance charts & comparison layout
+   ================================================================ */
+
+/* Breadcrumb */
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -27,7 +31,7 @@
   font-weight: 600;
 }
 
-/* Page Header*/
+/* Page Header */
 .pageHeader {
   display: flex;
   justify-content: space-between;
@@ -63,17 +67,77 @@
   color: var(--muted);
 }
 
-.metricsBackWrap {
-  margin-top: 12px;
+
+/* Comparison Section */
+.comparisonSection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  margin-bottom: 32px;
 }
 
-/* Stack */
+/* Chart panel - glass card used everywhere */
+.chartPanel {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 26px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chartPanel:hover {
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.08);
+}
+
+/* Chart title row */
+.chartTitle {
+  margin: 0 0 18px 0;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+
+.chartTitleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* Chart wrapper containers */
+.chartWrap {
+  position: relative;
+  width: 100%;
+}
+
+.chartWrapAuto {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+}
+
+.chartWrapFI {
+  height: 420px;
+}
+
+/* Model cards stack */
 .modelMetricsStack {
   display: grid;
   gap: 28px;
 }
 
-/* Override Card wrapper  */
+/* Override Card wrapper */
 .modelMetricsCard.card {
   background: transparent;
   border: none;
@@ -140,22 +204,7 @@
 .modelHeaderRight {
   display: flex;
   justify-content: flex-end;
-  align-items: flex-start;
-}
-
-.modelHeaderMeta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-.modelHeaderMetaLabel {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  font-weight: 700;
+  align-items: center;
 }
 
 /* Badges */
@@ -183,30 +232,7 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 800;
-  border: 1px solid var(--border);
-}
-
-.statusBadgeDeployed {
-  color: #34d399;
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.22);
-}
-
-.statusBadgeIdle {
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-/* Metrics Cards Grid (top 5 stat boxes) */
+/* Metrics Cards Grid (top stat boxes) */
 .metricsGrid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -289,20 +315,55 @@
   line-height: 1;
 }
 
-/* Bottom Grid (report + confusion) */
-.metricsBottomGrid {
+/* Expanded details area */
+.expandedDetails {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.95fr);
   gap: 22px;
-  align-items: start;
+  animation: fadeSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Panel wrapper for report & confusion matrix */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Feature importance panel */
+.featureImportancePanel {
+  max-width: 100%;
+}
+
+/* No data fallback message */
+.noDataMsg {
+  color: var(--muted);
+  font-size: 14px;
+  font-style: italic;
+  padding: 24px 0;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Bottom Grid (report + confusion matrix) */
+.metricsBottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+/* Panel wrapper for report and confusion matrix */
 .metricsPanel {
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 .sectionTitle {
@@ -358,85 +419,20 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Confusion Matrix */
-.cmWrap {
-  display: grid;
-  gap: 10px;
-  margin-top: 6px;
-  justify-items: center;
-}
-
-.cmTopLabel {
-  width: 100%;
-  max-width: 420px;
-  text-align: right;
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.cmGrid {
-  width: fit-content;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 116px 152px 152px;
-  grid-template-rows: 48px 64px 64px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.cmCorner,
-.cmHead,
-.cmCell {
+/* Confusion Matrix Heatmap (canvas) */
+.heatmapWrap {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  padding: 12px 0;
 }
 
-.cmCorner {
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+.heatmapWrap canvas {
+  max-width: 100%;
+  height: auto;
 }
 
-.cmHead {
-  font-weight: 800;
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.04);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-}
-
-.cmHeadRight {
-  border-right: none;
-}
-
-.cmCell {
-  font-weight: 900;
-  font-size: 18px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.cmCellRight {
-  border-right: none;
-}
-
-.cmRowLast {
-  border-bottom: none;
-}
-
-.cmDiag {
-  background: rgba(96, 165, 250, 0.14);
-  border-color: rgba(96, 165, 250, 0.22);
-}
-
-/* Light Theme */
+/* Light Theme Overrides */
 body[data-theme="light"] .modelMetricsCardActive {
   border: none;
   box-shadow: none;
@@ -454,21 +450,31 @@ body[data-theme="light"] .modelBadgeActive {
 }
 
 body[data-theme="light"] .metricCard,
-body[data-theme="light"] .metricsPanel {
+body[data-theme="light"] .metricsPanel,
+body[data-theme="light"] .chartPanel {
   background: rgba(2, 6, 23, 0.02);
 }
 
-body[data-theme="light"] .cmGrid {
-  background: rgba(2, 6, 23, 0.02);
+body[data-theme="light"] .metricCard:hover .metricValue {
+  color: #0f172a;
+  text-shadow: none;
 }
 
-body[data-theme="light"] .cmDiag {
-  background: rgba(22, 163, 74, 0.1);
-  border-color: rgba(22, 163, 74, 0.2);
+body[data-theme="light"] .metricCard:hover .metricLabel {
+  color: #1d4ed8;
+}
+
+body[data-theme="light"] .chartTitleIcon {
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
+  .comparisonSection {
+    grid-template-columns: 1fr;
+  }
+
   .metricsGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -485,8 +491,7 @@ body[data-theme="light"] .cmDiag {
     align-items: flex-start;
   }
 
-  .modelHeaderRight,
-  .modelHeaderMeta {
+  .modelHeaderRight {
     align-items: flex-start;
   }
 
@@ -498,13 +503,13 @@ body[data-theme="light"] .cmDiag {
     font-size: 20px;
   }
 
-  .cmGrid {
-    grid-template-columns: 90px 120px 120px;
-    grid-template-rows: 44px 56px 56px;
+  .chartWrapBar,
+  .chartWrapRadar {
+    height: 260px;
   }
 
-  .cmCell {
-    font-size: 16px;
+  .chartWrapFI {
+    height: 350px;
   }
 }
 
@@ -519,17 +524,8 @@ body[data-theme="light"] .cmDiag {
     font-size: 13px;
   }
 
-  .cmGrid {
-    grid-template-columns: 74px 96px 96px;
-    grid-template-rows: 40px 50px 50px;
-  }
-
-  .cmCorner,
-  .cmHead {
-    font-size: 12px;
-  }
-
-  .cmCell {
-    font-size: 14px;
+  .chartWrapBar,
+  .chartWrapRadar {
+    height: 220px;
   }
 }

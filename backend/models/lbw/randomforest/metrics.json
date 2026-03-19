@@ -85,10 +85,6 @@
       "importance": 0.1346
     },
     {
-      "feature": "RF_CESAR",
-      "importance": 0.1141
-    },
-    {
       "feature": "M_Ht_In",
       "importance": 0.1139
     },
@@ -103,6 +99,76 @@
     {
       "feature": "PRIORLIVE",
       "importance": 0.0817
+    },
+    {
+      "feature": "FEDUC",
+      "importance": 0.0816
+    },
+    {
+      "feature": "LD_INDL",
+      "importance": 0.0791
+    },
+    {
+      "feature": "RF_CESAR",
+      "importance": 0.0767
+    },
+    {
+      "feature": "MEDUC",
+      "importance": 0.0671
+    },
+    {
+      "feature": "CIG_0",
+      "importance": 0.0631
+    },
+    {
+      "feature": "SEX",
+      "importance": 0.0596
+    },
+    {
+      "feature": "ILOP_R",
+      "importance": 0.0577
+    },
+    {
+      "feature": "PAY",
+      "importance": 0.049
+    },
+    {
+      "feature": "PAY_REC",
+      "importance": 0.0464
+    },
+    {
+      "feature": "RESTATUS",
+      "importance": 0.0418
+    },
+    {
+      "feature": "PRIORTERM",
+      "importance": 0.0417
+    },
+    {
+      "feature": "RF_CESARN",
+      "importance": 0.0374
+    },
+    {
+      "feature": "MBSTATE_REC",
+      "importance": 0.0295
+    },
+    {
+      "feature": "BFACIL",
+      "importance": 0.0097
+    },
+    {
+      "feature": "NO_INFEC",
+      "importance": 0.0089
+    },
+    {
+      "feature": "PRIORDEAD",
+      "importance": 0.0079
+    },
+    {
+      "feature": "NO_MMORB",
+      "importance": 0.0038
     }
-  ]
+  ],
+  "total_features": 31,
+  "features_shown": 31
 }

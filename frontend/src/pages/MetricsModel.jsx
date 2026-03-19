@@ -351,15 +351,18 @@ export default function MetricsModel() {
 
 
   /* Build per-model feature importance chart */
-  const buildFIData = useCallback((fi) => {
+  const MAX_FI_DISPLAY = 10;
+
+  const buildFIData = useCallback((fi, maxCount = MAX_FI_DISPLAY) => {
     if (!fi || !Array.isArray(fi) || fi.length === 0) return null;
     const sorted = [...fi].sort((a, b) => b.importance - a.importance);
+    const top = sorted.slice(0, maxCount);
     return {
-      labels: sorted.map((f) => f.feature),
+      labels: top.map((f) => f.feature),
       datasets: [
         {
           label: "Importance",
-          data: sorted.map((f) => f.importance),
+          data: top.map((f) => f.importance),
           backgroundColor: FI_GRADIENT_COLORS[0],
           borderColor: FI_GRADIENT_COLORS[1],
           borderWidth: 1,
@@ -560,6 +563,8 @@ export default function MetricsModel() {
               const report = data.classification_report || null;
               const cm = data.confusion_matrix || null;
               const fi = data.feature_importance || null;
+              const totalFeatures = data.total_features || (fi ? fi.length : 0);
+              const featuresShown = data.features_shown || (fi ? fi.length : 0);
 
               const statEntries = Object.entries(metrics).filter(([k]) =>
                 HIGHLIGHT.some((h) => k.toLowerCase().includes(h)),
@@ -623,7 +628,7 @@ export default function MetricsModel() {
                           <div className="chartPanel featureImportancePanel">
                             <h4 className="chartTitle">
                               <span className="chartTitleIcon">#</span>
-                              Feature Importance — Top {fi ? fi.length : 15}
+                              Feature Importance — Top {fiData ? fiData.labels.length : 0} of {totalFeatures} Features
                             </h4>
                             {fiData ? (
                               <div className="chartWrap chartWrapFI">

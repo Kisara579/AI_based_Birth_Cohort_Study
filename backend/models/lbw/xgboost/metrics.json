@@ -45,64 +45,130 @@
   ],
   "feature_importance": [
     {
-      "feature": "RF_CESAR",
+      "feature": "NO_RISKS",
       "importance": 1.0
     },
     {
-      "feature": "NO_RISKS",
-      "importance": 0.8259
+      "feature": "RF_CESAR",
+      "importance": 0.9782
     },
     {
       "feature": "DMAR",
-      "importance": 0.7301
+      "importance": 0.8841
     },
     {
       "feature": "PREVIS",
-      "importance": 0.6418
+      "importance": 0.7771
     },
     {
       "feature": "LD_INDL",
-      "importance": 0.5344
+      "importance": 0.647
     },
     {
       "feature": "ILLB_R",
-      "importance": 0.5262
+      "importance": 0.6371
     },
     {
       "feature": "SEX",
-      "importance": 0.4789
+      "importance": 0.5799
     },
     {
       "feature": "ATTEND",
-      "importance": 0.349
+      "importance": 0.4225
     },
     {
       "feature": "PRECARE",
-      "importance": 0.3184
+      "importance": 0.3855
     },
     {
       "feature": "ILP_R",
-      "importance": 0.2861
+      "importance": 0.3464
     },
     {
       "feature": "CIG_0",
-      "importance": 0.2426
+      "importance": 0.2937
     },
     {
       "feature": "WTGAIN",
-      "importance": 0.2343
+      "importance": 0.2837
     },
     {
       "feature": "RESTATUS",
-      "importance": 0.211
+      "importance": 0.2555
     },
     {
       "feature": "PWgt_R",
-      "importance": 0.2006
+      "importance": 0.2429
     },
     {
       "feature": "MBSTATE_REC",
-      "importance": 0.1956
+      "importance": 0.2368
+    },
+    {
+      "feature": "RF_CESARN",
+      "importance": 0.2326
+    },
+    {
+      "feature": "PAY",
+      "importance": 0.2104
+    },
+    {
+      "feature": "M_Ht_In",
+      "importance": 0.1822
+    },
+    {
+      "feature": "PRIORLIVE",
+      "importance": 0.1804
+    },
+    {
+      "feature": "BFACIL",
+      "importance": 0.1797
+    },
+    {
+      "feature": "PRIORDEAD",
+      "importance": 0.1745
+    },
+    {
+      "feature": "FAGECOMB",
+      "importance": 0.1642
+    },
+    {
+      "feature": "PRIORTERM",
+      "importance": 0.1638
+    },
+    {
+      "feature": "PAY_REC",
+      "importance": 0.1601
+    },
+    {
+      "feature": "MAGER",
+      "importance": 0.157
+    },
+    {
+      "feature": "BMI",
+      "importance": 0.1562
+    },
+    {
+      "feature": "MEDUC",
+      "importance": 0.1509
+    },
+    {
+      "feature": "ILOP_R",
+      "importance": 0.1453
+    },
+    {
+      "feature": "NO_INFEC",
+      "importance": 0.1399
+    },
+    {
+      "feature": "FEDUC",
+      "importance": 0.1387
+    },
+    {
+      "feature": "NO_MMORB",
+      "importance": 0.1174
     }
-  ]
+  ],
+  "total_features": 31,
+  "features_shown": 31
 }

@@ -5,7 +5,7 @@ from pathlib import Path
 from collections import defaultdict
 
 
-def _extract_feature_importance(pipeline, feature_order, categorical_features, top_n=15):
+def _extract_feature_importance(pipeline, feature_order, categorical_features, top_n=None):
     """
     Extract feature importance from a sklearn Pipeline for any supported estimator.
 
@@ -16,7 +16,9 @@ def _extract_feature_importance(pipeline, feature_order, categorical_features, t
       - GradientBoostingClassifier               → .feature_importances_
 
     One-hot-encoded columns are aggregated back to the original categorical feature name.
-    Returns a list of {feature, importance} dicts sorted descending, capped at top_n.
+    Returns a dict with 'items' (list of {feature, importance} dicts sorted descending),
+    'total_features' (total aggregated feature count), and 'features_shown'.
+    If top_n is None, all aggregated features are included.
     """
     try:
         #Find the estimator inside the pipeline 
@@ -83,7 +85,7 @@ def _extract_feature_importance(pipeline, feature_order, categorical_features, t
         for fname, imp in zip(transformed_names, raw_importances):
             original = fname
             for cat in cat_set:
-                if fname.startswith(cat + "_") or fname.startswith("cat__" + cat) or fname.startswith(cat):
+                if fname == cat or fname.startswith(cat + "_") or fname.startswith("cat__" + cat + "_") or fname.startswith("cat__" + cat + " "):
                     original = cat
                     break
             # Also handle sklearn's "transformername__colname_value" pattern
@@ -99,14 +101,22 @@ def _extract_feature_importance(pipeline, feature_order, categorical_features, t
             aggregated[original] += float(imp)
 
         #  Sort and return top N 
-        sorted_features = sorted(aggregated.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        all_sorted = sorted(aggregated.items(), key=lambda x: x[1], reverse=True)
+        total_features = len(all_sorted)
+        selected = all_sorted[:top_n] if top_n is not None else all_sorted
 
         # Normalize so the top feature is 1.0
-        if sorted_features and sorted_features[0][1] > 0:
-            max_imp = sorted_features[0][1]
-            return [{"feature": f, "importance": round(v / max_imp, 4)} for f, v in sorted_features]
+        if selected and selected[0][1] > 0:
+            max_imp = selected[0][1]
+            items = [{"feature": f, "importance": round(v / max_imp, 4)} for f, v in selected]
+        else:
+            items = [{"feature": f, "importance": round(v, 4)} for f, v in selected]
 
-        return [{"feature": f, "importance": round(v, 4)} for f, v in sorted_features]
+        return {
+            "items": items,
+            "total_features": total_features,
+            "features_shown": len(selected),
+        }
 
     except Exception as e:
         print(f"[WARN] Could not extract feature importance: {e}")
@@ -154,10 +164,12 @@ def save_model_artifacts(
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     # Extract feature importance and add to metrics payload
-    fi = _extract_feature_importance(pipeline, feature_order, categorical_features)
-    if fi is not None:
-        metrics_payload["feature_importance"] = fi
-        print(f"  [OK] Feature importance extracted ({len(fi)} features)")
+    fi_result = _extract_feature_importance(pipeline, feature_order, categorical_features)
+    if fi_result is not None:
+        metrics_payload["feature_importance"] = fi_result["items"]
+        metrics_payload["total_features"] = fi_result["total_features"]
+        metrics_payload["features_shown"] = fi_result["features_shown"]
+        print(f"  [OK] Feature importance extracted ({fi_result['features_shown']}/{fi_result['total_features']} features)")
 
     # Save metrics.json
     metrics_path = model_dir / "metrics.json"

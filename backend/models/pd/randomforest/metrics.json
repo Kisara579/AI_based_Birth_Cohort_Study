@@ -103,6 +103,84 @@
     {
       "feature": "PRETERM",
       "importance": 0.0898
+    },
+    {
+      "feature": "CIGNUM",
+      "importance": 0.0718
+    },
+    {
+      "feature": "SEX",
+      "importance": 0.0637
+    },
+    {
+      "feature": "MARITAL",
+      "importance": 0.0574
+    },
+    {
+      "feature": "ECLAMP",
+      "importance": 0.0543
+    },
+    {
+      "feature": "HYPERCH",
+      "importance": 0.0474
+    },
+    {
+      "feature": "CERVIX",
+      "importance": 0.0422
+    },
+    {
+      "feature": "DIABETES",
+      "importance": 0.0353
+    },
+    {
+      "feature": "BDEAD",
+      "importance": 0.0346
+    },
+    {
+      "feature": "ANEMIA",
+      "importance": 0.0285
+    },
+    {
+      "feature": "UTERINE",
+      "importance": 0.0238
+    },
+    {
+      "feature": "HYDRAM",
+      "importance": 0.0227
+    },
+    {
+      "feature": "HERPES",
+      "importance": 0.0167
+    },
+    {
+      "feature": "ACLUNG",
+      "importance": 0.0154
+    },
+    {
+      "feature": "PINFANT",
+      "importance": 0.0091
+    },
+    {
+      "feature": "DRINKNUM",
+      "importance": 0.0056
+    },
+    {
+      "feature": "CARDIAC",
+      "importance": 0.0052
+    },
+    {
+      "feature": "RENAL",
+      "importance": 0.0047
+    },
+    {
+      "feature": "RHSEN",
+      "importance": 0.0036
+    },
+    {
+      "feature": "HEMOGLOB",
+      "importance": 0.0035
     }
-  ]
+  ],
+  "total_features": 34,
+  "features_shown": 34
 }

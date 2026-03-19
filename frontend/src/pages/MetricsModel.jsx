@@ -4,17 +4,25 @@ import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
-import { fetchMetrics, fetchModels } from "../api/modelsApi.js";
+import { fetchMetrics, fetchModels, fetchOutcomes } from "../api/modelsApi.js";
 import "./MetricsModel.css";
 
 export default function MetricsModel() {
   const { outcomeId } = useParams();
   const navigate = useNavigate();
 
+  const [outcomes, setOutcomes] = useState([]);
   const [modelsInfo, setModelsInfo] = useState(null);
   const [modelsData, setModelsData] = useState([]);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const outcome = useMemo(
+    () => outcomes.find((item) => item.id === outcomeId),
+    [outcomes, outcomeId],
+  );
+
+  const outcomeDisplayName = outcome?.name || outcomeId.toUpperCase();
 
   useEffect(() => {
     let cancelled = false;
@@ -25,9 +33,13 @@ export default function MetricsModel() {
       setModelsData([]);
 
       try {
-        const info = await fetchModels(outcomeId);
+        const [info, outcomesData] = await Promise.all([
+          fetchModels(outcomeId),
+          fetchOutcomes(),
+        ]);
         if (cancelled) return;
 
+        setOutcomes(outcomesData);
         setModelsInfo(info);
 
         const availableModels = (info?.models || []).filter(
@@ -111,10 +123,10 @@ export default function MetricsModel() {
     const hasActive = modelsData.some((m) => m.isActive);
 
     return {
-      outcome: outcomeId.toUpperCase(),
+      outcome: outcomeDisplayName,
       activeLabel: hasActive ? activeLabel : null,
     };
-  }, [outcomeId, modelsData, modelsInfo]);
+  }, [outcomeDisplayName, modelsData, modelsInfo]);
 
   if (err) {
     return (
@@ -131,7 +143,7 @@ export default function MetricsModel() {
           <div>
             <h2 className="pageTitle">Model Metrics</h2>
             <p className="pageSubtitle">
-              Outcome: <b>{outcomeId.toUpperCase()}</b>
+              Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
           <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -242,7 +254,7 @@ export default function MetricsModel() {
                     </div>
 
                     <p className="modelTarget">
-                      Target Outcome: <b>{outcomeId.toUpperCase()}</b>
+                      Target Outcome: <b>{outcomeDisplayName}</b>
                     </p>
                   </div>
 

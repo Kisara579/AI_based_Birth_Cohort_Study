@@ -34,6 +34,8 @@ export default function ResultsModel() {
     [outcomes, outcomeId],
   );
 
+  const outcomeDisplayName = outcome?.name || outcomeId.toUpperCase();
+
   const formValues = location.state?.formValues;
 
   // Map field.name -> field.label
@@ -167,7 +169,7 @@ export default function ResultsModel() {
           <div>
             <h2 className="pageTitle">Prediction Results</h2>
             <p className="pageSubtitle">
-              Outcome: <b>{outcomeId.toUpperCase()}</b>
+              Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
           <Link to="/">
@@ -193,7 +195,7 @@ export default function ResultsModel() {
           <div>
             <h2 className="pageTitle">Prediction Results</h2>
             <p className="pageSubtitle">
-              Outcome: <b>{outcomeId.toUpperCase()}</b>
+              Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
           <Link to="/">

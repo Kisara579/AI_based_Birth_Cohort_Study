@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
@@ -22,6 +22,8 @@ export default function PredictModel() {
     () => outcomes.find((o) => o.id === outcomeId),
     [outcomes, outcomeId],
   );
+
+  const outcomeDisplayName = outcome?.name || outcomeId.toUpperCase();
 
   useEffect(() => {
     let cancelled = false;
@@ -96,7 +98,7 @@ export default function PredictModel() {
           <div>
             <h2 className="pageTitle">Predict</h2>
             <p className="pageSubtitle">
-              Outcome: <b>{outcomeId.toUpperCase()}</b>
+              Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
           <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -122,7 +124,7 @@ export default function PredictModel() {
           <div>
             <h2 className="pageTitle">Predict</h2>
             <p className="pageSubtitle">
-              Outcome: <b>{outcomeId.toUpperCase()}</b>
+              Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
           <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -137,7 +139,7 @@ export default function PredictModel() {
     );
   }
 
-  const availableModels = modelsInfo?.models || [];
+  // const availableModels = modelsInfo?.models || [];
 
   return (
     <div>
@@ -154,7 +156,7 @@ export default function PredictModel() {
         <div>
           <h2 className="pageTitle">Predict</h2>
           <p className="pageSubtitle">
-            Outcome: <b>{outcomeId.toUpperCase()}</b>
+            Outcome: <b>{outcomeDisplayName}</b>
           </p>
         </div>
         <Button variant="ghost" onClick={() => navigate(-1)}>

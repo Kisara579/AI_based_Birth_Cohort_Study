@@ -129,5 +129,7 @@ save_model_artifacts(
     metrics_payload=metrics_payload,
     positive_label="Low Birth Weight (<2500g)",
     negative_label="Normal Birth Weight",
-    threshold=best_threshold
+    threshold=best_threshold,
+    y_test=y_test,
+    y_prob=y_prob
 )

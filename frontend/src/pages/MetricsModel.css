@@ -348,6 +348,18 @@
   opacity: 0.7;
 }
 
+/* Middle Grid (New charts: ROC, PR, etc) */
+.metricsChartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.chartWrapSquare {
+  height: 280px;
+}
+
 /* Bottom Grid (report + confusion matrix) */
 .metricsBottomGrid {
   display: grid;
@@ -479,6 +491,7 @@ body[data-theme="light"] .chartTitleIcon {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .metricsChartsGrid,
   .metricsBottomGrid {
     grid-template-columns: 1fr;
   }

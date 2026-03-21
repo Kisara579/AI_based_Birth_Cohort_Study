@@ -31,3 +31,18 @@
     transform: translateX(100%);
   }
 }
+
+/* Light Theme Overrides */
+body[data-theme="light"] .skeletonLine {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body[data-theme="light"] .skeletonLine::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+}
+

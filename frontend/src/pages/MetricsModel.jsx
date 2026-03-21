@@ -4,49 +4,53 @@ import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
-import { fetchMetrics, fetchModels, fetchOutcomes, fetchSchema } from "../api/modelsApi.js";
+import {
+  fetchMetrics,
+  fetchModels,
+  fetchOutcomes,
+  fetchSchema,
+} from "../api/modelsApi.js";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
+import { Bar, Line, Doughnut } from "react-chartjs-2";
 import "./MetricsModel.css";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
   Tooltip,
-  Legend
+  Legend,
 );
 
 /* palette */
 const METRIC_COLORS = {
-  accuracy:  { bg: "rgba(99,102,241,0.75)",  border: "#818cf8" },
-  f1:        { bg: "rgba(16,185,129,0.75)",   border: "#34d399" },
-  precision: { bg: "rgba(245,158,11,0.75)",   border: "#fbbf24" },
-  recall:    { bg: "rgba(236,72,153,0.75)",    border: "#f472b6" },
-  roc_auc:   { bg: "rgba(56,189,248,0.75)",   border: "#38bdf8" },
+  accuracy: { bg: "rgba(99,102,241,0.75)", border: "#818cf8" },
+  f1: { bg: "rgba(16,185,129,0.75)", border: "#34d399" },
+  precision: { bg: "rgba(245,158,11,0.75)", border: "#fbbf24" },
+  recall: { bg: "rgba(236,72,153,0.75)", border: "#f472b6" },
+  roc_auc: { bg: "rgba(56,189,248,0.75)", border: "#38bdf8" },
 };
 
-
-
-const FI_GRADIENT_COLORS = [
-  "rgba(99,102,241,0.85)",
-  "rgba(129,140,248,0.7)",
-];
+const FI_GRADIENT_COLORS = ["rgba(99,102,241,0.85)", "rgba(129,140,248,0.7)"];
 
 /* chart configs */
 const DARK_GRID = "rgba(255,255,255,0.1)";
 const DARK_TICK = "rgba(255,255,255,0.85)";
 const LIGHT_GRID = "rgba(15,23,42,0.1)";
 const LIGHT_TICK = "#0f172a";
-
-
 
 /* Confusion Matrix Heatmap (canvas) */
 function ConfusionHeatmap({ matrix, isDarkMode }) {
@@ -74,7 +78,9 @@ function ConfusionHeatmap({ matrix, isDarkMode }) {
     ctx.clearRect(0, 0, W, H);
 
     // axis labels
-    ctx.fillStyle = isDarkMode ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.7)";
+    ctx.fillStyle = isDarkMode
+      ? "rgba(255,255,255,0.85)"
+      : "rgba(15,23,42,0.7)";
     ctx.font = "600 12px Inter, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("Predicted →", LABEL_W + CELL + PAD, 16);
@@ -86,7 +92,9 @@ function ConfusionHeatmap({ matrix, isDarkMode }) {
     ctx.restore();
 
     // class labels top
-    ctx.fillStyle = isDarkMode ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.6)";
+    ctx.fillStyle = isDarkMode
+      ? "rgba(255,255,255,0.85)"
+      : "rgba(15,23,42,0.6)";
     ctx.font = "700 13px Inter, sans-serif";
     ctx.textAlign = "center";
     const y0 = 28 + LABEL_H / 2 + 4;
@@ -104,8 +112,10 @@ function ConfusionHeatmap({ matrix, isDarkMode }) {
     const maxVal = Math.max(...flat, 1);
 
     const cells = [
-      [0, 0], [0, 1],
-      [1, 0], [1, 1],
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1],
     ];
 
     cells.forEach(([r, c]) => {
@@ -329,7 +339,13 @@ export default function MetricsModel() {
 
   /* Build comparison chart data */
   const METRIC_KEYS = ["accuracy", "f1", "precision", "recall", "roc_auc"];
-  const METRIC_LABELS = ["Accuracy", "F1 Score", "Precision", "Recall", "AUC-ROC"];
+  const METRIC_LABELS = [
+    "Accuracy",
+    "F1 Score",
+    "Precision",
+    "Recall",
+    "AUC-ROC",
+  ];
 
   const comparisonBarData = useMemo(() => {
     const validModels = modelsData.filter((m) => m.data?.metrics);
@@ -348,7 +364,6 @@ export default function MetricsModel() {
       })),
     };
   }, [modelsData]);
-
 
   /* Build per-model feature importance chart */
   const MAX_FI_DISPLAY = 10;
@@ -375,92 +390,394 @@ export default function MetricsModel() {
 
   const tickColor = isDarkMode ? DARK_TICK : LIGHT_TICK;
   const gridColor = isDarkMode ? DARK_GRID : LIGHT_GRID;
-
-  const tooltipBg = isDarkMode ? "rgba(15,23,42,0.92)" : "rgba(255,255,255,0.96)";
+  const tooltipBg = isDarkMode
+    ? "rgba(15,23,42,0.92)"
+    : "rgba(255,255,255,0.96)";
   const tooltipTitle = isDarkMode ? "#f8fafc" : "#0f172a";
   const tooltipBody = isDarkMode ? "#cbd5e1" : "#334155";
-  const tooltipBorder = isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(15,23,42,0.15)";
+  const tooltipBorder = isDarkMode
+    ? "rgba(255,255,255,0.15)"
+    : "rgba(15,23,42,0.15)";
 
-  const baseBarOpts = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-      duration: 900,
-      easing: "easeOutQuart",
-      delay: (ctx) => ctx.dataIndex * 80 + ctx.datasetIndex * 40,
-    },
-    plugins: {
-      legend: { labels: { color: tickColor, font: { size: 12, weight: 600 } } },
-      tooltip: {
-        backgroundColor: tooltipBg,
-        titleColor: tooltipTitle,
-        bodyColor: tooltipBody,
-        borderColor: tooltipBorder,
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 10,
-        callbacks: {
-          label: (ctx) => `${ctx.dataset.label}: ${(ctx.raw * 100).toFixed(1)}%`,
-        },
-      },
-    },
-    scales: {
-      x: { ticks: { color: tickColor, font: { size: 12, weight: 500 } }, grid: { color: gridColor } },
-      y: {
-        beginAtZero: true,
-        max: 1,
-        ticks: {
-          color: tickColor,
-          font: { size: 12, weight: 500 },
-          callback: (v) => `${(v * 100).toFixed(0)}%`,
-        },
-        grid: { color: gridColor },
-      },
-    },
-  }), [tickColor, gridColor, tooltipBg, tooltipTitle, tooltipBody, tooltipBorder]);
-
-  const fiOpts = useMemo(() => ({
-    indexAxis: "y",
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-      duration: 800,
-      easing: "easeOutQuart",
-      delay: (ctx) => ctx.dataIndex * 60,
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: tooltipBg,
-        titleColor: tooltipTitle,
-        bodyColor: tooltipBody,
-        borderColor: tooltipBorder,
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 10,
-        callbacks: {
-          title: (items) => {
-            if (!items.length) return "";
-            const fieldName = items[0].label;
-            return fieldLabelMap[fieldName] || fieldName;
+  /* Build ROC, PR, Threshold, and Doughnut data */
+  const buildRocData = useCallback(
+    (rocObj) => {
+      if (!rocObj) return null;
+      return {
+        labels: rocObj.fpr,
+        datasets: [
+          {
+            label: "ROC Curve",
+            data: rocObj.tpr,
+            borderColor: METRIC_COLORS.roc_auc.border,
+            backgroundColor: METRIC_COLORS.roc_auc.bg,
+            tension: 0.3,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 4,
           },
-          label: (ctx) => `${ctx.label}: ${ctx.raw.toFixed(4)}`,
+          {
+            label: "Random",
+            data: rocObj.fpr,
+            borderColor: isDarkMode
+              ? "rgba(255,255,255,0.3)"
+              : "rgba(0,0,0,0.3)",
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      };
+    },
+    [isDarkMode],
+  );
+
+  const buildPrData = useCallback((prObj) => {
+    if (!prObj) return null;
+    return {
+      labels: prObj.recall,
+      datasets: [
+        {
+          label: "Precision-Recall Curve",
+          data: prObj.precision,
+          borderColor: METRIC_COLORS.precision.border,
+          backgroundColor: METRIC_COLORS.precision.bg,
+          tension: 0.3,
+          fill: true,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        },
+      ],
+    };
+  }, []);
+
+  const buildThresholdData = useCallback((thrObj) => {
+    if (!thrObj) return null;
+    return {
+      labels: thrObj.thresholds,
+      datasets: [
+        {
+          label: "Precision",
+          data: thrObj.precision,
+          borderColor: METRIC_COLORS.precision.border,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        },
+        {
+          label: "Recall",
+          data: thrObj.recall,
+          borderColor: METRIC_COLORS.recall.border,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        },
+        {
+          label: "F1 Score",
+          data: thrObj.f1,
+          borderColor: METRIC_COLORS.f1.border,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        },
+      ],
+    };
+  }, []);
+
+  const buildClassDistData = useCallback(
+    (clsObj) => {
+      if (!clsObj) return null;
+      return {
+        labels: clsObj.labels.map(
+          (l, i) => `Class ${l} (${clsObj.percentages[i]}%)`,
+        ),
+        datasets: [
+          {
+            data: clsObj.counts,
+            backgroundColor: [
+              isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(15,23,42,0.15)",
+              "rgba(239,68,68,0.75)", // Red for positive class
+            ],
+            borderColor: tooltipBorder,
+            borderWidth: 1,
+          },
+        ],
+      };
+    },
+    [isDarkMode, tooltipBorder],
+  );
+
+  const baseBarOpts = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 900,
+        easing: "easeOutQuart",
+        delay: (ctx) => ctx.dataIndex * 80 + ctx.datasetIndex * 40,
+      },
+      plugins: {
+        legend: {
+          labels: { color: tickColor, font: { size: 12, weight: 600 } },
+        },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipTitle,
+          bodyColor: tooltipBody,
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: {
+            label: (ctx) =>
+              `${ctx.dataset.label}: ${(ctx.raw * 100).toFixed(1)}%`,
+          },
         },
       },
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-        max: 1.05,
-        ticks: { color: tickColor, font: { size: 11, weight: 500 } },
-        grid: { color: gridColor },
+      scales: {
+        x: {
+          ticks: { color: tickColor, font: { size: 12, weight: 500 } },
+          grid: { color: gridColor },
+        },
+        y: {
+          beginAtZero: true,
+          max: 1,
+          ticks: {
+            color: tickColor,
+            font: { size: 12, weight: 500 },
+            callback: (v) => `${(v * 100).toFixed(0)}%`,
+          },
+          grid: { color: gridColor },
+        },
       },
-      y: {
-        ticks: { color: tickColor, font: { size: 12, weight: 600 } },
-        grid: { display: false },
+    }),
+    [tickColor, gridColor, tooltipBg, tooltipTitle, tooltipBody, tooltipBorder],
+  );
+
+  const fiOpts = useMemo(
+    () => ({
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 800,
+        easing: "easeOutQuart",
+        delay: (ctx) => ctx.dataIndex * 60,
       },
-    },
-  }), [fieldLabelMap, tickColor, gridColor, tooltipBg, tooltipTitle, tooltipBody, tooltipBorder]);
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipTitle,
+          bodyColor: tooltipBody,
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: {
+            title: (items) => {
+              if (!items.length) return "";
+              const fieldName = items[0].label;
+              return fieldLabelMap[fieldName] || fieldName;
+            },
+            label: (ctx) => `${ctx.label}: ${ctx.raw.toFixed(4)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 1.05,
+          ticks: { color: tickColor, font: { size: 11, weight: 500 } },
+          grid: { color: gridColor },
+        },
+        y: {
+          ticks: { color: tickColor, font: { size: 12, weight: 600 } },
+          grid: { display: false },
+        },
+      },
+    }),
+    [
+      fieldLabelMap,
+      tickColor,
+      gridColor,
+      tooltipBg,
+      tooltipTitle,
+      tooltipBody,
+      tooltipBorder,
+    ],
+  );
+
+  const lineCurveOpts = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      animations: {
+        x: {
+          type: "number",
+          easing: "linear",
+          duration: (ctx) => {
+            if (ctx.type !== "data") return 0;
+            const len = ctx.chart.data.labels?.length || 100;
+            return 1500 / len;
+          },
+          from: NaN,
+          delay: (ctx) => {
+            if (ctx.type !== "data") return 0;
+            const len = ctx.chart.data.labels?.length || 100;
+            return ctx.index * (1500 / len);
+          },
+        },
+        y: {
+          type: "number",
+          easing: "linear",
+          duration: (ctx) => {
+            if (ctx.type !== "data") return 0;
+            const len = ctx.chart.data.labels?.length || 100;
+            return 1500 / len;
+          },
+          from: (ctx) => {
+            if (ctx.type !== "data") return 0;
+            if (ctx.index === 0) return ctx.chart.scales.y.getPixelForValue(0);
+            return ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index - 1].getProps(["y"], true).y;
+          },
+          delay: (ctx) => {
+            if (ctx.type !== "data") return 0;
+            const len = ctx.chart.data.labels?.length || 100;
+            return ctx.index * (1500 / len);
+          },
+        },
+      },
+      plugins: {
+        legend: { labels: { color: tickColor, font: { size: 12 } } },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipTitle,
+          bodyColor: tooltipBody,
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+        },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          min: 0,
+          max: 1,
+          ticks: { color: tickColor, stepSize: 0.2 },
+          grid: { color: gridColor },
+          title: { display: true, color: tickColor, font: { weight: "bold" } },
+        },
+        y: {
+          min: 0,
+          max: 1,
+          ticks: { color: tickColor, stepSize: 0.2 },
+          grid: { color: gridColor },
+        },
+      },
+    }),
+    [tickColor, gridColor, tooltipBg, tooltipTitle, tooltipBody, tooltipBorder],
+  );
+
+  const thresholdOpts = useMemo(() => {
+    return {
+      ...lineCurveOpts,
+      scales: {
+        ...lineCurveOpts.scales,
+        x: {
+          ...lineCurveOpts.scales.x,
+          title: {
+            display: true,
+            text: "Threshold",
+            color: tickColor,
+            font: { weight: "bold" },
+          },
+        },
+      },
+    };
+  }, [lineCurveOpts, tickColor]);
+
+  const rocOpts = useMemo(() => {
+    return {
+      ...lineCurveOpts,
+      scales: {
+        ...lineCurveOpts.scales,
+        x: {
+          ...lineCurveOpts.scales.x,
+          title: {
+            display: true,
+            text: "False Positive Rate",
+            color: tickColor,
+            font: { weight: "bold" },
+          },
+        },
+        y: {
+          ...lineCurveOpts.scales.y,
+          title: {
+            display: true,
+            text: "True Positive Rate",
+            color: tickColor,
+            font: { weight: "bold" },
+          },
+        },
+      },
+    };
+  }, [lineCurveOpts, tickColor]);
+
+  const prOpts = useMemo(() => {
+    return {
+      ...lineCurveOpts,
+      scales: {
+        ...lineCurveOpts.scales,
+        x: {
+          ...lineCurveOpts.scales.x,
+          title: {
+            display: true,
+            text: "Recall",
+            color: tickColor,
+            font: { weight: "bold" },
+          },
+        },
+        y: {
+          ...lineCurveOpts.scales.y,
+          title: {
+            display: true,
+            text: "Precision",
+            color: tickColor,
+            font: { weight: "bold" },
+          },
+        },
+      },
+    };
+  }, [lineCurveOpts, tickColor]);
+
+  const doughnutOpts = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 1800,
+        easing: "easeInOutCirc",
+        animateRotate: true,
+        animateScale: true,
+        delay: 200,
+      },
+      plugins: {
+        legend: {
+          position: "right",
+          labels: { color: tickColor, font: { size: 12 } },
+        },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipTitle,
+          bodyColor: tooltipBody,
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+        },
+      },
+      cutout: "65%",
+    }),
+    [tickColor, tooltipBg, tooltipTitle, tooltipBody, tooltipBorder],
+  );
 
   /* render helpers */
   const HIGHLIGHT = ["accuracy", "roc_auc", "f1", "precision", "recall", "auc"];
@@ -471,7 +788,9 @@ export default function MetricsModel() {
     return (
       <div>
         <nav className="breadcrumb">
-          <a href="/" className="breadcrumbLink">Overview</a>
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Model Metrics</span>
         </nav>
@@ -482,7 +801,9 @@ export default function MetricsModel() {
               Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
-          <Button variant="ghost" onClick={() => navigate(-1)}>← Back</Button>
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            ← Back
+          </Button>
         </div>
         <ErrorBanner message={err} />
       </div>
@@ -493,7 +814,9 @@ export default function MetricsModel() {
     return (
       <div>
         <nav className="breadcrumb">
-          <a href="/" className="breadcrumbLink">Overview</a>
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
           <span className="breadcrumbSep">›</span>
           <span className="breadcrumbCurrent">Model Metrics</span>
         </nav>
@@ -511,7 +834,9 @@ export default function MetricsModel() {
   return (
     <div>
       <nav className="breadcrumb">
-        <a href="/" className="breadcrumbLink">Overview</a>
+        <a href="/" className="breadcrumbLink">
+          Overview
+        </a>
         <span className="breadcrumbSep">›</span>
         <span className="breadcrumbCurrent">Model Metrics</span>
       </nav>
@@ -533,7 +858,9 @@ export default function MetricsModel() {
             )}
           </p>
         </div>
-        <Button variant="ghost" onClick={() => navigate(-1)}>← Back</Button>
+        <Button variant="ghost" onClick={() => navigate(-1)}>
+          ← Back
+        </Button>
       </div>
 
       {modelsData.length === 0 ? (
@@ -549,7 +876,11 @@ export default function MetricsModel() {
                   Model Performance Comparison
                 </h4>
                 <div className="chartWrapAuto">
-                  <Bar key={isDarkMode ? "dark-comp" : "light-comp"} data={comparisonBarData} options={baseBarOpts} />
+                  <Bar
+                    key={isDarkMode ? "dark-comp" : "light-comp"}
+                    data={comparisonBarData}
+                    options={baseBarOpts}
+                  />
                 </div>
               </div>
             </section>
@@ -628,17 +959,119 @@ export default function MetricsModel() {
                           <div className="chartPanel featureImportancePanel">
                             <h4 className="chartTitle">
                               <span className="chartTitleIcon">#</span>
-                              Feature Importance — Top {fiData ? fiData.labels.length : 0} of {totalFeatures} Features
+                              Feature Importance — Top{" "}
+                              {fiData ? fiData.labels.length : 0} of{" "}
+                              {totalFeatures} Features
                             </h4>
                             {fiData ? (
                               <div className="chartWrap chartWrapFI">
-                                <Bar key={isDarkMode ? "dark-fi" : "light-fi"} data={fiData} options={fiOpts} />
+                                <Bar
+                                  key={isDarkMode ? "dark-fi" : "light-fi"}
+                                  data={fiData}
+                                  options={fiOpts}
+                                />
                               </div>
                             ) : (
                               <p className="noDataMsg">
-                                No feature importance data available. Re-train the model to generate this data.
+                                No feature importance data available. Re-train
+                                the model to generate this data.
                               </p>
                             )}
+                          </div>
+
+                          {/* New Grid for line curves + doughnut */}
+                          <div className="metricsChartsGrid">
+                            <div className="chartPanel">
+                              <h4 className="chartTitle">
+                                <span className="chartTitleIcon">📈</span>
+                                ROC Curve
+                                {data.roc_curve && (
+                                  <span className="metricLabel">
+                                    {" "}
+                                    (AUC: {data.roc_curve.auc.toFixed(3)})
+                                  </span>
+                                )}
+                              </h4>
+                              {data.roc_curve ? (
+                                <div className="chartWrap chartWrapSquare">
+                                  <Line
+                                    key={isDarkMode ? "dark-roc" : "light-roc"}
+                                    data={buildRocData(data.roc_curve)}
+                                    options={rocOpts}
+                                  />
+                                </div>
+                              ) : (
+                                <p className="noDataMsg">
+                                  Re-train model to generate ROC curve.
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="chartPanel">
+                              <h4 className="chartTitle">
+                                <span className="chartTitleIcon">🎯</span>
+                                Precision-Recall Curve
+                              </h4>
+                              {data.pr_curve ? (
+                                <div className="chartWrap chartWrapSquare">
+                                  <Line
+                                    key={isDarkMode ? "dark-pr" : "light-pr"}
+                                    data={buildPrData(data.pr_curve)}
+                                    options={prOpts}
+                                  />
+                                </div>
+                              ) : (
+                                <p className="noDataMsg">
+                                  Re-train model to generate PR curve.
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="chartPanel">
+                              <h4 className="chartTitle">
+                                <span className="chartTitleIcon">⚙️</span>
+                                Metrics over Thresholds
+                              </h4>
+                              {data.threshold_metrics ? (
+                                <div className="chartWrap chartWrapSquare">
+                                  <Line
+                                    key={isDarkMode ? "dark-thr" : "light-thr"}
+                                    data={buildThresholdData(
+                                      data.threshold_metrics,
+                                    )}
+                                    options={thresholdOpts}
+                                  />
+                                </div>
+                              ) : (
+                                <p className="noDataMsg">
+                                  Re-train model to generate Threshold curve.
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="chartPanel">
+                              <h4 className="chartTitle">
+                                <span className="chartTitleIcon">📊</span>
+                                Test Set Class Distribution
+                              </h4>
+                              {data.class_distribution ? (
+                                <div className="chartWrap chartWrapSquare">
+                                  <Doughnut
+                                    key={
+                                      isDarkMode ? "dark-dist" : "light-dist"
+                                    }
+                                    data={buildClassDistData(
+                                      data.class_distribution,
+                                    )}
+                                    options={doughnutOpts}
+                                  />
+                                </div>
+                              ) : (
+                                <p className="noDataMsg">
+                                  Re-train model to generate Class Distribution.
+                                </p>
+                              )}
+                            </div>
                           </div>
 
                           {/* Bottom grid: report + confusion */}
@@ -665,9 +1098,15 @@ export default function MetricsModel() {
                                       return (
                                         <tr key={label}>
                                           <td>{label}</td>
-                                          <td>{(row["precision"] ?? 0).toFixed(4)}</td>
-                                          <td>{(row["recall"] ?? 0).toFixed(4)}</td>
-                                          <td>{(row["f1-score"] ?? 0).toFixed(4)}</td>
+                                          <td>
+                                            {(row["precision"] ?? 0).toFixed(4)}
+                                          </td>
+                                          <td>
+                                            {(row["recall"] ?? 0).toFixed(4)}
+                                          </td>
+                                          <td>
+                                            {(row["f1-score"] ?? 0).toFixed(4)}
+                                          </td>
                                           <td>{row["support"] ?? "-"}</td>
                                         </tr>
                                       );
@@ -682,7 +1121,10 @@ export default function MetricsModel() {
                                 <h4 className="sectionTitle">
                                   Confusion Matrix
                                 </h4>
-                                <ConfusionHeatmap matrix={cm} isDarkMode={isDarkMode} />
+                                <ConfusionHeatmap
+                                  matrix={cm}
+                                  isDarkMode={isDarkMode}
+                                />
                               </div>
                             )}
                           </div>

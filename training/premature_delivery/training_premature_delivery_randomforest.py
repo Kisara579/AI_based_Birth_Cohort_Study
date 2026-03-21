@@ -183,5 +183,7 @@ save_model_artifacts(
     metrics_payload=metrics_payload,
     positive_label="premature delivery(week < 37)",
     negative_label="full-term delivery(week >= 37)",
-    threshold=best_threshold
+    threshold=best_threshold,
+    y_test=y_test,
+    y_prob=y_prob
 )

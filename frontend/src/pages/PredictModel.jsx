@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
 import LoadingSkeleton from "../components/common/LoadingSkeleton.jsx";
 import DynamicForm from "../components/forms/DynamicForm.jsx";
-import { fetchOutcomes, fetchSchema } from "../api/modelsApi.js";
+import { fetchOutcomes, fetchSchema, fetchModels } from "../api/modelsApi.js";
+import "./PredictModel.css";
 
 export default function PredictModel() {
   const { outcomeId } = useParams();
@@ -13,6 +14,7 @@ export default function PredictModel() {
 
   const [outcomes, setOutcomes] = useState([]);
   const [schema, setSchema] = useState(null);
+  const [modelsInfo, setModelsInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -21,6 +23,8 @@ export default function PredictModel() {
     [outcomes, outcomeId],
   );
 
+  const outcomeDisplayName = outcome?.name || outcomeId.toUpperCase();
+
   useEffect(() => {
     let cancelled = false;
 
@@ -28,18 +32,18 @@ export default function PredictModel() {
       setLoading(true);
       setErr("");
       try {
-        // We load outcomes too so we can show name/short on this page
-        const [outs, sch] = await Promise.all([
+        const [outs, sch, modelInfo] = await Promise.all([
           fetchOutcomes(),
           fetchSchema(outcomeId),
+          fetchModels(outcomeId),
         ]);
 
-        // backend returns {"error":"Schema not found"} sometimes
         if (sch?.error) throw new Error(sch.error);
 
         if (!cancelled) {
           setOutcomes(outs);
           setSchema(sch);
+          setModelsInfo(modelInfo);
         }
       } catch (e) {
         if (!cancelled) setErr(e.message || "Failed to load schema");
@@ -55,14 +59,26 @@ export default function PredictModel() {
   }, [outcomeId]);
 
   function handleSubmit(values) {
-    // Later we will POST to backend /predict
-    navigate(`/results/${outcomeId}`, { state: { formValues: values } });
+    navigate(`/results/${outcomeId}`, {
+      state: { formValues: values },
+    });
   }
-
   if (loading) {
     return (
       <div>
-        <h1>Predict</h1>
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Predict</span>
+        </nav>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Predict</h2>
+            <p className="pageSubtitle">Loading outcome form...</p>
+          </div>
+        </div>
         <LoadingSkeleton lines={6} />
       </div>
     );
@@ -71,13 +87,25 @@ export default function PredictModel() {
   if (err) {
     return (
       <div>
-        <h1>Predict</h1>
-        <ErrorBanner title="Could not load prediction form" message={err} />
-        <div style={{ marginTop: 14 }}>
-          <Link to="/">
-            <Button variant="secondary">Back to Overview</Button>
-          </Link>
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Predict</span>
+        </nav>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Predict</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcomeDisplayName}</b>
+            </p>
+          </div>
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            ← Back
+          </Button>
         </div>
+        <ErrorBanner title="Could not load prediction form" message={err} />
       </div>
     );
   }
@@ -85,28 +113,77 @@ export default function PredictModel() {
   if (!outcome) {
     return (
       <div>
-        <h1>Predict</h1>
+        <nav className="breadcrumb">
+          <a href="/" className="breadcrumbLink">
+            Overview
+          </a>
+          <span className="breadcrumbSep">›</span>
+          <span className="breadcrumbCurrent">Predict</span>
+        </nav>
+        <div className="pageHeader">
+          <div>
+            <h2 className="pageTitle">Predict</h2>
+            <p className="pageSubtitle">
+              Outcome: <b>{outcomeDisplayName}</b>
+            </p>
+          </div>
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            ← Back
+          </Button>
+        </div>
         <ErrorBanner
           title="Unknown outcome"
           message={`No outcome found for id: "${outcomeId}"`}
         />
-        <div style={{ marginTop: 14 }}>
-          <Link to="/">
-            <Button variant="secondary">Back to Overview</Button>
-          </Link>
-        </div>
       </div>
     );
   }
 
+  // const availableModels = modelsInfo?.models || [];
+
   return (
     <div>
-      <h1>Predict</h1>
-      <p className="muted">
-        Outcome: <b>{outcome.name}</b> ({outcome.short})
-      </p>
+      {/* Breadcrumb */}
+      <nav className="breadcrumb">
+        <a href="/" className="breadcrumbLink">
+          Overview
+        </a>
+        <span className="breadcrumbSep">›</span>
+        <span className="breadcrumbCurrent">Predict</span>
+      </nav>
 
-      <Card title={schema?.title || "Inputs"}>
+      <div className="pageHeader">
+        <div>
+          <h2 className="pageTitle">Predict</h2>
+          <p className="pageSubtitle">
+            Outcome: <b>{outcomeDisplayName}</b>
+          </p>
+        </div>
+        <Button variant="ghost" onClick={() => navigate(-1)}>
+          ← Back
+        </Button>
+      </div>
+
+      <Card
+        title="Prediction Model"
+        subtitle="Best-performing algorithm selected by F1 score"
+        className="predictModelPanel"
+      >
+        <div className="predictModelInfo">
+          <div className="predictModelRow">
+            <span className="predictModelLabel">Active Algorithm</span>
+            <span className="predictModelValue">
+              {modelsInfo?.models?.find(
+                (m) => m.algorithm === modelsInfo?.active_model,
+              )?.label ||
+                modelsInfo?.active_model ||
+                "Not available"}
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      <Card title={schema?.title || "Inputs"} className="predictFormCard">
         <DynamicForm schema={schema} onSubmit={handleSubmit} />
       </Card>
     </div>

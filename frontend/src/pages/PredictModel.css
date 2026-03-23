@@ -1,0 +1,121 @@
+/* Override Card to transparent wrapper on this page */
+.predictCard.card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.predictCard.card:hover {
+  box-shadow: none;
+}
+
+/* Model info top panel — accent left border */
+.predictModelPanel.card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent, #3b82f6);
+  border-radius: 12px;
+  padding: 22px 28px;
+  box-shadow: none;
+  backdrop-filter: none;
+  margin-bottom: 6px;
+}
+
+.predictModelPanel.card:hover {
+  box-shadow: none;
+  border-color: var(--border);
+  border-left-color: var(--accent, #3b82f6);
+}
+
+.predictModelPanel .cardHeader {
+  margin-bottom: 4px;
+}
+
+.predictModelPanel .cardTitle {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.predictModelPanel .cardSubtitle {
+  font-size: 15px;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.predictActions {
+  margin-top: 14px;
+}
+
+/* Model info rows */
+.predictModelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.predictModelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.predictModelLabel {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.predictModelValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: #93c5fd;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  padding: 5px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+/* Form card styling */
+.predictFormCard.card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.predictFormCard.card:hover {
+  box-shadow: none;
+}
+
+.predictFormCard .cardTitle {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.predictFormCard .cardBody {
+  margin-top: 12px;
+}
+
+/* Light theme */
+body[data-theme="light"] .predictModelPanel.card,
+body[data-theme="light"] .predictFormCard.card,
+body[data-theme="light"] .predictCard.card {
+  background: rgba(2, 6, 23, 0.02);
+}
+
+body[data-theme="light"] .predictModelValue {
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.18);
+}
+
+.cardSubtitle

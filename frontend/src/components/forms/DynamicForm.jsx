@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import FormSection from "./FormSection.jsx";
 import Button from "../common/Button.jsx";
+import "./DynamicForm.css";
 
 // simple validators
 function validateField(field, rawValue) {

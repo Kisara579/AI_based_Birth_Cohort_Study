@@ -1,5 +1,12 @@
+import "./Card.css";
 
-export default function Card({ title, subtitle, children, classname = "", className = "" }) {
+export default function Card({
+  title,
+  subtitle,
+  children,
+  classname = "",
+  className = "",
+}) {
   return (
     <section className={`card ${classname} ${className}`.trim()}>
       {(title || subtitle) && (

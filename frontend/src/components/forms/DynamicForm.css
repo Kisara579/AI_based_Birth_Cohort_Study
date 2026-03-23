@@ -1,0 +1,9 @@
+.dynamicForm {
+  margin-top: 8px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}

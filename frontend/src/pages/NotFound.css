@@ -1,0 +1,50 @@
+.notFoundWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  text-align: center;
+  gap: 12px;
+}
+
+.notFoundTitle {
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+  margin: 0;
+}
+
+.notFoundText {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.notFoundLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  transition: background 0.15s ease;
+}
+
+.notFoundLink:hover {
+  background: rgba(96, 165, 250, 0.2);
+}
+
+body[data-theme="light"] .notFoundLink {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+body[data-theme="light"] .notFoundLink:hover {
+  background: rgba(22, 163, 74, 0.15);
+}

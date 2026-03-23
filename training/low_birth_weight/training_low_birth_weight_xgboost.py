@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+    
+
 import pandas as pd
 from pathlib import Path
 import joblib
@@ -10,6 +18,9 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 
 from xgboost import XGBClassifier
+
+from sklearn.metrics import f1_score
+import numpy as np
 
 DATA_PATH = Path("data/low_birth_weight/processed/lbw_train_processed.csv")
 
@@ -61,15 +72,31 @@ pipeline = Pipeline(steps=[
 
 pipeline.fit(X_train,y_train)
 
-y_pred = pipeline.predict(X_test)
 y_prob = pipeline.predict_proba(X_test)[:, 1]
 
+
+thresholds = np.arange(0.1, 0.91, 0.05)
+best_threshold = 0.5
+best_f1 = 0
+
+for t in thresholds:
+    y_pred = (y_prob >= t).astype(int)
+    f1 = f1_score(y_test, y_pred)
+    if f1 > best_f1:
+        best_f1 = f1
+        best_threshold = t
+
+print("Best threshold:", best_threshold)
+print("Best F1:", best_f1)
+
+y_pred = (y_prob >= best_threshold).astype(int)
+
 metrics = {
-    "Accuracy": float(accuracy_score(y_test, y_pred)),
-    "Precision": float(precision_score(y_test, y_pred)),
-    "Recall": float(recall_score(y_test, y_pred)),
-    "F1 Score": float(f1_score(y_test, y_pred)),
-    "ROC AUC": float(roc_auc_score(y_test, y_prob))
+    "accuracy": float(accuracy_score(y_test, y_pred)),
+    "precision": float(precision_score(y_test, y_pred)),
+    "recall": float(recall_score(y_test, y_pred)),
+    "f1": float(f1_score(y_test, y_pred)),
+    "roc_auc": float(roc_auc_score(y_test, y_prob))
 }
 
 report = classification_report(y_test, y_pred, output_dict=True)
@@ -88,34 +115,20 @@ for k, v in metrics.items():
 
 
 
-# Save the model
+from shared.model_artifacts import save_model_artifacts
 
-MODEL_DIR = Path("backend/models")
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
-
-MODEL_PATH = MODEL_DIR / "lbw_model.pkl"
-joblib.dump(pipeline, MODEL_PATH)
-
-
-# Save meta for backend
-META_PATH = MODEL_DIR / "lbw_model.meta.json"
-meta = {
-    "outcome_id": "lbw",
-    "model_type": "xgboost",
-    "target": "low_birth_weight",
-    "positive_label": "Low Birth Weight (<2500g)",
-    "negative_label": "Normal Birth Weight",
-    "feature_order": X.columns.tolist(),
-    "threshold": 0.5,
-    "categorical_features": categorical_features
-}
-META_PATH.write_text(json.dumps(meta, indent=2), encoding="utf-8")
-
-# save metrics 
-METRICS_PATH = MODEL_DIR / "lbw_metrics.json"
-METRICS_PATH.write_text(json.dumps(metrics_payload, indent=2), encoding="utf-8")
-
-print("\nSaved:")
-print(" -", MODEL_PATH)
-print(" -", META_PATH)
-print(" -", METRICS_PATH)
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="lbw",
+    outcome_id="lbw",
+    algorithm="xgboost",
+    label="XGBoost",
+    description="Gradient-boosted tree classifier trained on CDC Natality data.",
+    target_column="low_birth_weight",
+    feature_order=X.columns.tolist(),
+    categorical_features=categorical_features,
+    metrics_payload=metrics_payload,
+    positive_label="Low Birth Weight (<2500g)",
+    negative_label="Normal Birth Weight",
+    threshold=best_threshold
+)

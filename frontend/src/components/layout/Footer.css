@@ -1,0 +1,14 @@
+.footer {
+  border-top: 1px solid var(--border);
+}
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}

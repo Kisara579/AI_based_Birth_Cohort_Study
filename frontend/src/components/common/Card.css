@@ -1,0 +1,49 @@
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadowSoft);
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+  border-color: var(--border2);
+  box-shadow: var(--shadow);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.cardSubtitle {
+  margin: 6px 0 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.cardBody {
+  margin-top: 8px;
+}
+
+.container .card + .card {
+  margin-top: 20px;
+}
+
+.grid > .card,
+.grid > .card + .card,
+.grid .card + .card,
+.aboutGrid > .card,
+.aboutGrid > .card + .card,
+.aboutGrid .card + .card {
+  margin-top: 0;
+}
+
+body[data-theme="light"] .card {
+  box-shadow: none;
+}
+
+body[data-theme="light"] .card:hover {
+  box-shadow: none;
+}

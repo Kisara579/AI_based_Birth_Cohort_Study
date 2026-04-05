@@ -6,44 +6,16 @@
   "positive_label": "premature delivery(week < 37)",
   "negative_label": "full-term delivery(week >= 37)",
   "feature_order": [
-    "SEX",
-    "MARITAL",
-    "FAGE",
-    "GAINED",
-    "VISITS",
     "MAGE",
-    "FEDUC",
-    "MEDUC",
-    "TOTALP",
-    "BDEAD",
-    "TERMS",
-    "LOUTCOME",
-    "RACEMOM",
-    "RACEDAD",
-    "HISPMOM",
-    "HISPDAD",
-    "CIGNUM",
-    "DRINKNUM",
-    "ANEMIA",
     "CARDIAC",
     "ACLUNG",
     "DIABETES",
-    "HERPES",
-    "HYDRAM",
-    "HEMOGLOB",
     "HYPERCH",
     "HYPERPR",
-    "ECLAMP",
-    "CERVIX",
     "PINFANT",
-    "PRETERM",
     "RENAL",
-    "RHSEN",
-    "UTERINE"
+    "PRETERM"
   ],
-  "categorical_features": [
-    "HISPMOM",
-    "HISPDAD"
-  ],
-  "threshold": 0.5
+  "categorical_features": [],
+  "threshold": 0.45
 }

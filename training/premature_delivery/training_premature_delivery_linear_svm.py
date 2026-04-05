@@ -36,47 +36,6 @@ df = pd.read_csv(DATA_PATH)
 X = df.drop(columns=["premature_delivery"])
 y = df["premature_delivery"]
 
-# Define feature groups
-categorical_cols = [
-    "SEX",
-    "MARITAL",
-    "LOUTCOME",
-    "RACEMOM",
-    "RACEDAD",
-    "HISPMOM",
-    "HISPDAD",
-]
-
-numeric_cols = [
-    "FAGE",
-    "GAINED",
-    "VISITS",
-    "MAGE",
-    "FEDUC",
-    "MEDUC",
-    "TOTALP",
-    "BDEAD",
-    "TERMS",
-    "CIGNUM",
-    "DRINKNUM",
-    "ANEMIA",
-    "CARDIAC",
-    "ACLUNG",
-    "DIABETES",
-    "HERPES",
-    "HYDRAM",
-    "HEMOGLOB",
-    "HYPERCH",
-    "HYPERPR",
-    "ECLAMP",
-    "CERVIX",
-    "PINFANT",
-    "PRETERM",
-    "RENAL",
-    "RHSEN",
-    "UTERINE",
-]
-
 # Train test split
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -93,8 +52,8 @@ categorical_features = X_train.select_dtypes(include=["object","string"]).column
 # Preprocessing
 preprocessor = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
-        ("num", StandardScaler(), numeric_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+        ("num", StandardScaler(), numeric_features),
     ]
 )
 

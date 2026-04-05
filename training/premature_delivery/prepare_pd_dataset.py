@@ -1,6 +1,5 @@
 import pandas as pd
 from pathlib import Path
-import numpy as np
 
 RAW_PATH = Path("data/premature_delivery/raw/birth-weight-prediction/baby-weights-dataset.csv")
 
@@ -30,18 +29,23 @@ print(sorted(df["WEEKS"].dropna().unique())[:20])
 print("...")
 print(sorted(df["WEEKS"].dropna().unique())[-20:])
 
-# create temporary target just for checking
-temp_target = (df["WEEKS"] < 37).astype(int)
+selected_columns = [
+    "MAGE",
+    "CARDIAC",
+    "ACLUNG",
+    "DIABETES",
+    "HYPERCH",
+    "HYPERPR",
+    "PINFANT",
+    "RENAL",
+    "PRETERM",
+    "WEEKS",
+]
 
-print("\nPremature delivery count (WEEKS < 37):\n")
-print(temp_target.value_counts())
-
-print("\nPremature delivery percentage:\n")
-print(temp_target.value_counts(normalize=True) * 100)
+df = df[selected_columns].copy()
 
 df = df.dropna(subset=["WEEKS"])
 
-# create target variable
 df["premature_delivery"] = (df["WEEKS"] < 37).astype(int)
 
 print("\nTarget distribution:")
@@ -49,70 +53,26 @@ print(df["premature_delivery"].value_counts())
 
 print("Shape:", df.shape)
 
+df = df.drop(columns=["WEEKS"])
 
-drop_columns = ["ID", "WEEKS", "BWEIGHT"]
-
-df = df.drop(columns=drop_columns)
-
-print("\nColumns after dropping :\n")
+print("\nColumns after keeping only requested features and removing WEEKS:\n")
 print(df.columns.tolist())
 
 print("\nNew shape:", df.shape)
 
-categorical_cols = [
-    "SEX",
-    "MARITAL",
-    "LOUTCOME",
-    "RACEMOM",
-    "RACEDAD",
-    "HISPMOM",
-    "HISPDAD",
-]
-
 numeric_cols = [
-    "FAGE",
-    "GAINED",
-    "VISITS",
     "MAGE",
-    "FEDUC",
-    "MEDUC",
-    "TOTALP",
-    "BDEAD",
-    "TERMS",
-    "CIGNUM",
-    "DRINKNUM",
-    "ANEMIA",
     "CARDIAC",
     "ACLUNG",
     "DIABETES",
-    "HERPES",
-    "HYDRAM",
-    "HEMOGLOB",
     "HYPERCH",
     "HYPERPR",
-    "ECLAMP",
-    "CERVIX",
     "PINFANT",
-    "PRETERM",
     "RENAL",
-    "RHSEN",
-    "UTERINE",
+    "PRETERM",
 ]
 
 target_col = "premature_delivery"
-
-all_used = categorical_cols + numeric_cols + [target_col]
-
-print("Categorical count:", len(categorical_cols))
-print("Numeric count:", len(numeric_cols))
-print("Total used:", len(all_used))
-print("DF column count:", len(df.columns))
-
-missing_from_df = [c for c in all_used if c not in df.columns]
-extra_in_df = [c for c in df.columns if c not in all_used]
-
-print("\nMissing from df:", missing_from_df)
-print("Extra in df:", extra_in_df)
 
 
 # Fill numeric columns with median
@@ -136,3 +96,27 @@ print("\nSaved processed dataset to:")
 print(PROCESSED_PATH)
 
 print("Final shape:", df.shape)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

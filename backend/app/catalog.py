@@ -77,71 +77,12 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
             "title": "Low Birth Weight Inputs",
             "sections": [
                 {
-                    "id": "demographics",
-                    "title": "Demographics",
                     "fields": [
                         {"name": "MAGER", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
-                        {"name": "FAGECOMB", "label": "Father age (years)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 30"},
                         {"name": "MEDUC", "label": "Mother education level", "type": "select", "required": True, "options": [{"value": 1, "label": "No formal education / Primary"},{"value": 2, "label": "Grade 6–11"},{"value": 3, "label": "Passed O/L"},{"value": 4, "label": "Passed A/L"},{"value": 5, "label": "Diploma / Associate"},{"value": 6, "label": "Degree"},{"value": 7, "label": "Postgraduate"},{"value": 8, "label": "Doctorate"},{"value": 9, "label": "Unknown"}]},
-                        {"name": "FEDUC", "label": "Father education level", "type": "select", "required": True, "options": [{"value": 1, "label": "No formal education / Primary"},{"value": 2, "label": "Grade 6–11"},{"value": 3, "label": "Passed O/L"},{"value": 4, "label": "Passed A/L"},{"value": 5, "label": "Diploma / Associate"},{"value": 6, "label": "Degree"},{"value": 7, "label": "Postgraduate"},{"value": 8, "label": "Doctorate"},{"value": 9, "label": "Unknown"}]},
-                        {"name": "DMAR","label": "Marital Status","type": "select","required": True,"options": [{"value": "1", "label": "Married"},{"value": "2", "label": "Not Married"},{"value": "", "label": "Unknown"}]},
-                        {"name": "MBSTATE_REC", "label": "Mother nativity (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"}
-                    ],
-                },
-                {
-                    "id": "maternal_health",
-                    "title": "Maternal Health",
-                    "fields": [
                         {"name": "BMI", "label": "Body Mass Index (BMI)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 23.4"},
-                        {"name": "PWgt_R", "label": "Pre-pregnancy weight (coded)", "type": "number", "required": True, "placeholder": "e.g., 120"},
-                        {"name": "M_Ht_In", "label": "Mother height (inches)", "type": "number", "min": 40, "max": 84, "required": True, "placeholder": "e.g., 62"},
-                        {"name": "WTGAIN", "label": "Weight gain during pregnancy (lbs)", "type": "number", "min": 0, "max": 100, "required": True, "placeholder": "e.g., 25"},
                         {"name": "CIG_0", "label": "Cigarettes before pregnancy (per day)", "type": "number", "min": 0, "max": 60, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "NO_INFEC", "label": "No infections reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
-                        {"name": "NO_MMORB", "label": "No maternal morbidity reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
-                        {"name": "NO_RISKS", "label": "No risk factors reported (coded)", "type": "number", "required": True, "placeholder": "e.g., 0/1"},
-                        {"name":"RF_CESAR","label":"Previous cesarean","type":"select","required":True,"options":[{"value":"Y","label":"Yes"},{"value":"N","label":"No"}]},
-
-                        {"name": "RF_CESARN", "label": "Number of previous cesareans", "type": "number", "min": 0, "max": 10, "required": True, "placeholder": "e.g., 0"}
-                    ],
-                },
-                {
-                    "id": "prenatal_care",
-                    "title": "Prenatal Care",
-                    "fields": [
-                        {"name": "PRECARE", "label": "Month prenatal care began (coded)", "type": "number", "min": 0, "max": 9, "required": True, "placeholder": "e.g., 2"},
                         {"name": "PREVIS", "label": "Number of prenatal visits", "type": "number", "min": 0, "max": 50, "required": True, "placeholder": "e.g., 10"},
-                        {"name": "ATTEND", "label": "Attendant at birth (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
-                        {"name": "BFACIL", "label": "Birth facility / place (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
-                        {"name":"LD_INDL","label":"Induction of labor","type":"select","required":True,"options":[{"value":"Y","label":"Yes"},{"value":"N","label":"No"}]}
-
-                    ],
-                },
-                {
-                    "id": "history",
-                    "title": "Pregnancy History",
-                    "fields": [
-                        {"name": "PRIORLIVE", "label": "Prior births now living", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "PRIORDEAD", "label": "Prior births now dead", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "PRIORTERM", "label": "Prior other terminations", "type": "number", "min": 0, "max": 20, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "ILLB_R", "label": "Interval since last live birth (code)", "type": "number", "required": True, "placeholder": "e.g., 0"},
-                        {"name": "ILOP_R", "label": "Interval since last other pregnancy outcome (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"},
-                        {"name": "ILP_R", "label": "Interval since last pregnancy (coded)", "type": "number", "required": True, "placeholder": "e.g., 0"}
-                    ],
-                },
-                {
-                    "id": "admin",
-                    "title": "Administrative / Coverage",
-                    "fields": [
-                        {"name": "PAY", "label": "Payment source for delivery (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
-                        {"name": "PAY_REC", "label": "Payment recode (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"},
-                        {"name": "RESTATUS", "label": "Residence status (coded)", "type": "number", "required": True, "placeholder": "e.g., 1"}
-                    ],
-                },
-                {
-                    "id": "baby",
-                    "title": "Child Information",
-                    "fields": [
                         {"name": "SEX", "label": "Sex", "type": "select", "required": True, "options": [{"value":"M","label":"Male"}, {"value":"F","label":"Female"}]}
                     ],
                 }
@@ -157,255 +98,24 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "PD",
         "description": "Predict likelihood of delivery before 37 weeks.",
         "model_key": "pd",
-        "schema": {"title": "Premature Delivery Inputs", 
-                   "sections": [
-                       {
-                "id": "demographics",
-                "title": "Demographics",
-                "fields": [
-                    {
-                        "name": "SEX",
-                        "label": "Sex of baby",
-                        "type": "select",
-                        "required": True,
-                        "options": [
-                            {"value": 1, "label": "Male"},
-                            {"value": 2, "label": "Female"}
-                        ]
-                    },
-                    {
-                        "name": "MARITAL",
-                        "label": "Marital status of parents",
-                        "type": "select",
-                        "required": True,
-                        "options": [
-                            {"value": 1, "label": "Married"},
-                            {"value": 2, "label": "Unmarried"}
-                        ]
-                    },
-                    {
-                        "name": "FAGE",
-                        "label": "Father age",
-                        "type": "number",
-                        "min": 10,
-                        "max": 90,
-                        "required": True,
-                        "placeholder": "e.g., 30"
-                    },
-                    {
-                        "name": "MAGE",
-                        "label": "Mother age",
-                        "type": "number",
-                        "min": 10,
-                        "max": 60,
-                        "required": True,
-                        "placeholder": "e.g., 28"
-                    },
-                    {
-                        "name": "FEDUC",
-                        "label": "Father education years",
-                        "type": "number",
-                        "min": 0,
-                        "max": 30,
-                        "required": True,
-                        "placeholder": "e.g., 12"
-                    },
-                    {
-                        "name": "MEDUC",
-                        "label": "Mother education years",
-                        "type": "number",
-                        "min": 0,
-                        "max": 30,
-                        "required": True,
-                        "placeholder": "e.g., 12"
-                    },
-                    {
-                        "name": "RACEMOM",
-                        "label": "Mother race",
-                        "type": "select",
-                        "required": True,
-                        "options": [
-                            {"value": 0, "label": "Unknown"},
-                            {"value": 1, "label": "Other Non-White"},
-                            {"value": 2, "label": "White"},
-                            {"value": 3, "label": "Black"},
-                            {"value": 4, "label": "American Indian"},
-                            {"value": 5, "label": "Chinese"},
-                            {"value": 6, "label": "Japanese"},
-                            {"value": 7, "label": "Hawaiian"},
-                            {"value": 8, "label": "Filipino"},
-                            {"value": 9, "label": "Other Asian"}
-                        ]
-                    },
-                    {
-                        "name": "RACEDAD",
-                        "label": "Father race",
-                        "type": "select",
-                        "required": True,
-                        "options": [
-                            {"value": 0, "label": "Unknown"},
-                            {"value": 1, "label": "Other Non-White"},
-                            {"value": 2, "label": "White"},
-                            {"value": 3, "label": "Black"},
-                            {"value": 4, "label": "American Indian"},
-                            {"value": 5, "label": "Chinese"},
-                            {"value": 6, "label": "Japanese"},
-                            {"value": 7, "label": "Hawaiian"},
-                            {"value": 8, "label": "Filipino"},
-                            {"value": 9, "label": "Other Asian"}
-                        ]
-                    },
-                    {
-                        "name": "HISPMOM",
-                        "label": "Mother Hispanic group",
-                        "type": "select",
-                        "required": True,
-                        "options": [
-                            {"value": "C", "label": "Cuban"},
-                            {"value": "M", "label": "Mexican"},
-                            {"value": "N", "label": "No"},
-                            {"value": "O", "label": "Colombian"},
-                            {"value": "P", "label": "Peruvian"},
-                            {"value": "S", "label": "Salvadoran"},
-                            {"value": "U", "label": "Guatemalan"}
-                        ]
-                    },
-                    {
-                        "name": "HISPDAD",
-                        "label": "Father Hispanic group",
-                        "type": "select",
-                        "required": True,
-                        "options": [
-                            {"value": "C", "label": "Cuban"},
-                            {"value": "M", "label": "Mexican"},
-                            {"value": "N", "label": "No"},
-                            {"value": "O", "label": "Colombian"},
-                            {"value": "P", "label": "Peruvian"},
-                            {"value": "S", "label": "Salvadoran"},
-                            {"value": "U", "label": "Guatemalan"}
-                        ]
-                    }
-                ]
-            },
-            {
-                "id": "pregnancy_and_history",
-                "title": "Pregnancy and History",
-                "fields": [
-                    {
-                        "name": "GAINED",
-                        "label": "Weight gained during pregnancy",
-                        "type": "number",
-                        "min": 0,
-                        "max": 100,
-                        "required": True,
-                        "placeholder": "e.g., 25"
-                    },
-                    {
-                        "name": "VISITS",
-                        "label": "Prenatal visits",
-                        "type": "number",
-                        "min": 0,
-                        "max": 50,
-                        "required": True,
-                        "placeholder": "e.g., 10"
-                    },
-                    {
-                        "name": "TOTALP",
-                        "label": "Total pregnancies",
-                        "type": "number",
-                        "min": 0,
-                        "max": 20,
-                        "required": True,
-                        "placeholder": "e.g., 2"
-                    },
-                    {
-                        "name": "BDEAD",
-                        "label": "Children born alive now dead",
-                        "type": "number",
-                        "min": 0,
-                        "max": 20,
-                        "required": True,
-                        "placeholder": "e.g., 0"
-                    },
-                    {
-                        "name": "TERMS",
-                        "label": "Other terminations",
-                        "type": "number",
-                        "min": 0,
-                        "max": 20,
-                        "required": True,
-                        "placeholder": "e.g., 0"
-                    },
-                    {
-                        "name": "LOUTCOME",
-                        "label": "Outcome of last delivery",
-                        "type": "number",
-                        "min": 0,
-                        "max": 10,
-                        "required": True,
-                        "placeholder": "e.g., 1"
-                    },
-                    {
-                        "name": "PRETERM",
-                        "label": "Previous preterm or small infant",
-                        "type": "select",
-                        "required": True,
-                        "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]
-                    },
-                    {
-                        "name": "PINFANT",
-                        "label": "Previous infant over 4000 grams",
-                        "type": "select",
-                        "required": True,
-                        "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]
-                    }
-                ]
-            },
-            {
-                "id": "lifestyle",
-                "title": "Lifestyle Factors",
-                "fields": [
-                    {
-                        "name": "CIGNUM",
-                        "label": "Average cigarettes per day",
-                        "type": "number",
-                        "min": 0,
-                        "max": 60,
-                        "required": True,
-                        "placeholder": "e.g., 0"
-                    },
-                    {
-                        "name": "DRINKNUM",
-                        "label": "Average drinks per day",
-                        "type": "number",
-                        "min": 0,
-                        "max": 20,
-                        "required": True,
-                        "placeholder": "e.g., 0"
-                    }
-                ]
-            },
-            {
-                "id": "maternal_conditions",
-                "title": "Maternal Conditions",
-                "fields": [
-                    {"name": "ANEMIA", "label": "Anemia", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "CARDIAC", "label": "Cardiac disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "ACLUNG", "label": "Acute or chronic lung disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "DIABETES", "label": "Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "HERPES", "label": "Genital herpes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "HYDRAM", "label": "Hydramnios / Oligohydramnios", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "HEMOGLOB", "label": "Hemoglobinopathy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "HYPERCH", "label": "Chronic hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "HYPERPR", "label": "Pregnancy hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "ECLAMP", "label": "Eclampsia", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "CERVIX", "label": "Incompetent cervix", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "RENAL", "label": "Renal disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "RHSEN", "label": "Rh sensitization", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                    {"name": "UTERINE", "label": "Uterine bleeding", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
-                ]
-            }
-                   ]}
+        "schema": {
+            "title": "Premature Delivery Inputs",
+            "sections": [
+                {
+                    "fields": [
+                        {"name": "MAGE", "label": "Mother age", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "CARDIAC", "label": "Cardiac disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "ACLUNG", "label": "Acute or chronic lung disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "DIABETES", "label": "Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HYPERCH", "label": "Chronic hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HYPERPR", "label": "Pregnancy hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "PINFANT", "label": "Previous infant over 4000 grams", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "RENAL", "label": "Renal disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "PRETERM", "label": "Previous preterm or small infant", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
+                    ]
+                }
+            ]
+        }
     },
 
     

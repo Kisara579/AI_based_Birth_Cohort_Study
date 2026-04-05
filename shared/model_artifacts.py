@@ -30,7 +30,7 @@ def save_model_artifacts(
     joblib.dump(pipeline, model_path)
 
     # Save meta.json
-
+    threshold = 0.5
     meta = {
         "outcome": outcome,
         "outcome_id": outcome_id,

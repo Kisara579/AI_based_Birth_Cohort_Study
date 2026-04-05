@@ -20,16 +20,9 @@ print(df.dtypes)
 # Create target
 df["low_birth_weight"] = (df["DBWT"] < 2500).astype(int)
 
-# Drop unwanted columns
-df = df.drop(columns=[
-    "id",
-    "DLMP_MM",
-    "DOB_MM",
-    "DOB_TT",
-    "DOB_WK",
-    "DBWT",
-    "RDMETH_REC"
-])
+# keep wanted columns
+df = df[["BMI", "CIG_0", "MAGER", "MEDUC", "PREVIS", "SEX", "low_birth_weight"]]
+
 
 print("\nNew shape:", df.shape)
 print("\nLBW distribution:\n", df["low_birth_weight"].value_counts())

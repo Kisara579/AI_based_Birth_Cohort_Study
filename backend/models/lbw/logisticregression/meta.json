@@ -1,0 +1,20 @@
+{
+  "outcome": "lbw",
+  "outcome_id": "lbw",
+  "algorithm": "logisticregression",
+  "target_column": "low_birth_weight",
+  "positive_label": "Low Birth Weight (<2500g)",
+  "negative_label": "Normal Birth Weight",
+  "feature_order": [
+    "BMI",
+    "CIG_0",
+    "MAGER",
+    "MEDUC",
+    "PREVIS",
+    "SEX"
+  ],
+  "categorical_features": [
+    "SEX"
+  ],
+  "threshold": 0.5
+}

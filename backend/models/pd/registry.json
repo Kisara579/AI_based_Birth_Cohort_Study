@@ -1,0 +1,27 @@
+{
+  "outcome": "pd",
+  "outcome_id": "pd",
+  "selection_mode": "auto",
+  "selection_metric": "f1",
+  "active_model": "xgboost",
+  "models": [
+    {
+      "algorithm": "linearsvm",
+      "label": "Linear SVM",
+      "description": "Linear SVM classifier trained on birth dataset",
+      "trained": true
+    },
+    {
+      "algorithm": "randomforest",
+      "label": "Random Forest",
+      "description": "Random Forest classifier trained on birth dataset",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost classifier trained on birth dataset",
+      "trained": true
+    }
+  ]
+}

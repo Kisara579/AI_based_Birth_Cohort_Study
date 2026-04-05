@@ -1,3 +1,5 @@
+import "./ErrorBanner.css";
+
 export default function ErrorBanner({ title = "Error", message, onRetry }) {
   return (
     <div className="errorBanner" role="alert">
@@ -14,4 +16,3 @@ export default function ErrorBanner({ title = "Error", message, onRetry }) {
     </div>
   );
 }
-

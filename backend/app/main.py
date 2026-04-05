@@ -1,12 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pathlib import Path
 import json
 
-from .config import APP_NAME, ENV
+from .config import APP_NAME, ENV, model_paths, OUTCOME_FOLDER,MODELS_DIR
 from .schemas import PredictRequest, PredictResponse
 from .catalog import get_outcomes as catalog_outcomes, get_schema as catalog_schema
-from .catalog import get_model_key
+from .catalog import get_model_key,select_best_model
 from .predictor import predict_with_model_key
 
 
@@ -43,24 +42,52 @@ def schema(outcome_id: str):
     return s
 
 
-
+# manual model selection
 @app.post("/predict/{outcome_id}", response_model=PredictResponse)
-def predict(outcome_id: str, request: PredictRequest):
+def predict(outcome_id: str, request: PredictRequest, model: str | None = Query(default=None)):
     model_key = get_model_key(outcome_id)
     if model_key is None:
         raise HTTPException(status_code=404, detail="Unknown outcome")
 
-    probability, risk_label = predict_with_model_key(model_key, request.data)
+    probability, risk_label = predict_with_model_key(model_key, request.data, algorithm=model)
     return {"probability": probability, "risk_label": risk_label}
 
-
 @app.get("/metrics/{outcome_id}")
-def metrics(outcome_id: str):
-    
-    BASE_DIR = Path(__file__).resolve().parents[1]
-    metrics_path = BASE_DIR / "models" / f"{outcome_id}_metrics.json"
+def metrics(outcome_id: str, model: str | None = Query(default=None)):
+    model_key = get_model_key(outcome_id)
+    if model_key is None:
+        raise HTTPException(status_code=404, detail="Unknown outcome")
+
+    if model is None:
+        model = select_best_model(model_key)
+
+    _, _, metrics_path = model_paths(model_key, algorithm=model)
 
     if not metrics_path.exists():
         raise HTTPException(status_code=404, detail="Metrics not found. Train model first.")
 
     return json.loads(metrics_path.read_text(encoding="utf-8"))
+
+
+@app.get("/models/{outcome_id}")
+def models(outcome_id: str):
+    model_key = get_model_key(outcome_id)
+    if model_key is None:
+        raise HTTPException(status_code=404, detail="Unknown outcome")
+
+    select_best_model(model_key)
+
+    outcome_folder = OUTCOME_FOLDER.get(model_key, model_key)
+    reg_path = MODELS_DIR / outcome_folder / "registry.json"
+
+    if not reg_path.exists():
+        return {
+            "active_model": None,
+            "models": []
+        }
+
+    registry = json.loads(reg_path.read_text(encoding="utf-8"))
+    return {
+        "active_model": registry.get("active_model"),
+        "models": registry.get("models", [])
+    }

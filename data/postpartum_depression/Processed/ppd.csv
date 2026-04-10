@@ -1,0 +1,801 @@
+EPDS Result,Age,Education Level,Marital status,Husband's education level,Occupation After Your Latest Childbirth,Recieved Support
+High,24,University,Married,University,Student,High
+High,31,University,Divorced,University,Doctor,Medium
+High,31,University,Married,University,Service,High
+Low,32,University,Married,University,Doctor,Medium
+Low,27,University,Married,University,Housewife,Medium
+High,24,University,Married,University,Student,High
+High,29,University,Married,University,Service,Medium
+Low,30,University,Married,University,Doctor,High
+High,29,University,Married,University,Housewife,Medium
+Low,23,University,Married,University,Housewife,High
+Low,29,University,Married,University,Doctor,High
+High,32,University,Married,College,Housewife,Medium
+Medium,36,University,Married,University,Housewife,Low
+High,40,College,Married,University,Housewife,Low
+High,22,Primary School,Married,University,Housewife,High
+Low,36,University,Married,University,Housewife,High
+Low,25,University,Married,University,Student,High
+High,30,University,Married,University,Housewife,Low
+Low,31,University,Married,University,Teacher,Low
+Medium,28,University,Married,University,Doctor,Medium
+Low,25,Primary School,Married,Primary School,Housewife,Medium
+High,23,University,Married,University,Student,High
+Low,23,University,Married,University,Student,High
+High,28,University,Married,University,Housewife,High
+High,34,University,Married,University,Doctor,Medium
+Low,31,University,Married,University,Doctor,High
+Low,36,University,Married,University,Doctor,High
+Medium,33,University,Married,University,Doctor,Low
+Medium,33,University,Married,University,Housewife,High
+Low,26,College,Married,University,Housewife,High
+Low,28,University,Married,University,Doctor,High
+High,28,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Low
+Low,28,University,Married,University,Business,High
+Medium,24,University,Married,University,Student,Medium
+Low,30,University,Married,University,Service,High
+High,30,University,Married,University,Service,Medium
+Low,31,University,Married,University,Service,Low
+Low,28,University,Married,University,Teacher,Low
+Low,36,University,Married,University,Service,High
+Low,22,University,Married,University,Housewife,High
+High,29,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,High
+Medium,29,University,Married,University,Teacher,Medium
+High,25,University,Married,University,Housewife,High
+Low,24,University,Married,University,Student,High
+Medium,25,University,Married,University,Student,High
+High,25,University,Married,University,Student,Medium
+High,29,University,Married,University,Housewife,High
+Low,31,University,Married,University,Housewife,High
+Low,28,University,Married,University,Housewife,High
+Medium,29,University,Married,University,Housewife,High
+Low,30,University,Married,University,Teacher,High
+Medium,24,University,Married,University,Student,Medium
+Low,28,University,Married,University,Housewife,High
+Low,31,University,Married,University,Housewife,High
+Low,25,University,Married,University,Housewife,High
+Medium,19,High School,Married,University,Housewife,High
+Low,27,University,Married,University,Housewife,High
+High,26,University,Married,University,Student,High
+Medium,34,University,Married,University,Housewife,Medium
+Low,37,University,Married,University,Service,High
+Low,31,University,Married,University,Service,High
+Low,28,University,Married,University,Housewife,High
+Medium,26,University,Married,University,Service,High
+Medium,30,University,Married,University,Doctor,High
+Medium,26,University,Married,University,Housewife,High
+Low,25,University,Married,University,Student,High
+Medium,30,University,Married,University,Teacher,Medium
+Low,30,University,Married,University,Business,Low
+High,31,University,Married,University,Housewife,High
+High,24,University,Married,Primary School,Housewife,High
+High,28,University,Married,University,Other,Medium
+High,22,University,Married,Primary School,Housewife,Low
+High,26,University,Married,University,Housewife,Low
+Medium,30,University,Married,University,Housewife,Medium
+Low,29,University,Married,University,Teacher,Low
+Medium,32,College,Married,University,Housewife,High
+Low,18,High School,Married,High School,Housewife,High
+Low,34,University,Married,University,Service,High
+Low,30,High School,Married,High School,Housewife,High
+Low,27,University,Married,University,Housewife,High
+Low,31,University,Married,High School,Housewife,High
+Low,28,University,Married,University,Housewife,High
+High,26,University,Married,University,Housewife,Low
+Medium,36,College,Married,College,Housewife,Medium
+High,36,University,Married,University,Housewife,Low
+High,30,University,Married,University,Other,High
+Low,29,University,Married,University,Housewife,High
+High,36,University,Married,University,Doctor,Medium
+Medium,33,University,Married,University,Teacher,Medium
+Low,22,University,Married,University,Student,Medium
+High,25,University,Married,University,Student,Medium
+High,22,University,Married,University,Student,Medium
+Low,30,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,High
+Low,28,University,Married,University,Teacher,Medium
+High,31,University,Married,University,Housewife,Low
+High,26,University,Married,University,Housewife,High
+High,28,University,Married,University,Doctor,Medium
+Medium,27,University,Married,University,Service,High
+Low,37,University,Married,University,Teacher,Low
+Medium,28,University,Married,University,Other,High
+Low,32,University,Married,University,Other,Low
+Low,23,College,Married,University,Housewife,High
+High,31,College,Married,University,Service,Low
+High,28,University,Married,University,Housewife,Low
+High,25,University,Married,University,Housewife,Low
+High,26,University,Married,University,Housewife,Low
+Low,27,University,Married,University,Teacher,Medium
+High,26,College,Married,University,Housewife,High
+Low,20,University,Married,University,Housewife,High
+Medium,32,University,Married,University,Service,High
+High,36,University,Married,University,Service,Medium
+High,26,University,Married,University,Housewife,High
+High,26,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Medium
+Low,38,College,Married,University,Housewife,Medium
+Medium,33,University,Married,University,Housewife,Low
+High,26,University,Married,University,Housewife,Low
+Low,32,University,Married,University,Housewife,Medium
+High,31,University,Married,University,Service,High
+High,25,University,Married,University,Housewife,High
+High,29,University,Married,University,Housewife,Low
+Low,26,University,Married,College,Housewife,Medium
+High,33,University,Married,University,Housewife,High
+Medium,31,University,Married,University,Service,Medium
+Medium,27,University,Married,University,Doctor,High
+High,29,University,Married,University,Service,High
+High,22,University,Married,University,Housewife,Medium
+Medium,27,University,Married,High School,Service,High
+Medium,31,University,Married,University,Business,High
+High,21,College,Married,University,Student,Medium
+High,33,University,Married,University,Housewife,Medium
+Low,30,University,Married,University,Teacher,High
+Low,29,University,Married,University,Service,Medium
+High,27,University,Married,University,Service,High
+High,27,University,Married,University,Housewife,Medium
+Medium,22,University,Married,University,Student,Low
+Low,26,University,Married,University,Housewife,Medium
+Low,34,University,Married,University,Service,Medium
+High,25,University,Married,University,Housewife,Medium
+High,26,University,Married,University,Student,Medium
+High,38,University,Married,University,Housewife,Low
+High,33,University,Divorced,University,Doctor,Medium
+Medium,26,University,Married,University,Housewife,High
+Medium,27,University,Married,University,Teacher,Medium
+High,27,University,Married,High School,Housewife,Medium
+High,26,University,Married,University,Housewife,Medium
+High,30,University,Married,University,Housewife,Low
+High,34,University,Married,University,Housewife,Medium
+High,28,University,Married,University,Housewife,Medium
+High,30,University,Married,University,Housewife,Medium
+Low,26,University,Married,University,Housewife,High
+High,25,University,Married,University,Housewife,Medium
+Medium,32,College,Married,University,Housewife,Medium
+Medium,27,University,Married,University,Doctor,High
+High,28,University,Married,University,Housewife,High
+Medium,24,University,Married,University,Housewife,Medium
+High,32,University,Married,College,Service,High
+Low,34,University,Married,University,Doctor,Medium
+High,28,University,Married,University,Housewife,Medium
+High,36,University,Married,University,Housewife,Low
+Low,32,University,Married,University,Housewife,Low
+High,25,College,Married,University,Housewife,Medium
+High,33,College,Married,University,Housewife,Medium
+High,33,University,Married,University,Service,Medium
+High,28,University,Married,University,Housewife,High
+Medium,25,High School,Married,High School,Housewife,High
+High,28,University,Married,University,Doctor,Medium
+High,34,University,Married,University,Housewife,Medium
+Medium,29,University,Married,University,Housewife,Medium
+High,33,University,Married,University,Housewife,Medium
+High,35,University,Married,University,Housewife,Low
+High,25,University,Married,University,Student,Medium
+High,30,University,Married,University,Other,Medium
+High,27,University,Married,University,Other,Medium
+High,26,University,Married,University,Other,Medium
+Medium,32,University,Married,University,Other,Medium
+High,27,University,Married,University,Housewife,Low
+High,23,University,Married,University,Student,Medium
+High,24,University,Married,University,Housewife,Medium
+Medium,33,University,Married,University,Housewife,Low
+Low,26,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Housewife,Low
+High,24,University,Married,University,Housewife,Medium
+Low,24,University,Married,University,Housewife,Low
+High,28,University,Married,High School,Housewife,Low
+Medium,27,University,Married,University,Doctor,High
+High,28,University,Married,University,Housewife,Medium
+Medium,31,University,Married,University,Doctor,Low
+High,31,University,Married,University,Teacher,Medium
+High,22,University,Married,University,Housewife,Medium
+High,25,College,Married,College,Housewife,Medium
+High,30,University,Married,High School,Housewife,Low
+High,30,University,Married,University,Service,Medium
+Medium,32,University,Married,University,Housewife,High
+High,24,University,Married,College,Student,Low
+High,41,University,Married,University,Service,Medium
+Low,26,University,Married,High School,Teacher,High
+Medium,38,University,Married,University,Housewife,Low
+High,21,University,Married,University,Student,Medium
+High,27,University,Married,University,Service,Low
+High,32,University,Married,University,Housewife,Medium
+Low,30,University,Married,College,Housewife,Low
+Medium,26,University,Married,University,Housewife,Low
+Medium,29,University,Married,University,Service,Low
+Medium,25,University,Married,University,Housewife,Medium
+High,28,University,Married,University,Housewife,High
+High,27,University,Married,College,Teacher,Low
+Medium,21,University,Married,University,Housewife,Low
+Medium,25,University,Married,College,Housewife,High
+High,31,University,Married,University,Business,Low
+High,33,University,Married,University,Housewife,Medium
+Low,29,College,Married,College,Housewife,High
+Medium,37,University,Married,University,Service,Medium
+Low,34,University,Married,University,Other,High
+Medium,22,University,Married,High School,Housewife,High
+High,30,University,Married,University,Housewife,Medium
+High,31,University,Married,University,Housewife,Medium
+High,23,University,Married,University,Housewife,Medium
+Low,30,University,Married,University,Housewife,Low
+Low,29,University,Married,University,Housewife,High
+Low,32,University,Married,University,Doctor,High
+Medium,26,University,Married,University,Housewife,Medium
+High,31,University,Married,University,Business,Medium
+High,34,University,Married,University,Housewife,Medium
+Low,30,University,Married,University,Service,High
+High,31,University,Married,University,Housewife,Low
+Medium,30,University,Married,High School,Housewife,Medium
+Medium,28,University,Married,University,Housewife,Medium
+Medium,23,University,Married,University,Teacher,High
+Medium,26,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Teacher,Medium
+Low,22,University,Married,College,Housewife,High
+Low,19,College,Married,University,Housewife,High
+High,27,University,Married,College,Housewife,Low
+High,22,High School,Married,College,Housewife,Medium
+High,26,University,Married,University,Housewife,Low
+High,30,University,Married,University,Housewife,Medium
+Medium,24,University,Married,University,Student,High
+Low,20,College,Married,University,Housewife,High
+High,28,University,Married,University,Housewife,Low
+Medium,25,High School,Married,University,Housewife,Medium
+Medium,36,University,Married,University,Teacher,High
+Medium,23,College,Married,University,Housewife,Medium
+Medium,30,University,Married,University,Housewife,High
+Medium,31,University,Married,University,Teacher,High
+Low,26,University,Married,University,Housewife,Low
+High,38,University,Married,University,Teacher,Medium
+Low,23,University,Married,University,Other,High
+Low,33,University,Married,University,Service,High
+High,23,University,Married,University,Housewife,Medium
+Low,34,University,Married,University,Housewife,High
+High,31,University,Married,University,Doctor,High
+Low,33,University,Married,University,Teacher,Medium
+High,20,College,Married,University,Housewife,Medium
+Medium,31,University,Married,University,Other,Low
+Low,20,University,Married,University,Student,High
+High,21,University,Married,University,Housewife,Medium
+High,26,University,Married,College,Housewife,Medium
+High,25,High School,Married,High School,Housewife,Low
+Low,30,University,Married,University,Housewife,Medium
+Medium,30,University,Married,University,Housewife,Medium
+Low,24,University,Married,University,Student,Medium
+Low,30,University,Married,University,Teacher,High
+Low,36,University,Married,University,Service,High
+High,30,University,Married,University,Housewife,Medium
+Medium,27,University,Married,University,Housewife,Medium
+High,26,University,Married,University,Housewife,High
+Low,34,University,Married,University,Teacher,Medium
+Low,26,University,Married,University,Student,Medium
+High,25,College,Married,College,Housewife,Medium
+High,24,College,Married,University,Housewife,Low
+Medium,29,University,Married,University,Housewife,Medium
+High,36,University,Married,College,Housewife,High
+Low,18,High School,Married,University,Housewife,Medium
+High,26,University,Married,College,Housewife,Medium
+High,24,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Teacher,Medium
+High,24,University,Married,University,Housewife,Low
+Medium,21,High School,Married,High School,Housewife,High
+High,32,University,Married,University,Housewife,Low
+High,23,University,Married,University,Housewife,Low
+Medium,35,University,Married,University,Housewife,High
+High,31,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Teacher,High
+Medium,21,University,Married,University,Housewife,High
+High,22,University,Married,University,Housewife,Low
+Medium,19,University,Married,University,Student,Low
+High,22,University,Married,High School,Teacher,High
+High,33,University,Divorced,University,Housewife,Low
+High,32,University,Married,University,Housewife,Medium
+High,26,University,Married,University,Housewife,Medium
+High,35,University,Married,University,Teacher,Medium
+High,24,University,Married,University,Service,Medium
+High,27,College,Married,College,Housewife,Medium
+High,30,College,Married,College,Housewife,Medium
+High,28,University,Married,University,Housewife,Medium
+Low,24,University,Married,College,Student,High
+Medium,28,University,Married,University,Housewife,High
+High,34,University,Married,College,Teacher,Medium
+Low,33,University,Married,University,Housewife,Low
+Medium,32,College,Married,University,Housewife,Medium
+High,27,College,Married,College,Housewife,Medium
+High,29,University,Married,University,Housewife,Medium
+High,24,University,Married,University,Housewife,High
+High,26,College,Married,University,Housewife,High
+High,25,College,Married,High School,Housewife,Medium
+Low,30,University,Married,University,Student,Medium
+Medium,27,University,Married,College,Housewife,Medium
+High,24,University,Married,University,Housewife,High
+Medium,35,University,Married,University,Doctor,Medium
+Low,32,University,Married,University,Teacher,Medium
+High,25,University,Married,University,Housewife,Medium
+Medium,31,University,Married,University,Teacher,Medium
+High,29,University,Married,University,Housewife,Medium
+High,22,College,Married,College,Housewife,Medium
+High,27,University,Married,University,Housewife,High
+Medium,21,University,Married,University,Housewife,Low
+Medium,26,University,Married,University,Housewife,High
+High,30,University,Married,University,Housewife,Medium
+Medium,26,University,Married,University,Housewife,Low
+High,25,University,Married,High School,Housewife,Medium
+Low,23,College,Married,High School,Housewife,Low
+Medium,30,University,Married,University,Service,Medium
+High,32,University,Married,University,Doctor,Medium
+Medium,21,College,Married,College,Housewife,Medium
+High,25,University,Married,University,Housewife,Medium
+High,22,College,Married,College,Housewife,Low
+High,27,University,Married,University,Housewife,High
+High,27,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Low
+High,32,University,Married,University,Housewife,High
+High,31,University,Married,University,Housewife,Medium
+High,26,University,Married,High School,Housewife,Low
+High,26,University,Married,University,Housewife,Medium
+High,26,University,Married,University,Housewife,Medium
+Medium,35,University,Married,University,Other,Medium
+High,24,University,Married,University,Student,Low
+Medium,27,University,Married,University,Other,Medium
+Medium,30,University,Married,University,Housewife,Medium
+High,24,University,Married,University,Housewife,High
+High,38,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Doctor,High
+Medium,25,University,Married,University,Business,Medium
+High,30,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Student,Medium
+High,22,University,Married,College,Housewife,Medium
+Medium,25,University,Married,University,Student,High
+Medium,28,University,Married,University,Housewife,Medium
+Low,31,University,Married,University,Housewife,High
+Medium,32,University,Married,University,Housewife,High
+Low,30,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Teacher,Medium
+Medium,32,University,Married,University,Housewife,High
+High,27,University,Married,University,Housewife,Medium
+Medium,24,University,Married,University,Housewife,High
+Medium,26,University,Married,University,Housewife,High
+High,26,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Housewife,Low
+High,23,College,Married,High School,Housewife,Medium
+High,26,University,Married,University,Housewife,Low
+High,32,University,Married,University,Service,High
+High,30,University,Married,University,Housewife,Low
+High,25,University,Married,University,Housewife,Low
+Medium,37,College,Married,University,Housewife,Low
+High,26,University,Married,University,Other,Low
+Low,35,College,Married,University,Housewife,Medium
+High,31,University,Married,University,Other,High
+High,29,University,Married,University,Housewife,Low
+Low,25,University,Married,University,Housewife,Medium
+Low,34,University,Married,University,Service,Low
+High,29,University,Married,University,Housewife,Medium
+Medium,30,University,Married,University,Housewife,High
+Low,26,University,Married,University,Housewife,Low
+High,30,University,Married,University,Doctor,Medium
+High,25,College,Married,University,Housewife,Low
+High,31,University,Married,University,Housewife,Low
+High,32,University,Married,University,Housewife,Medium
+Low,35,University,Married,University,Teacher,Medium
+Low,21,High School,Married,University,Housewife,Medium
+Medium,30,University,Married,University,Housewife,Medium
+High,26,University,Married,University,Housewife,Medium
+Medium,23,University,Married,High School,Housewife,High
+High,28,University,Married,University,Housewife,High
+High,21,High School,Married,High School,Housewife,Low
+High,30,University,Married,University,Housewife,High
+Low,27,University,Married,College,Housewife,Medium
+Medium,24,University,Married,University,Student,High
+High,31,University,Married,University,Other,High
+Low,25,University,Married,University,Student,Low
+Medium,26,College,Married,High School,Housewife,Medium
+Medium,22,University,Married,University,Student,Medium
+Low,32,University,Married,University,Student,Medium
+High,21,College,Married,University,Housewife,Medium
+Low,23,University,Married,University,Student,High
+Low,26,University,Married,University,Student,Low
+Low,27,University,Married,University,Housewife,Low
+Medium,30,University,Married,University,Housewife,High
+Low,26,University,Married,University,Housewife,Medium
+High,31,College,Married,High School,Housewife,Low
+High,27,University,Divorced,University,Housewife,Low
+Low,31,University,Married,University,Other,High
+High,40,University,Married,University,Business,Low
+High,30,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Other,Low
+High,31,University,Married,College,Housewife,Low
+High,28,University,Married,University,Housewife,High
+Low,24,College,Married,College,Housewife,Low
+Medium,31,University,Married,University,Student,High
+Low,25,University,Married,University,Student,Medium
+High,24,College,Married,University,Student,Low
+Medium,26,University,Married,University,Housewife,Low
+High,33,University,Married,University,Housewife,Medium
+High,25,University,Married,University,Student,Medium
+High,22,University,Married,University,Housewife,Medium
+Low,26,University,Married,University,Housewife,High
+Medium,23,University,Married,Primary School,Housewife,Low
+High,30,University,Married,University,Housewife,High
+High,27,University,Married,University,Housewife,Low
+High,25,University,Married,University,Student,Medium
+High,27,University,Married,University,Housewife,Medium
+Medium,25,University,Married,University,Student,High
+High,30,University,Married,University,Housewife,Medium
+High,31,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Housewife,Medium
+High,28,University,Married,University,Housewife,Medium
+Low,30,University,Married,University,Housewife,Low
+Low,27,University,Married,University,Housewife,Medium
+High,34,University,Married,University,Housewife,Low
+Medium,31,University,Married,University,Housewife,High
+High,29,University,Married,University,Housewife,Medium
+Medium,38,University,Married,University,Other,Medium
+High,31,University,Married,University,Teacher,Low
+High,27,University,Married,University,Teacher,Low
+Low,25,University,Married,College,Housewife,Medium
+High,42,University,Married,University,Housewife,Low
+High,26,University,Married,University,Housewife,Medium
+Medium,28,University,Married,University,Housewife,Medium
+Low,30,University,Married,University,Housewife,Low
+Low,30,University,Married,University,Housewife,High
+High,27,University,Married,University,Housewife,High
+Low,22,College,Married,High School,Housewife,Low
+High,23,University,Married,University,Student,Medium
+Low,27,University,Married,University,Housewife,Low
+High,27,University,Married,High School,Housewife,Medium
+High,26,University,Married,University,Housewife,Medium
+Low,26,University,Married,University,Housewife,High
+Low,30,College,Married,University,Housewife,Medium
+Low,27,University,Married,University,Doctor,High
+High,23,University,Married,University,Student,Medium
+High,30,University,Married,University,Housewife,Medium
+High,23,University,Married,University,Housewife,Low
+Medium,24,University,Married,University,Housewife,Medium
+Medium,26,University,Married,University,Doctor,High
+Medium,34,University,Married,University,Housewife,Medium
+Low,21,College,Married,Primary School,Other,Medium
+High,37,University,Married,University,Service,Medium
+Low,28,University,Married,University,Housewife,Low
+High,21,High School,Married,Primary School,Housewife,High
+Low,28,Primary School,Married,Primary School,Housewife,High
+Low,27,College,Married,High School,Housewife,High
+Low,19,High School,Married,High School,Housewife,High
+Low,30,High School,Married,High School,Housewife,High
+Medium,30,High School,Married,Primary School,Housewife,High
+High,22,High School,Married,University,Housewife,High
+Medium,27,High School,Married,High School,Housewife,High
+Low,22,High School,Married,Primary School,Housewife,High
+Low,25,High School,Married,High School,Housewife,High
+Low,27,College,Married,College,Housewife,High
+Low,24,College,Married,University,Housewife,High
+Medium,19,High School,Married,High School,Housewife,Medium
+Medium,20,High School,Married,Primary School,Housewife,High
+Medium,24,High School,Married,High School,Housewife,Medium
+Low,32,Primary School,Married,Primary School,Other,High
+Medium,26,Primary School,Married,Primary School,Other,Medium
+Medium,22,University,Married,University,Housewife,High
+Medium,34,University,Married,College,Housewife,Low
+Low,30,Primary School,Married,High School,Housewife,High
+Medium,22,University,Married,University,Housewife,Medium
+Low,24,High School,Married,High School,Housewife,High
+Low,19,High School,Married,College,Housewife,High
+Low,20,High School,Married,Primary School,Housewife,High
+Low,23,High School,Married,High School,Housewife,High
+High,33,Primary School,Married,Primary School,Housewife,Medium
+Medium,23,Primary School,Married,High School,Housewife,Medium
+Low,20,College,Married,High School,Housewife,Medium
+Medium,24,Primary School,Married,High School,Housewife,Medium
+Low,22,High School,Married,High School,Housewife,Medium
+Low,21,College,Married,College,Housewife,High
+Medium,30,Primary School,Divorced,Primary School,Other,Medium
+Low,26,High School,Married,High School,Housewife,High
+Low,24,Primary School,Married,Primary School,Housewife,High
+Low,21,College,Married,High School,Housewife,Medium
+Medium,30,Primary School,Married,University,Housewife,Medium
+Low,27,University,Married,University,Housewife,High
+Low,29,University,Married,University,Service,High
+Low,33,University,Married,University,Housewife,High
+Low,18,College,Married,High School,Housewife,High
+Low,23,High School,Married,Primary School,Housewife,Medium
+Medium,30,University,Married,College,Housewife,Medium
+High,35,Primary School,Married,Primary School,Other,Low
+Low,29,High School,Married,High School,Housewife,Medium
+High,23,High School,Married,High School,Housewife,Medium
+Medium,28,High School,Married,College,Housewife,Medium
+High,23,High School,Married,College,Housewife,Medium
+High,21,Primary School,Married,Primary School,Other,Medium
+High,27,University,Married,University,Teacher,High
+Low,24,College,Married,University,Housewife,Medium
+Medium,18,High School,Married,High School,Housewife,Medium
+Medium,37,High School,Married,Primary School,Housewife,Medium
+Low,19,College,Married,College,Housewife,High
+Medium,30,Primary School,Married,Primary School,Housewife,Medium
+Medium,23,College,Married,High School,Housewife,High
+Medium,25,High School,Married,High School,Housewife,Low
+Low,22,High School,Married,High School,Housewife,Medium
+Low,18,High School,Married,High School,Housewife,Low
+High,33,Primary School,Married,Primary School,Business,Low
+Medium,21,High School,Married,High School,Housewife,Medium
+Medium,28,Primary School,Married,High School,Housewife,High
+Low,26,University,Married,University,Teacher,Medium
+High,33,College,Married,High School,Housewife,Medium
+High,19,High School,Married,College,Housewife,High
+Medium,28,College,Married,Primary School,Housewife,Medium
+Low,22,College,Married,College,Housewife,High
+Medium,34,Primary School,Married,Primary School,Housewife,Medium
+High,32,University,Married,Primary School,Housewife,Medium
+Low,19,College,Married,High School,Housewife,High
+Medium,32,High School,Married,Primary School,Housewife,Medium
+Medium,32,High School,Married,High School,Housewife,Medium
+Low,30,High School,Married,High School,Housewife,Low
+Medium,25,High School,Married,High School,Housewife,Low
+Low,30,Primary School,Married,High School,Housewife,Low
+Medium,25,High School,Married,High School,Housewife,Medium
+Low,27,College,Married,College,Other,High
+Medium,30,High School,Married,High School,Housewife,High
+Low,25,High School,Married,High School,Housewife,High
+Low,30,Primary School,Married,Primary School,Housewife,High
+Low,25,High School,Married,High School,Other,High
+Medium,33,College,Married,College,Housewife,Low
+Medium,34,College,Married,University,Housewife,Medium
+Low,33,College,Married,University,Other,Low
+Medium,22,College,Married,University,Student,High
+High,40,Primary School,Married,Primary School,Housewife,Low
+Low,20,High School,Married,High School,Housewife,High
+High,20,College,Married,College,Housewife,High
+Low,30,Primary School,Married,Primary School,Housewife,Medium
+Low,21,High School,Married,High School,Housewife,High
+Low,30,Primary School,Married,Primary School,Housewife,Medium
+Low,25,University,Married,University,Student,High
+Low,28,Primary School,Married,High School,Housewife,Medium
+High,29,College,Married,College,Housewife,Medium
+Low,21,College,Married,College,Housewife,Low
+Medium,25,High School,Married,High School,Other,High
+Medium,26,High School,Married,High School,Housewife,Medium
+Low,28,University,Married,University,Other,High
+High,25,College,Married,College,Student,Low
+Medium,22,College,Married,College,Housewife,Low
+Low,24,High School,Married,College,Housewife,Low
+Low,27,University,Married,University,Housewife,Medium
+Low,31,University,Married,University,Doctor,Medium
+Medium,29,College,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Medium
+Medium,38,College,Married,University,Housewife,Medium
+High,26,High School,Married,University,Housewife,Medium
+Medium,38,College,Married,High School,Housewife,Medium
+Medium,24,Primary School,Married,High School,Housewife,Medium
+Low,24,College,Married,University,Housewife,High
+Low,22,High School,Married,High School,Housewife,Low
+High,29,University,Married,University,Other,Medium
+Low,25,University,Married,University,Student,High
+High,21,College,Married,University,Student,Medium
+High,26,University,Married,University,Student,High
+Medium,31,University,Married,University,Service,Low
+Low,29,University,Married,University,Business,Medium
+Low,23,University,Married,University,Student,High
+High,31,University,Married,University,Service,Medium
+High,30,University,Married,University,Housewife,Low
+Medium,26,University,Married,University,Student,High
+High,21,High School,Married,Primary School,Housewife,Medium
+High,28,University,Married,University,Service,Medium
+Low,23,University,Married,University,Housewife,Medium
+Medium,33,University,Married,University,Housewife,High
+Low,36,College,Married,University,Housewife,Low
+High,28,University,Married,University,Other,High
+High,25,University,Married,University,Doctor,High
+High,27,University,Married,University,Teacher,Medium
+High,29,College,Married,University,Housewife,Low
+Medium,26,University,Married,University,Student,Low
+High,25,University,Married,University,Student,High
+High,31,University,Married,University,Housewife,High
+Low,25,University,Married,University,Business,Medium
+High,18,College,Married,High School,Student,Low
+Low,28,University,Married,University,Service,Medium
+Low,27,University,Married,University,Housewife,High
+High,33,University,Married,University,Housewife,Medium
+Medium,24,University,Married,University,Student,High
+Medium,22,College,Married,University,Housewife,High
+Low,28,University,Married,University,Doctor,High
+High,23,University,Married,University,Student,High
+Low,22,University,Married,University,Housewife,High
+Medium,24,University,Married,University,Housewife,High
+Low,29,University,Married,College,Housewife,Medium
+Medium,27,University,Married,University,Service,Medium
+Low,18,High School,Married,University,Student,High
+Low,31,University,Married,University,Housewife,Medium
+Medium,30,University,Married,University,Housewife,High
+High,26,University,Married,High School,Housewife,Medium
+High,29,University,Married,University,Housewife,Medium
+Low,24,University,Married,College,Housewife,Medium
+Low,35,College,Married,University,Housewife,High
+Low,33,University,Married,University,Housewife,Medium
+High,22,University,Married,University,Housewife,Medium
+Medium,26,University,Married,University,Student,High
+Low,31,University,Married,University,Housewife,High
+High,22,University,Married,University,Housewife,High
+High,26,University,Married,University,Housewife,Low
+High,26,University,Married,University,Housewife,High
+High,28,University,Married,University,Housewife,Medium
+Medium,33,University,Married,University,Housewife,Medium
+Low,22,High School,Married,High School,Housewife,High
+Medium,24,University,Married,University,Housewife,Medium
+High,23,University,Married,University,Housewife,High
+High,31,University,Married,University,Teacher,High
+High,28,University,Married,University,Housewife,Medium
+Low,33,University,Married,University,Housewife,Medium
+High,30,University,Married,University,Teacher,Medium
+Medium,31,University,Married,University,Service,Medium
+High,29,University,Married,University,Housewife,Medium
+High,37,University,Married,University,Service,Medium
+High,28,University,Married,University,Housewife,Medium
+Low,27,University,Married,University,Teacher,Medium
+Medium,29,University,Married,University,Teacher,High
+High,30,University,Married,College,Housewife,Medium
+Medium,29,University,Married,University,Housewife,High
+High,26,University,Married,University,Housewife,Medium
+High,29,University,Married,University,Housewife,Medium
+Low,36,University,Married,College,Housewife,High
+High,27,College,Married,College,Housewife,Low
+High,21,University,Married,University,Housewife,Low
+High,32,University,Married,University,Service,Low
+Low,30,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Low
+High,34,University,Married,University,Housewife,Low
+Low,29,University,Married,University,Doctor,High
+Medium,28,University,Married,University,Housewife,Medium
+High,24,College,Married,University,Housewife,Medium
+Medium,27,University,Married,University,Student,High
+Low,29,University,Married,College,Housewife,Low
+Low,24,University,Married,College,Housewife,Medium
+High,29,University,Married,University,Housewife,High
+Low,25,University,Married,University,Housewife,High
+High,22,College,Married,College,Housewife,High
+Low,28,High School,Married,High School,Housewife,High
+Low,36,University,Married,University,Housewife,Low
+High,25,University,Married,University,Student,Medium
+High,31,University,Married,University,Housewife,Medium
+Low,32,University,Married,University,Other,Medium
+Low,37,University,Married,University,Teacher,High
+High,27,College,Married,College,Housewife,High
+Low,22,University,Married,University,Housewife,High
+High,25,College,Married,College,Housewife,Medium
+High,29,University,Married,University,Housewife,Medium
+High,27,University,Married,University,Housewife,Medium
+High,25,College,Married,High School,Housewife,Low
+High,25,University,Married,University,Housewife,Medium
+Low,33,University,Married,University,Housewife,Medium
+High,21,High School,Married,High School,Housewife,High
+Medium,34,University,Married,University,Housewife,High
+High,27,University,Married,University,Housewife,High
+Low,24,University,Married,University,Housewife,Medium
+High,26,University,Married,College,Student,Low
+Low,29,University,Married,College,Housewife,High
+High,25,College,Married,University,Housewife,Medium
+Low,32,University,Married,University,Housewife,High
+High,25,University,Married,University,Teacher,Medium
+High,33,University,Married,University,Housewife,Low
+High,25,College,Married,University,Housewife,Medium
+Medium,30,University,Married,University,Housewife,High
+High,22,University,Married,University,Teacher,Low
+High,25,University,Married,University,Housewife,High
+Low,37,University,Married,University,Service,Low
+Low,27,University,Married,University,Teacher,High
+High,29,University,Married,University,Housewife,Low
+High,24,University,Married,College,Housewife,Low
+Low,35,University,Married,University,Housewife,High
+High,33,University,Married,University,Service,Low
+Low,31,University,Married,University,Housewife,Low
+Low,30,University,Married,University,Service,Medium
+Low,31,University,Married,University,Service,Medium
+Low,23,College,Married,College,Housewife,Low
+Low,36,University,Married,University,Doctor,Medium
+Low,27,University,Married,University,Housewife,Medium
+Low,25,College,Married,College,Housewife,Medium
+Medium,28,University,Married,University,Housewife,Medium
+High,32,University,Married,University,Teacher,Medium
+High,28,High School,Married,College,Housewife,Medium
+Medium,32,University,Married,University,Housewife,Medium
+High,23,University,Married,University,Housewife,Medium
+High,30,University,Married,University,Service,High
+Low,25,University,Married,University,Housewife,High
+Low,26,University,Married,University,Student,High
+High,22,University,Married,University,Housewife,High
+Low,29,University,Married,University,Housewife,Medium
+Medium,36,University,Married,University,Housewife,Medium
+High,24,High School,Married,Primary School,Housewife,Low
+High,30,University,Married,University,Housewife,Medium
+Medium,31,University,Married,University,Housewife,Medium
+High,26,University,Married,University,Housewife,Medium
+High,19,College,Married,University,Housewife,Low
+High,27,University,Married,College,Housewife,High
+High,27,University,Married,University,Housewife,Medium
+Medium,30,College,Married,University,Housewife,Medium
+High,28,University,Married,University,Housewife,Low
+Low,22,College,Married,College,Housewife,High
+High,31,University,Married,University,Housewife,Medium
+High,23,University,Married,College,Housewife,High
+High,29,University,Married,University,Housewife,Medium
+Low,21,College,Married,University,Housewife,High
+Low,26,University,Married,University,Housewife,High
+High,27,University,Married,University,Housewife,Medium
+Medium,37,University,Married,University,Housewife,High
+Medium,23,University,Married,University,Business,High
+High,30,University,Married,University,Housewife,High
+Low,23,University,Married,University,Housewife,Low
+Low,22,University,Married,University,Housewife,High
+Medium,31,College,Married,University,Housewife,Low
+Medium,26,University,Married,University,Housewife,High
+High,25,University,Married,University,Housewife,Medium
+High,22,University,Married,University,Housewife,High
+Medium,32,University,Married,University,Service,High
+High,32,University,Married,University,Service,High
+Low,28,University,Married,University,Business,High
+High,31,University,Married,University,Housewife,Low
+Low,26,University,Married,University,Housewife,High
+High,30,University,Married,University,Service,High
+Low,25,University,Married,University,Student,Medium
+Low,30,University,Married,University,Other,High
+Low,34,University,Married,University,Service,Medium
+Low,37,University,Married,University,Doctor,High
+High,26,University,Married,University,Service,High
+High,26,University,Married,University,Housewife,Medium
+Medium,26,University,Married,University,Housewife,High
+Low,31,University,Married,University,Service,High
+High,35,University,Married,University,Housewife,Low
+High,26,University,Married,University,Housewife,High
+Low,25,University,Married,University,Housewife,Low
+Medium,22,High school,Married,High school,Housewife,Medium
+High,20,Primary school,Married,Primary school,Housewife,Medium
+High,26,University,Married,University,Other,Medium
+Medium,28,Primary school,Married,High school,Housewife,Medium
+Medium,25,Primary school,Married,College,Housewife,High
+Low,20,College,Married,College,Other,High
+Medium,22,High school,Married,College,Housewife,Medium
+Low,20,High school,Married,College,Housewife,High
+Low,27,University,Married,College,Doctor,High
+High,23,Primary school,Married,High school,Housewife,Medium
+High,23,College,Married,High school,Housewife,High
+Medium,30,University,Married,University,Service,High
+Medium,25,College,Married,College,Housewife,High
+High,28,University,Married,University,Housewife,High
+Low,27,University,Married,University,Service,Medium
+High,21,High school,Married,Primary school,Housewife,High
+Medium,23,Primary school,Married,High school,Housewife,High
+Low,35,University,Married,High school,Housewife,Medium
+Medium,29,Primary school,Married,High school,Housewife,High
+Low,22,College,Married,University,Student,High
+Medium,27,High school,Married,University,Housewife,Medium
+Medium,23,High school,Married,University,Student,High
+Low,35,Primary school,Married,High school,Housewife,High
+Low,18,Primary school,Married,University,Housewife,High
+Medium,33,University,Married,University,Housewife,High
+Medium,45,College,Married,University,Housewife,High
+Low,22,Primary school,Married,Primary school,Housewife,Medium
+Low,31,High school,Married,Primary school,Housewife,High
+Low,18,University,Married,College,Housewife,High
+Low,26,University,Married,University,Doctor,High
+Low,37,University,Married,University,Teacher,High
+Low,26,University,Married,University,Doctor,High
+Low,22,High school,Married,University,Housewife,High
+High,26,University,Married,University,Doctor,High
+Medium,25,University,Married,University,Student,Medium
+Medium,28,University,Married,University,Housewife,High
+Low,25,University,Married,University,Housewife,High
+High,34,University,Married,University,Business,Medium
+Low,32,University,Married,University,Other,High
+Low,26,University,Married,University,Housewife,High
+High,26,University,Married,University,Housewife,High
+Low,26,University,Married,University,Business,High
+High,26,University,Married,University,Service,Low
+Medium,22,College,Married,University,Student,High
+Medium,33,Primary school,Married,Primary school,Housewife,High
+Low,24,College,Married,University,Housewife,High
+Low,22,College,Married,University,House wife,High
+Low,34,University,Married,University,Housewife,Low
+Low,25,High school,Married,Primary school,Housewife,Medium
+Low,21,Primary school,Married,University,Housewife,High
+Low,33,University,Married,University,Housewife,High

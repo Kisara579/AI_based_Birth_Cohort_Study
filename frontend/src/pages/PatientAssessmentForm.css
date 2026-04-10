@@ -1,0 +1,115 @@
+/* ── Assessment Page ─────────────────────────────────────────────── */
+.assessmentPage {
+  padding-bottom: 3rem;
+}
+
+/* Hero header  */
+.assessmentHero {
+  margin-bottom: 1.5rem;
+}
+
+.assessmentTitle {
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 10px;
+  background: linear-gradient(135deg, var(--text) 40%, var(--muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.assessmentSubtitle {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 600px;
+}
+
+/* Demo banner*/
+.demoBanner {
+  margin-bottom: 1.5rem;
+}
+
+.demoBannerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  background: rgba(96, 165, 250, 0.04);
+}
+
+.demoBannerText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.demoBannerIcon {
+  font-size: 18px;
+}
+
+.demoBannerActions {
+  display: flex;
+  gap: 10px;
+}
+
+.demoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+.demoBtn:hover {
+  transform: translateY(-1px);
+  border-color: var(--border2);
+}
+
+.demoBtnDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.demoBtnDot.p1 { background: #60a5fa; }
+.demoBtnDot.p2 { background: #a78bfa; }
+
+.demoBtn:hover {
+  border-color: var(--accent);
+  background: rgba(96, 165, 250, 0.06);
+}
+
+/* Form card */
+.assessmentFormCard {
+  margin-bottom: 2rem;
+}
+
+/* Light theme overrides  */
+body[data-theme="light"] .demoBannerInner {
+  border-color: rgba(22, 163, 74, 0.2);
+  background: rgba(22, 163, 74, 0.03);
+}
+
+body[data-theme="light"] .assessmentTitle {
+  background: linear-gradient(135deg, var(--text) 40%, #64748b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

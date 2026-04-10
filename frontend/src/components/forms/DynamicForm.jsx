@@ -56,7 +56,7 @@ function normalizeValues(schema, values) {
   return out;
 }
 
-export default function DynamicForm({ schema, onSubmit }) {
+export default function DynamicForm({ schema, onSubmit, initialValues = {}, submitLabel = "Run Prediction" }) {
   const allFields = useMemo(() => {
     const fields = [];
     for (const s of schema.sections) fields.push(...s.fields);
@@ -65,7 +65,10 @@ export default function DynamicForm({ schema, onSubmit }) {
 
   const [values, setValues] = useState(() => {
     const init = {};
-    for (const f of allFields) init[f.name] = "";
+    for (const f of allFields) {
+      // Use initialValues if provided, otherwise default to empty string
+      init[f.name] = initialValues[f.name] !== undefined ? String(initialValues[f.name]) : "";
+    }
     return init;
   });
 
@@ -118,7 +121,7 @@ export default function DynamicForm({ schema, onSubmit }) {
 
       <div className="formActions">
         <Button type="submit" variant="primary">
-          Run Prediction
+          {submitLabel}
         </Button>
       </div>
     </form>

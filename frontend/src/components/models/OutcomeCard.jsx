@@ -42,16 +42,10 @@ export default function OutcomeCard({ outcome }) {
 
         <div className="outcomeActions">
           <Button
-            variant="ghost"
+            variant="primary"
             onClick={() => navigate(`/metrics/${outcome.id}`)}
           >
-            Metrics
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => navigate(`/predict/${outcome.id}`)}
-          >
-            Predict
+            View Metrics
           </Button>
         </div>
       </div>

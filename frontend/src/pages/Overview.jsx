@@ -40,7 +40,7 @@ export default function Overview() {
         <div>
           <h1 className="pageTitle">Overview</h1>
           <p className="pageSubtitle">
-            Select an outcome to start a prediction.
+            Explore model metrics for each outcome. Use the <b>Predict</b> tab for risk assessments.
           </p>
         </div>
         <Button variant="ghost" onClick={() => window.location.reload()}>

@@ -57,13 +57,27 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "schema": {"title": "C-Section Inputs", "sections": []}
     },
 
-    "postpartum": {
-        "id": "postpartum",
+    "ppd": {
+        "id": "ppd",
         "name": "Postpartum Depression",
         "short": "PPD",
         "description": "Predict likelihood of postpartum depression.",
-        "model_key": "postpartum",
-        "schema": {"title": "Postpartum Depression Inputs", "sections": []}
+        "model_key": "ppd",
+        "schema": {
+            "title": "Postpartum Depression Inputs", 
+            "sections": [
+                {
+                    "fields":[
+                        {"name": "Age", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "Education Level", "label": "Education level", "type": "select", "required": True, "options": [{"value": "Primary school", "label": "Primary school"},{"value": "High school", "label": "High school"},{"value": "College", "label": "College"},{"value": "University", "label": "University"}]},
+                        {"name": "Marital status", "label": "Marital status", "type": "select", "required": True, "options": [{"value": "Married", "label": "Married"},{"value": "Divorced", "label": "Divorced"}]},
+                        {"name": "Husband's education level", "label": "Husband's education level", "type": "select", "required": True, "options": [{"value": "Primary school", "label": "Primary school"},{"value": "High school", "label": "High school"},{"value": "College", "label": "College"},{"value": "University", "label": "University"}]},
+                        {"name": "Occupation After Your Latest Childbirth", "label": "Occupation", "type": "select", "required": True, "options": [{"value": "Housewife", "label": "Housewife"},{"value": "Student", "label": "Student"},{"value": "Teacher", "label": "Teacher"},{"value": "Doctor", "label": "Doctor"},{"value": "Service", "label": "Service"},{"value": "Business", "label": "Business"},{"value": "Other", "label": "Other"}]},
+                        {"name": "Recieved Support", "label": "Received support", "type": "select", "required": True, "options": [{"value": "Low", "label": "Low"},{"value": "Medium", "label": "Medium"},{"value": "High", "label": "High"}]},
+                    ]
+                }
+            ]
+        }
     },
 
 

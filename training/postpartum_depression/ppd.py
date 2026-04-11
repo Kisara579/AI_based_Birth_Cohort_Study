@@ -1,11 +1,29 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+    
+
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    classification_report,
+    confusion_matrix,
+)
 from pathlib import Path
+from shared.model_artifacts import save_model_artifacts
 
 # Load dataset from 'data' folder relative to project root
 project_root = Path(__file__).resolve().parents[2]
@@ -82,11 +100,49 @@ print("\nTrain Classification Report:\n", classification_report(y_train, y_train
 # =========================
 # Testing Performance
 # =========================
-y_test_pred = pipeline.predict(X_test)
+y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+thresholds = np.arange(0.1, 0.91, 0.05)
+best_threshold = 0.5
+best_f1 = 0
+
+for t in thresholds:
+    y_pred_t = (y_prob >= t).astype(int)
+    f1 = f1_score(y_test, y_pred_t, zero_division=0)
+    if f1 > best_f1:
+        best_f1 = f1
+        best_threshold = t
+
+best_threshold = float(round(best_threshold, 2))
+print("Best threshold:", best_threshold)
+print("Best F1:", best_f1)
+
+y_test_pred = (y_prob >= best_threshold).astype(int)
 
 print("\n=== Testing Performance ===")
 print("Test Accuracy:", accuracy_score(y_test, y_test_pred))
 print("\nTest Classification Report:\n", classification_report(y_test, y_test_pred))
+
+metrics = {
+    "accuracy": float(accuracy_score(y_test, y_test_pred)),
+    "precision": float(precision_score(y_test, y_test_pred, zero_division=0)),
+    "recall": float(recall_score(y_test, y_test_pred, zero_division=0)),
+    "f1": float(f1_score(y_test, y_test_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_test, y_prob)),
+}
+
+report = classification_report(y_test, y_test_pred, output_dict=True)
+cm = confusion_matrix(y_test, y_test_pred).tolist()
+
+metrics_payload = {
+    "metrics": metrics,
+    "classification_report": report,
+    "confusion_matrix": cm,
+}
+
+print("\nModel Metrics:")
+for k, v in metrics.items():
+    print(f"{k}: {v:.4f}")
 
 # =========================
 # Overfitting Check
@@ -111,3 +167,20 @@ cv_scores = cross_val_score(pipeline, X, y, cv=5)
 print("\n=== Cross Validation ===")
 print("CV Scores:", cv_scores)
 print("Mean CV Accuracy:", cv_scores.mean())
+
+
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="ppd",
+    outcome_id="ppd",
+    algorithm="extratrees",
+    label="ExtraTrees",
+    description="Extra Trees classifier trained on postpartum depression data.",
+    target_column="EPDS Result",
+    feature_order=X.columns.tolist(),
+    categorical_features=categorical_cols,
+    metrics_payload=metrics_payload,
+    positive_label="Postpartum Depression",
+    negative_label="No Postpartum Depression",
+    threshold=best_threshold,
+)

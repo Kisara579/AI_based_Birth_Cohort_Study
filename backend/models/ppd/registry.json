@@ -1,0 +1,15 @@
+{
+  "outcome": "ppd",
+  "outcome_id": "ppd",
+  "selection_mode": "auto",
+  "selection_metric": "f1",
+  "active_model": "extratrees",
+  "models": [
+    {
+      "algorithm": "extratrees",
+      "label": "ExtraTrees",
+      "description": "Extra Trees classifier trained on postpartum depression data.",
+      "trained": true
+    }
+  ]
+}

@@ -22,6 +22,12 @@
       "label": "XGBoost",
       "description": "XGBoost classifier trained on birth dataset",
       "trained": true
+    },
+    {
+      "algorithm": "logisticregression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression classifier trained on birth dataset",
+      "trained": true
     }
   ]
 }

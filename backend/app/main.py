@@ -61,12 +61,23 @@ def metrics(outcome_id: str, model: str | None = Query(default=None)):
     if model is None:
         model = select_best_model(model_key)
 
-    _, _, metrics_path = model_paths(model_key, algorithm=model)
+    _, meta_path, metrics_path = model_paths(model_key, algorithm=model)
 
     if not metrics_path.exists():
         raise HTTPException(status_code=404, detail="Metrics not found. Train model first.")
 
-    return json.loads(metrics_path.read_text(encoding="utf-8"))
+    data = json.loads(metrics_path.read_text(encoding="utf-8"))
+
+    # Inject feature counts from meta.json if not already present
+    if meta_path.exists():
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        feature_order = meta.get("feature_order", [])
+        data.setdefault("total_features", len(feature_order))
+    fi = data.get("feature_importance")
+    if fi and isinstance(fi, list):
+        data.setdefault("features_shown", len(fi))
+
+    return data
 
 
 @app.get("/models/{outcome_id}")

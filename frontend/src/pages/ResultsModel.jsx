@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
@@ -131,6 +131,55 @@ export default function ResultsModel() {
       cancelled = true;
     };
   }, [outcomeId, formValues, modelsInfo, loadingOutcomes]);
+
+  // SVG circle gauge values (must be before early returns for hooks)
+  const prob = prediction?.probability ?? 0;
+  const pct = prob * 100;
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const targetOffset = circumference - (pct / 100) * circumference;
+
+  // Animate circle fill from empty to target
+  const [animatedOffset, setAnimatedOffset] = useState(circumference);
+  const [displayPct, setDisplayPct] = useState(0);
+  const animFrameRef = useRef(null);
+
+  useEffect(() => {
+    // Only animate when prediction is visible (not loading)
+    if (!prediction || predLoading) {
+      setAnimatedOffset(circumference);
+      setDisplayPct(0);
+      return;
+    }
+
+    // Reset then animate after a short delay
+    setAnimatedOffset(circumference);
+    setDisplayPct(0);
+
+    const timer = setTimeout(() => {
+      setAnimatedOffset(targetOffset);
+
+      // Animate counter number
+      const duration = 1200;
+      const startTime = performance.now();
+      const animate = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutQuart
+        const eased = 1 - Math.pow(1 - progress, 4);
+        setDisplayPct(eased * pct);
+        if (progress < 1) {
+          animFrameRef.current = requestAnimationFrame(animate);
+        }
+      };
+      animFrameRef.current = requestAnimationFrame(animate);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [prediction, predLoading]);
 
   // ui statuses
 
@@ -302,14 +351,8 @@ export default function ResultsModel() {
     );
   }
 
-  const prob = prediction?.probability ?? 0;
-  const riskLabel = prediction?.risk_label ?? "Unknown";
-  const pct = prob * 100;
 
-  // SVG circle gauge
-  const radius = 46;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (pct / 100) * circumference;
+  const riskLabel = prediction?.risk_label ?? "Unknown";
 
   // Colour band
   let riskClass = "riskLow";
@@ -374,12 +417,12 @@ export default function ResultsModel() {
                 cy="55"
                 r={radius}
                 strokeDasharray={circumference}
-                strokeDashoffset={offset}
+                strokeDashoffset={animatedOffset}
               />
             </svg>
             <div className="probCircleText">
               <span className={`probCirclePct text-${riskClass}`}>
-                {pct.toFixed(1)}%
+                {displayPct.toFixed(1)}%
               </span>
               <span className="probCircleSmall">probability</span>
             </div>
@@ -401,11 +444,11 @@ export default function ResultsModel() {
 
             <div className="resultMetaRow">
               <span className="resultMetaLabel">Predicted Probability</span>
-              <span className="resultMetaValue">{pct.toFixed(2)}%</span>
+              <span className="resultMetaValue">{displayPct.toFixed(2)}%</span>
               <div className="progressBarWrap">
                 <div
                   className={`progressBarFill bg-${riskClass}`}
-                  style={{ width: `${pct}%` }}
+                  style={{ width: `${displayPct}%` }}
                 />
               </div>
             </div>

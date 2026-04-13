@@ -1,6 +1,7 @@
 import json
 import joblib
 from pathlib import Path
+from shared.charts import generate_all_chart_data
 
 
 def save_model_artifacts(
@@ -17,15 +18,15 @@ def save_model_artifacts(
     positive_label,
     negative_label,
     threshold,
+    y_test=None,
+    y_prob=None,
 ):
 
     base_dir = Path("backend/models") / outcome
     model_dir = base_dir / algorithm
     model_dir.mkdir(parents=True, exist_ok=True)
 
-    
     # Save model.pkl
-
     model_path = model_dir / "model.pkl"
     joblib.dump(pipeline, model_path)
 
@@ -45,13 +46,21 @@ def save_model_artifacts(
     meta_path = model_dir / "meta.json"
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
-    # Save metrics.json
+    # Generate all chart data (feature importance + curves) and merge
+    chart_data = generate_all_chart_data(pipeline, feature_order, categorical_features, y_test, y_prob)
+    metrics_payload.update(chart_data)
+    
+    # Print status message
+    if "total_features" in chart_data:
+        print(f"  [OK] Feature importance extracted ({chart_data['features_shown']}/{chart_data['total_features']} features)")
+    if "roc_curve" in chart_data:
+        print("  [OK] ROC and PR curves generated")
 
+    # Save metrics.json
     metrics_path = model_dir / "metrics.json"
     metrics_path.write_text(json.dumps(metrics_payload, indent=2), encoding="utf-8")
 
     # Update registry.json
-
     registry_path = base_dir / "registry.json"
 
     if registry_path.exists():
@@ -92,5 +101,3 @@ def save_model_artifacts(
     print(" -", meta_path)
     print(" -", metrics_path)
     print(" -", registry_path)
-
-    

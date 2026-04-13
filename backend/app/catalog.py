@@ -196,6 +196,9 @@ def select_best_model(outcome: str):
 
     best_model = None
     best_score = -1
+    
+    fallback_model = None
+    fallback_score = -1
 
     for model in registry.get("models", []):
 
@@ -203,22 +206,32 @@ def select_best_model(outcome: str):
             continue
 
         algo = model["algorithm"]
-
         metrics_path = outcome_dir / algo / "metrics.json"
 
         if not metrics_path.exists():
             continue
 
         metrics_data = json.loads(metrics_path.read_text())
-
         score = metrics_data["metrics"].get(metric_name)
 
         if score is None:
             continue
 
+        if score > fallback_score:
+            fallback_score = score
+            fallback_model = algo
+
+        overfitting = metrics_data.get("overfitting_analysis", {})
+        severity = overfitting.get("severity", "good")
+        if severity in ["danger", "critical"]:
+            continue
+
         if score > best_score:
             best_score = score
             best_model = algo
+
+    if best_model is None:
+        best_model = fallback_model
 
     if best_model is None:
         raise RuntimeError("No valid trained model found")

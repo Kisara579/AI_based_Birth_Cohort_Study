@@ -235,7 +235,7 @@
 /* Metrics Cards Grid (top stat boxes) */
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
   gap: 14px;
   margin-bottom: 22px;
 }
@@ -541,4 +541,70 @@ body[data-theme="light"] .chartTitleIcon {
   .chartWrapRadar {
     height: 220px;
   }
+}
+
+/* Overfitting Indicator Card Styles */
+.overfittingCard {
+  /* Using exact card layouts from .metricCard */
+}
+
+.overfittingStatusValue {
+  font-size: 18px;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Good Severity */
+.severity-good {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+[data-theme="dark"] .severity-good .overfittingStatusValue {
+  color: #34d399;
+}
+body:not([data-theme="dark"]) .severity-good .overfittingStatusValue,
+[data-theme="light"] .severity-good .overfittingStatusValue {
+  color: #059669;
+}
+
+/* Warning Severity */
+.severity-warning {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+[data-theme="dark"] .severity-warning .overfittingStatusValue {
+  color: #fbbf24;
+}
+body:not([data-theme="dark"]) .severity-warning .overfittingStatusValue,
+[data-theme="light"] .severity-warning .overfittingStatusValue {
+  color: #d97706;
+}
+
+/* Danger Severity */
+.severity-danger {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+[data-theme="dark"] .severity-danger .overfittingStatusValue {
+  color: #f87171;
+}
+body:not([data-theme="dark"]) .severity-danger .overfittingStatusValue,
+[data-theme="light"] .severity-danger .overfittingStatusValue {
+  color: #dc2626;
+}
+
+/* Critical Severity */
+.severity-critical {
+  background-color: rgba(168, 85, 247, 0.12) !important;
+  border-color: rgba(168, 85, 247, 0.35) !important;
+}
+[data-theme="dark"] .severity-critical .overfittingStatusValue {
+  color: #c084fc;
+}
+body:not([data-theme="dark"]) .severity-critical .overfittingStatusValue,
+[data-theme="light"] .severity-critical .overfittingStatusValue {
+  color: #9333ea;
 }

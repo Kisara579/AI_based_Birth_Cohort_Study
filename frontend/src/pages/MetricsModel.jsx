@@ -46,13 +46,6 @@ const METRIC_COLORS = {
 
 const FI_GRADIENT_COLORS = ["rgba(99,102,241,0.85)", "rgba(129,140,248,0.7)"];
 
-const OVERFITTING_COLORS = {
-  good: { bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.35)", text: "#34d399", lightText: "#059669" },
-  warning: { bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.35)", text: "#fbbf24", lightText: "#d97706" },
-  danger: { bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.35)", text: "#f87171", lightText: "#dc2626" },
-  critical: { bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", text: "#c084fc", lightText: "#9333ea" },
-};
-
 /* chart configs */
 const DARK_GRID = "rgba(255,255,255,0.1)";
 const DARK_TICK = "rgba(255,255,255,0.85)";
@@ -182,35 +175,18 @@ function ConfusionHeatmap({ matrix, isDarkMode }) {
   );
 }
 
-/* Overfitting Badge */
-function OverfittingBadge({ analysis, isDarkMode }) {
+/* Overfitting Card */
+function OverfittingCard({ analysis }) {
   if (!analysis) return null;
-  const colors = OVERFITTING_COLORS[analysis.severity] || OVERFITTING_COLORS.good;
-  const textColor = isDarkMode ? colors.text : colors.lightText;
-
-  const icon = {
-    good: "✓",
-    warning: "⚠",
-    danger: "✗",
-    critical: "✗✗",
-  }[analysis.severity] || "?";
 
   return (
-    <div
-      className="overfittingBadge"
-      style={{
-        background: colors.bg,
-        borderColor: colors.border,
-        color: textColor,
-      }}
-    >
-      <span className="overfittingIcon">{icon}</span>
-      <div className="overfittingInfo">
-        <span className="overfittingStatus">{analysis.status}</span>
-        <span className="overfittingGap">
-          Avg Gap: {(analysis.avg_gap * 100).toFixed(1)}%
-        </span>
-      </div>
+    <div className={`metricCard overfittingCard severity-${analysis.severity}`}>
+      <span className="metricValue overfittingStatusValue">
+        {analysis.status}
+      </span>
+      <span className="metricLabel">
+        Gap: {(analysis.avg_gap).toFixed(4)}
+      </span>
     </div>
   );
 }
@@ -404,6 +380,36 @@ export default function MetricsModel() {
       })),
     };
   }, [modelsData]);
+
+  /* Build Train vs Test comparison chart data */
+  const buildTrainTestData = useCallback((overfitObj) => {
+    if (!overfitObj) return null;
+    const keys = ["accuracy", "f1", "precision", "recall", "roc_auc"];
+    const labels = ["Accuracy", "F1", "Precision", "Recall", "AUC-ROC"];
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Train",
+          data: keys.map((k) => overfitObj.train_metrics[k] ?? 0),
+          backgroundColor: "rgba(99,102,241,0.65)",
+          borderColor: "#818cf8",
+          borderWidth: 1.5,
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+        {
+          label: "Test",
+          data: keys.map((k) => overfitObj.test_metrics[k] ?? 0),
+          backgroundColor: "rgba(16,185,129,0.65)",
+          borderColor: "#34d399",
+          borderWidth: 1.5,
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+      ],
+    };
+  }, []);
 
   /* Build per-model feature importance chart */
   const MAX_FI_DISPLAY = 10;
@@ -981,7 +987,7 @@ export default function MetricsModel() {
                   ) : (
                     <>
                       {/* Metric stat cards */}
-                      {statEntries.length > 0 && (
+                      {(statEntries.length > 0 || data.overfitting_analysis) && (
                         <div className="metricsGrid">
                           {statEntries.map(([k, v]) => (
                             <div key={k} className="metricCard">
@@ -989,48 +995,20 @@ export default function MetricsModel() {
                               <span className="metricLabel">{fmtKey(k)}</span>
                             </div>
                           ))}
+                          
+                          {/* Overfitting Indicator as a Card */}
+                          {data.overfitting_analysis && (
+                            <OverfittingCard
+                              analysis={data.overfitting_analysis}
+                            />
+                          )}
                         </div>
-                      )}
-
-                      {/* Overfitting Indicator */}
-                      {data.overfitting_analysis && (
-                        <OverfittingBadge
-                          analysis={data.overfitting_analysis}
-                          isDarkMode={isDarkMode}
-                        />
                       )}
 
                       {/* Expanded details */}
                       {isExpanded && (
                         <div className="expandedDetails">
-                          {/* Train vs Test Comparison (Overfitting) */}
-                          {data.overfitting_analysis && (
-                            <div className="chartPanel featureImportancePanel">
-                              <h4 className="chartTitle">
-                                <span className="chartTitleIcon">⚖️</span>
-                                Train vs Test — Generalization Analysis
-                                <OverfittingBadge
-                                  analysis={data.overfitting_analysis}
-                                  isDarkMode={isDarkMode}
-                                />
-                              </h4>
-                              <div className="chartWrapAuto">
-                                <Bar
-                                  key={
-                                    isDarkMode
-                                      ? "dark-traintest"
-                                      : "light-traintest"
-                                  }
-                                  data={buildTrainTestData(
-                                    data.overfitting_analysis,
-                                  )}
-                                  options={baseBarOpts}
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Feature Importance */}}
+                          {/* Feature Importance */}
                           <div className="chartPanel featureImportancePanel">
                             <h4 className="chartTitle">
                               <span className="chartTitleIcon">#</span>
@@ -1053,6 +1031,29 @@ export default function MetricsModel() {
                               </p>
                             )}
                           </div>
+
+                          {/* Train vs Test Comparison (Overfitting) */}
+                          {data.overfitting_analysis && (
+                            <div className="chartPanel featureImportancePanel">
+                              <h4 className="chartTitle">
+                                <span className="chartTitleIcon">⚖️</span>
+                                Train vs Test — Generalization Analysis
+                              </h4>
+                              <div className="chartWrapAuto">
+                                <Bar
+                                  key={
+                                    isDarkMode
+                                      ? "dark-traintest"
+                                      : "light-traintest"
+                                  }
+                                  data={buildTrainTestData(
+                                    data.overfitting_analysis,
+                                  )}
+                                  options={baseBarOpts}
+                                />
+                              </div>
+                            </div>
+                          )}
 
                           {/* New Grid for line curves + doughnut */}
                           <div className="metricsChartsGrid">

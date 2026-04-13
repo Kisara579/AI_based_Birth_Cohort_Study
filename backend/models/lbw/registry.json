@@ -22,6 +22,30 @@
       "label": "XGBoost",
       "description": "Gradient-boosted tree classifier trained on CDC Natality data.",
       "trained": true
+    },
+    {
+      "algorithm": "decisiontree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier trained on CDC Natality data.",
+      "trained": true
+    },
+    {
+      "algorithm": "gradientboosting",
+      "label": "Gradient Boosting",
+      "description": "Gradient Boosting classifier trained on CDC Natality data.",
+      "trained": true
+    },
+    {
+      "algorithm": "knn",
+      "label": "K-Nearest Neighbors",
+      "description": "KNN classifier trained on CDC Natality data.",
+      "trained": true
+    },
+    {
+      "algorithm": "linearsvm",
+      "label": "Linear SVM",
+      "description": "Linear SVM classifier with calibration trained on CDC Natality data.",
+      "trained": true
     }
   ]
 }

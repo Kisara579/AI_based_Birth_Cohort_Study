@@ -1,0 +1,21 @@
+{
+  "outcome": "pd",
+  "outcome_id": "pd",
+  "algorithm": "decisiontree",
+  "target_column": "premature_delivery",
+  "positive_label": "premature delivery(week < 37)",
+  "negative_label": "full-term delivery(week >= 37)",
+  "feature_order": [
+    "MAGE",
+    "CARDIAC",
+    "ACLUNG",
+    "DIABETES",
+    "HYPERCH",
+    "HYPERPR",
+    "PINFANT",
+    "RENAL",
+    "PRETERM"
+  ],
+  "categorical_features": [],
+  "threshold": 0.5
+}

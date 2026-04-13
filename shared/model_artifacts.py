@@ -4,6 +4,48 @@ from pathlib import Path
 from shared.charts import generate_all_chart_data
 
 
+def _compute_overfitting_analysis(train_metrics, test_metrics):
+    """Compute overfitting analysis by comparing train vs test metrics."""
+    if not train_metrics or not test_metrics:
+        return None
+
+    analysis = {
+        "train_metrics": train_metrics,
+        "test_metrics": test_metrics,
+        "gaps": {},
+    }
+
+    for key in ["accuracy", "precision", "recall", "f1", "roc_auc"]:
+        train_val = train_metrics.get(key, 0)
+        test_val = test_metrics.get(key, 0)
+        gap = round(train_val - test_val, 4)
+        analysis["gaps"][key] = gap
+
+    # Determine overfitting status based on F1 and Recall gaps
+    f1_gap = abs(analysis["gaps"].get("f1", 0))
+    recall_gap = abs(analysis["gaps"].get("recall", 0))
+    avg_gap = (f1_gap + recall_gap) / 2
+
+    if avg_gap <= 0.03:
+        status = "Well Generalized"
+        severity = "good"
+    elif avg_gap <= 0.08:
+        status = "Mild Overfitting"
+        severity = "warning"
+    elif avg_gap <= 0.15:
+        status = "Overfitting"
+        severity = "danger"
+    else:
+        status = "Severe Overfitting"
+        severity = "critical"
+
+    analysis["status"] = status
+    analysis["severity"] = severity
+    analysis["avg_gap"] = round(avg_gap, 4)
+
+    return analysis
+
+
 def save_model_artifacts(
     pipeline,
     outcome,
@@ -20,6 +62,7 @@ def save_model_artifacts(
     threshold,
     y_test=None,
     y_prob=None,
+    train_metrics=None,
 ):
 
     base_dir = Path("backend/models") / outcome
@@ -55,6 +98,13 @@ def save_model_artifacts(
         print(f"  [OK] Feature importance extracted ({chart_data['features_shown']}/{chart_data['total_features']} features)")
     if "roc_curve" in chart_data:
         print("  [OK] ROC and PR curves generated")
+
+    # Compute overfitting analysis
+    if train_metrics is not None:
+        overfitting = _compute_overfitting_analysis(train_metrics, metrics_payload.get("metrics", {}))
+        if overfitting:
+            metrics_payload["overfitting_analysis"] = overfitting
+            print(f"  [OK] Overfitting analysis: {overfitting['status']} (avg gap: {overfitting['avg_gap']:.4f})")
 
     # Save metrics.json
     metrics_path = model_dir / "metrics.json"

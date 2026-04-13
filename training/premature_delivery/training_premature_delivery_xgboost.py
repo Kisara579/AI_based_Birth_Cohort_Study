@@ -67,8 +67,7 @@ model = XGBClassifier(
     subsample=0.8,
     colsample_bytree=0.8,
     random_state=42,
-    eval_metric="logloss",
-    use_label_encoder=False
+    eval_metric="logloss"
 )
 
 
@@ -84,6 +83,17 @@ pipeline = Pipeline(
 
 # Train
 pipeline.fit(X_train, y_train)
+
+# Train metrics (for overfitting detection) 
+y_train_prob = pipeline.predict_proba(X_train)[:, 1]
+y_train_pred = (y_train_prob >= 0.5).astype(int)
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred)),
+    "precision": float(precision_score(y_train, y_train_pred, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob)),
+}
 
 # Predict
 y_pred = pipeline.predict(X_test)
@@ -147,5 +157,6 @@ save_model_artifacts(
     negative_label="full-term delivery(week >= 37)",
     threshold=best_threshold,
     y_test=y_test,
-    y_prob=y_prob
+    y_prob=y_prob,
+    train_metrics=train_metrics,
 )

@@ -43,6 +43,88 @@
       1646
     ]
   ],
+  "feature_importance_v2": {
+    "items": [
+      {
+        "feature": "HYPERPR",
+        "importance": 1.0
+      },
+      {
+        "feature": "PRETERM",
+        "importance": 0.7595
+      },
+      {
+        "feature": "HYPERCH",
+        "importance": 0.3667
+      },
+      {
+        "feature": "PINFANT",
+        "importance": 0.117
+      },
+      {
+        "feature": "MAGE",
+        "importance": 0.1077
+      },
+      {
+        "feature": "DIABETES",
+        "importance": 0.1011
+      },
+      {
+        "feature": "RENAL",
+        "importance": 0.083
+      },
+      {
+        "feature": "CARDIAC",
+        "importance": 0.0822
+      },
+      {
+        "feature": "ACLUNG",
+        "importance": 0.0793
+      }
+    ],
+    "total_features": 9,
+    "features_shown": 9
+  },
+  "feature_importance": [
+    {
+      "feature": "HYPERPR",
+      "importance": 1.0
+    },
+    {
+      "feature": "PRETERM",
+      "importance": 0.7595
+    },
+    {
+      "feature": "HYPERCH",
+      "importance": 0.3667
+    },
+    {
+      "feature": "PINFANT",
+      "importance": 0.117
+    },
+    {
+      "feature": "MAGE",
+      "importance": 0.1077
+    },
+    {
+      "feature": "DIABETES",
+      "importance": 0.1011
+    },
+    {
+      "feature": "RENAL",
+      "importance": 0.083
+    },
+    {
+      "feature": "CARDIAC",
+      "importance": 0.0822
+    },
+    {
+      "feature": "ACLUNG",
+      "importance": 0.0793
+    }
+  ],
+  "total_features": 9,
+  "features_shown": 9,
   "roc_curve": {
     "fpr": [
       0.0,
@@ -1079,5 +1161,31 @@
       88.3,
       11.7
     ]
+  },
+  "overfitting_analysis": {
+    "train_metrics": {
+      "accuracy": 0.8837017221612693,
+      "precision": 0.6814159292035398,
+      "recall": 0.00812664907651715,
+      "f1": 0.01606174384647476,
+      "roc_auc": 0.5784670200900995
+    },
+    "test_metrics": {
+      "accuracy": 0.40936883629191323,
+      "precision": 0.12758700875901094,
+      "recall": 0.6948079358379063,
+      "f1": 0.21558611656843485,
+      "roc_auc": 0.574243552951264
+    },
+    "gaps": {
+      "accuracy": 0.4743,
+      "precision": 0.5538,
+      "recall": -0.6867,
+      "f1": -0.1995,
+      "roc_auc": 0.0042
+    },
+    "status": "Severe Overfitting",
+    "severity": "critical",
+    "avg_gap": 0.4431
   }
 }

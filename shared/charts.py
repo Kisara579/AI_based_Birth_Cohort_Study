@@ -44,13 +44,32 @@ def extract_feature_importance(pipeline, feature_order, categorical_features, to
                         transformed_names.extend(remainder_cols)
                     elif isinstance(columns, list):
                         transformed_names.extend(columns)
-                elif hasattr(transformer, "get_feature_names_out"):
-                    ohe_names = transformer.get_feature_names_out(columns)
-                    transformed_names.extend(ohe_names)
                 else:
+                    fitted_transformer = preprocessor.named_transformers_.get(trans_name, transformer)
+
+                    if transformer in ("drop", "passthrough"):
+                        if transformer == "passthrough":
+                            if isinstance(columns, list):
+                                transformed_names.extend(columns)
+                            elif columns is not None:
+                                transformed_names.append(str(columns))
+                        continue
+
+                    # Some transformers (e.g., OHE on empty categorical set) are intentionally
+                    # left unfitted. Fall back to raw column names in that case.
+                    if hasattr(fitted_transformer, "get_feature_names_out"):
+                        try:
+                            if isinstance(columns, list) and len(columns) == 0:
+                                continue
+                            out_names = fitted_transformer.get_feature_names_out(columns)
+                            transformed_names.extend(list(out_names))
+                            continue
+                        except Exception:
+                            pass
+
                     if isinstance(columns, list):
                         transformed_names.extend(columns)
-                    else:
+                    elif columns is not None:
                         transformed_names.append(str(columns))
         else:
             transformed_names = list(feature_order)

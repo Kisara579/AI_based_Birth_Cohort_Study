@@ -28,6 +28,18 @@
       "label": "Logistic Regression",
       "description": "Logistic Regression classifier trained on birth dataset",
       "trained": true
+    },
+    {
+      "algorithm": "decisiontree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier trained on birth dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "gradientboosting",
+      "label": "Gradient Boosting",
+      "description": "Gradient Boosting classifier trained on birth dataset.",
+      "trained": true
     }
   ]
 }

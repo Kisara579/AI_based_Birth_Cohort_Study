@@ -46,6 +46,13 @@ const METRIC_COLORS = {
 
 const FI_GRADIENT_COLORS = ["rgba(99,102,241,0.85)", "rgba(129,140,248,0.7)"];
 
+const OVERFITTING_COLORS = {
+  good: { bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.35)", text: "#34d399", lightText: "#059669" },
+  warning: { bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.35)", text: "#fbbf24", lightText: "#d97706" },
+  danger: { bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.35)", text: "#f87171", lightText: "#dc2626" },
+  critical: { bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", text: "#c084fc", lightText: "#9333ea" },
+};
+
 /* chart configs */
 const DARK_GRID = "rgba(255,255,255,0.1)";
 const DARK_TICK = "rgba(255,255,255,0.85)";
@@ -171,6 +178,39 @@ function ConfusionHeatmap({ matrix, isDarkMode }) {
   return (
     <div className="heatmapWrap">
       <canvas ref={canvasRef} />
+    </div>
+  );
+}
+
+/* Overfitting Badge */
+function OverfittingBadge({ analysis, isDarkMode }) {
+  if (!analysis) return null;
+  const colors = OVERFITTING_COLORS[analysis.severity] || OVERFITTING_COLORS.good;
+  const textColor = isDarkMode ? colors.text : colors.lightText;
+
+  const icon = {
+    good: "✓",
+    warning: "⚠",
+    danger: "✗",
+    critical: "✗✗",
+  }[analysis.severity] || "?";
+
+  return (
+    <div
+      className="overfittingBadge"
+      style={{
+        background: colors.bg,
+        borderColor: colors.border,
+        color: textColor,
+      }}
+    >
+      <span className="overfittingIcon">{icon}</span>
+      <div className="overfittingInfo">
+        <span className="overfittingStatus">{analysis.status}</span>
+        <span className="overfittingGap">
+          Avg Gap: {(analysis.avg_gap * 100).toFixed(1)}%
+        </span>
+      </div>
     </div>
   );
 }
@@ -952,10 +992,45 @@ export default function MetricsModel() {
                         </div>
                       )}
 
+                      {/* Overfitting Indicator */}
+                      {data.overfitting_analysis && (
+                        <OverfittingBadge
+                          analysis={data.overfitting_analysis}
+                          isDarkMode={isDarkMode}
+                        />
+                      )}
+
                       {/* Expanded details */}
                       {isExpanded && (
                         <div className="expandedDetails">
-                          {/* Feature Importance */}
+                          {/* Train vs Test Comparison (Overfitting) */}
+                          {data.overfitting_analysis && (
+                            <div className="chartPanel featureImportancePanel">
+                              <h4 className="chartTitle">
+                                <span className="chartTitleIcon">⚖️</span>
+                                Train vs Test — Generalization Analysis
+                                <OverfittingBadge
+                                  analysis={data.overfitting_analysis}
+                                  isDarkMode={isDarkMode}
+                                />
+                              </h4>
+                              <div className="chartWrapAuto">
+                                <Bar
+                                  key={
+                                    isDarkMode
+                                      ? "dark-traintest"
+                                      : "light-traintest"
+                                  }
+                                  data={buildTrainTestData(
+                                    data.overfitting_analysis,
+                                  )}
+                                  options={baseBarOpts}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Feature Importance */}}
                           <div className="chartPanel featureImportancePanel">
                             <h4 className="chartTitle">
                               <span className="chartTitleIcon">#</span>
@@ -1077,7 +1152,7 @@ export default function MetricsModel() {
                           {/* Bottom grid: report + confusion */}
                           <div className="metricsBottomGrid">
                             {report && (
-                              <div className="metricsPanel">
+                              <div className="metricsPanel metricsPanelHover">
                                 <h4 className="sectionTitle">
                                   Classification Report
                                 </h4>
@@ -1117,7 +1192,7 @@ export default function MetricsModel() {
                             )}
 
                             {cm && Array.isArray(cm) && cm.length >= 2 && (
-                              <div className="metricsPanel">
+                              <div className="metricsPanel metricsPanelHover">
                                 <h4 className="sectionTitle">
                                   Confusion Matrix
                                 </h4>

@@ -3,14 +3,8 @@
   "outcome_id": "pd",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "decisiontree",
+  "active_model": "xgboost",
   "models": [
-    {
-      "algorithm": "linearsvm",
-      "label": "Linear SVM",
-      "description": "Linear SVM classifier trained on birth dataset",
-      "trained": true
-    },
     {
       "algorithm": "randomforest",
       "label": "Random Forest",
@@ -30,15 +24,15 @@
       "trained": true
     },
     {
-      "algorithm": "decisiontree",
-      "label": "Decision Tree",
-      "description": "Decision Tree classifier trained on birth dataset.",
-      "trained": true
-    },
-    {
       "algorithm": "gradientboosting",
       "label": "Gradient Boosting",
       "description": "Gradient Boosting classifier trained on birth dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "linearsvm",
+      "label": "Linear SVM",
+      "description": "Calibrated Linear Support Vector Machine trained on premature birth dataset",
       "trained": true
     }
   ]

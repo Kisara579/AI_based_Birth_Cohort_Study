@@ -16,5 +16,5 @@
   "categorical_features": [
     "SEX"
   ],
-  "threshold": 0.1
+  "threshold": 0.45
 }

@@ -15,7 +15,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score,classification_report, confusion_matrix
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline
+from imblearn.over_sampling import SMOTE
 
 from xgboost import XGBClassifier
 
@@ -44,9 +45,24 @@ numeric_features = X_train.select_dtypes(include=["int64", "float64"]).columns.t
 categorical_features = X_train.select_dtypes(include=["object","string"]).columns.tolist()
 
 # preprocessing
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline as SklearnPipeline
+from sklearn.preprocessing import StandardScaler
+
+numeric_transformer = SklearnPipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+categorical_transformer = SklearnPipeline(steps=[
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore"))
+])
+
 preprocessor = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features)
     ],
     remainder="passthrough"
 )
@@ -54,63 +70,73 @@ preprocessor = ColumnTransformer(
 
 # xgboost model
 model = XGBClassifier(
-    n_estimators=200,
-    max_depth=5,
-    learning_rate=0.1,
+    n_estimators=100,
+    max_depth=3,
+    learning_rate=0.05,
     subsample=0.8,
     colsample_bytree=0.8,
-    scale_pos_weight=(y_train.value_counts()[0] / y_train.value_counts()[1]),
+    reg_alpha=5,
+    reg_lambda=5,
     random_state=42,
     eval_metric="logloss"
 )
 
-
 pipeline = Pipeline(steps=[
     ("preprocess", preprocessor),
-    ("model", model)
+    ("smote", SMOTE(random_state=42)),
+        ("model", model)
 ])
 
-pipeline.fit(X_train,y_train)
+pipeline.fit(X_train, y_train)
 
-# Train metrics (for overfitting detection) 
-y_train_prob = pipeline.predict_proba(X_train)[:, 1]
-y_train_pred = (y_train_prob >= 0.5).astype(int)
-train_metrics = {
-    "accuracy": float(accuracy_score(y_train, y_train_pred)),
-    "precision": float(precision_score(y_train, y_train_pred, zero_division=0)),
-    "recall": float(recall_score(y_train, y_train_pred, zero_division=0)),
-    "f1": float(f1_score(y_train, y_train_pred, zero_division=0)),
-    "roc_auc": float(roc_auc_score(y_train, y_train_prob)),
-}
+from sklearn.model_selection import cross_val_predict
+import numpy as np
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, classification_report, confusion_matrix
 
-y_prob = pipeline.predict_proba(X_test)[:, 1]
+# 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
+y_train_prob_cv = cross_val_predict(
+    pipeline, X_train, y_train, cv=5, method='predict_proba', n_jobs=-1
+)[:, 1]
 
-
+# 2. Find best threshold dynamically on the OOF training predictions to prevent leakage
 thresholds = np.arange(0.1, 0.91, 0.05)
 best_threshold = 0.5
 best_f1 = 0
 
 for t in thresholds:
-    y_pred = (y_prob >= t).astype(int)
-    f1 = f1_score(y_test, y_pred)
+    y_pred_t = (y_train_prob_cv >= t).astype(int)
+    f1 = f1_score(y_train, y_pred_t, zero_division=0)
     if f1 > best_f1:
         best_f1 = f1
         best_threshold = t
 
-print("Best threshold:", best_threshold)
-print("Best F1:", best_f1)
+best_threshold = float(round(best_threshold, 2))
+print("Best threshold found on CV:", best_threshold)
 
+# 3. Compute train_metrics purely on the cross_val predictions at the BEST threshold
+y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred_cv)),
+    "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
+}
+
+# 4. Predict on absolute hold-out test set
+y_prob = pipeline.predict_proba(X_test)[:, 1]
 y_pred = (y_prob >= best_threshold).astype(int)
 
 metrics = {
     "accuracy": float(accuracy_score(y_test, y_pred)),
-    "precision": float(precision_score(y_test, y_pred)),
-    "recall": float(recall_score(y_test, y_pred)),
-    "f1": float(f1_score(y_test, y_pred)),
+    "precision": float(precision_score(y_test, y_pred, zero_division=0)),
+    "recall": float(recall_score(y_test, y_pred, zero_division=0)),
+    "f1": float(f1_score(y_test, y_pred, zero_division=0)),
     "roc_auc": float(roc_auc_score(y_test, y_prob))
 }
 
-report = classification_report(y_test, y_pred, output_dict=True)
+report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
 cm = confusion_matrix(y_test, y_pred).tolist()
 
 metrics_payload = {
@@ -118,13 +144,6 @@ metrics_payload = {
     "classification_report": report,
     "confusion_matrix": cm
 }
-
-
-print("\nModel Metrics:")
-for k, v in metrics.items():
-    print(f"{k}: {v:.4f}")
-
-
 
 from shared.model_artifacts import save_model_artifacts
 

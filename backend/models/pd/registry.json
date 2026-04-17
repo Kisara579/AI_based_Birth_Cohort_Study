@@ -3,7 +3,7 @@
   "outcome_id": "pd",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "xgboost",
+  "active_model": "randomforest",
   "models": [
     {
       "algorithm": "randomforest",
@@ -35,5 +35,22 @@
       "description": "Calibrated Linear Support Vector Machine trained on premature birth dataset",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "composite_with_safety_gate",
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 5,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "randomforest",
+      "selection_metric": "f1",
+      "selection_metric_value": 0.209295,
+      "composite_score": 0.521217,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

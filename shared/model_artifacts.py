@@ -4,8 +4,11 @@ from pathlib import Path
 from shared.charts import generate_all_chart_data
 
 
+METRIC_KEYS = ["accuracy", "precision", "recall", "f1", "roc_auc"]
+
+
 def _compute_overfitting_analysis(train_metrics, test_metrics):
-    """Compute overfitting analysis by comparing train vs test metrics."""
+    """Compute overfitting analysis from train-vs-test metric gaps."""
     if not train_metrics or not test_metrics:
         return None
 
@@ -15,33 +18,41 @@ def _compute_overfitting_analysis(train_metrics, test_metrics):
         "gaps": {},
     }
 
-    for key in ["accuracy", "precision", "recall", "f1", "roc_auc"]:
-        train_val = train_metrics.get(key, 0)
-        test_val = test_metrics.get(key, 0)
-        gap = round(train_val - test_val, 4)
-        analysis["gaps"][key] = gap
+    for key in METRIC_KEYS:
+        train_val = float(train_metrics.get(key, 0.0))
+        test_val = float(test_metrics.get(key, 0.0))
+        analysis["gaps"][key] = round(train_val - test_val, 4)
 
-    # Determine overfitting status based on F1 and Recall gaps
-    f1_gap = abs(analysis["gaps"].get("f1", 0))
-    recall_gap = abs(analysis["gaps"].get("recall", 0))
+    f1_gap = analysis["gaps"].get("f1", 0.0)
+    recall_gap = analysis["gaps"].get("recall", 0.0)
     avg_gap = (f1_gap + recall_gap) / 2
 
-    if avg_gap <= 0.03:
-        status = "Well Generalized"
-        severity = "good"
-    elif avg_gap <= 0.08:
-        status = "Mild Overfitting"
-        severity = "warning"
-    elif avg_gap <= 0.15:
-        status = "Overfitting"
-        severity = "danger"
-    else:
+    # Medical + imbalance focus: positive F1/Recall train-test gaps are most concerning.
+    if f1_gap > 0.15 or recall_gap > 0.18:
         status = "Severe Overfitting"
         severity = "critical"
+        note = "Very large train-test gap; high risk of poor minority-class recall"
+    elif f1_gap > 0.08 or recall_gap > 0.10:
+        status = "Overfitting"
+        severity = "danger"
+        note = "Large train-test gap, with potential false-negative risk"
+    elif f1_gap < -0.03 and recall_gap < -0.03:
+        status = "Possible Underfitting/Split Instability"
+        severity = "warning"
+        note = "Test metrics exceed train metrics; check data split stability"
+    elif 0 <= f1_gap <= 0.03 and -0.03 <= recall_gap <= 0.05:
+        status = "Well Generalized"
+        severity = "good"
+        note = "Small F1/Recall gap between train and test"
+    else:
+        status = "Mild Overfitting"
+        severity = "warning"
+        note = "Generalization gap is present but moderate"
 
     analysis["status"] = status
     analysis["severity"] = severity
     analysis["avg_gap"] = round(avg_gap, 4)
+    # analysis["note"] = note
 
     return analysis
 
@@ -104,7 +115,7 @@ def save_model_artifacts(
         overfitting = _compute_overfitting_analysis(train_metrics, metrics_payload.get("metrics", {}))
         if overfitting:
             metrics_payload["overfitting_analysis"] = overfitting
-            print(f"  [OK] Overfitting analysis: {overfitting['status']} (avg gap: {overfitting['avg_gap']:.4f})")
+            print(f"  [OK] Overfitting analysis: {overfitting['status']} (avg gap: {overfitting['avg_gap']:+.4f})")
 
     # Save metrics.json
     metrics_path = model_dir / "metrics.json"

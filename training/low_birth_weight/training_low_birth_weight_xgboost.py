@@ -93,12 +93,12 @@ from sklearn.model_selection import cross_val_predict
 import numpy as np
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, classification_report, confusion_matrix
 
-# 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
+# Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
 y_train_prob_cv = cross_val_predict(
     pipeline, X_train, y_train, cv=5, method='predict_proba', n_jobs=-1
 )[:, 1]
 
-# 2. Find best threshold dynamically on the OOF training predictions to prevent leakage
+# Find best threshold dynamically on the OOF training predictions to prevent leakage
 thresholds = np.arange(0.1, 0.91, 0.05)
 best_threshold = 0.5
 best_f1 = 0
@@ -113,7 +113,7 @@ for t in thresholds:
 best_threshold = float(round(best_threshold, 2))
 print("Best threshold found on CV:", best_threshold)
 
-# 3. Compute train_metrics purely on the cross_val predictions at the BEST threshold
+# Compute train_metrics purely on the cross_val predictions at the BEST threshold
 y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
 
 train_metrics = {
@@ -124,7 +124,7 @@ train_metrics = {
     "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
 }
 
-# 4. Predict on absolute hold-out test set
+# Predict on absolute hold-out test set
 y_prob = pipeline.predict_proba(X_test)[:, 1]
 y_pred = (y_prob >= best_threshold).astype(int)
 

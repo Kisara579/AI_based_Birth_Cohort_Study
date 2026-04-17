@@ -29,5 +29,22 @@
       "description": "Gradient Boosting classifier trained on CDC Natality data.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "composite_with_safety_gate",
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 4,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "gradientboosting",
+      "selection_metric": "f1",
+      "selection_metric_value": 0.22469,
+      "composite_score": 0.34042,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

@@ -8,7 +8,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, cross_val_predict
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -22,7 +22,6 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
 )
-from pathlib import Path
 from shared.model_artifacts import save_model_artifacts
 
 # Load dataset from 'data' folder relative to project root
@@ -62,9 +61,8 @@ for col in df.columns:
 X = df.drop("EPDS Result", axis=1)
 y = df["EPDS Result"]
 
-# Identify categorical and numeric columns
-categorical_cols = X.select_dtypes(include=['object']).columns.tolist()
-numeric_cols = X.select_dtypes(include=['number']).columns.tolist()
+# Identify categorical columns
+categorical_cols = X.select_dtypes(include=['object', 'string']).columns.tolist()
 
 # Preprocessing
 preprocessor = ColumnTransformer(
@@ -82,46 +80,55 @@ pipeline = Pipeline([
 
 # Train-test split
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
 # Train model
 pipeline.fit(X_train, y_train)
 
-# =========================
-# Training Performance
-# =========================
-y_train_pred = pipeline.predict(X_train)
+# Use 5-fold cross_val_predict to get out-of-fold probabilities on train split
+y_train_prob_cv = cross_val_predict(
+    pipeline, X_train, y_train, cv=5, method='predict_proba', n_jobs=-1
+)[:, 1]
 
-print("=== Training Performance ===")
-print("Train Accuracy:", accuracy_score(y_train, y_train_pred))
-print("\nTrain Classification Report:\n", classification_report(y_train, y_train_pred))
-
-# =========================
-# Testing Performance
-# =========================
-y_prob = pipeline.predict_proba(X_test)[:, 1]
-
+# Find best threshold dynamically on OOF training predictions
 thresholds = np.arange(0.1, 0.91, 0.05)
 best_threshold = 0.5
 best_f1 = 0
 
 for t in thresholds:
-    y_pred_t = (y_prob >= t).astype(int)
-    f1 = f1_score(y_test, y_pred_t, zero_division=0)
+    y_pred_t = (y_train_prob_cv >= t).astype(int)
+    f1 = f1_score(y_train, y_pred_t, zero_division=0)
     if f1 > best_f1:
         best_f1 = f1
         best_threshold = t
 
 best_threshold = float(round(best_threshold, 2))
-print("Best threshold:", best_threshold)
-print("Best F1:", best_f1)
+print("Best threshold found on CV:", best_threshold)
+print("Best F1 on CV:", best_f1)
 
+# Compute train metrics on OOF predictions at best threshold
+y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred_cv)),
+    "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
+}
+
+print("\n=== Training Performance (OOF CV) ===")
+print("Train Accuracy:", train_metrics["accuracy"])
+print("\nTrain Classification Report:\n", classification_report(y_train, y_train_pred_cv, zero_division=0))
+
+# Predict on hold-out test set
+y_prob = pipeline.predict_proba(X_test)[:, 1]
 y_test_pred = (y_prob >= best_threshold).astype(int)
 
 print("\n=== Testing Performance ===")
 print("Test Accuracy:", accuracy_score(y_test, y_test_pred))
-print("\nTest Classification Report:\n", classification_report(y_test, y_test_pred))
+print("\nTest Classification Report:\n", classification_report(y_test, y_test_pred, zero_division=0))
 
 metrics = {
     "accuracy": float(accuracy_score(y_test, y_test_pred)),
@@ -131,7 +138,7 @@ metrics = {
     "roc_auc": float(roc_auc_score(y_test, y_prob)),
 }
 
-report = classification_report(y_test, y_test_pred, output_dict=True)
+report = classification_report(y_test, y_test_pred, output_dict=True, zero_division=0)
 cm = confusion_matrix(y_test, y_test_pred).tolist()
 
 metrics_payload = {
@@ -143,30 +150,6 @@ metrics_payload = {
 print("\nModel Metrics:")
 for k, v in metrics.items():
     print(f"{k}: {v:.4f}")
-
-# =========================
-# Overfitting Check
-# =========================
-train_acc = accuracy_score(y_train, y_train_pred)
-test_acc = accuracy_score(y_test, y_test_pred)
-
-print("\n=== Overfitting Check ===")
-print(f"Training Accuracy: {train_acc:.4f}")
-print(f"Testing Accuracy: {test_acc:.4f}")
-
-if train_acc - test_acc > 0.05:
-    print("⚠️ Model is likely OVERFITTING")
-else:
-    print("✅ Model is not overfitting significantly")
-
-# =========================
-# Cross Validation
-# =========================
-cv_scores = cross_val_score(pipeline, X, y, cv=5)
-
-print("\n=== Cross Validation ===")
-print("CV Scores:", cv_scores)
-print("Mean CV Accuracy:", cv_scores.mean())
 
 
 save_model_artifacts(
@@ -183,4 +166,7 @@ save_model_artifacts(
     positive_label="Postpartum Depression",
     negative_label="No Postpartum Depression",
     threshold=best_threshold,
+    y_test=y_test,
+    y_prob=y_prob,
+    train_metrics=train_metrics,
 )

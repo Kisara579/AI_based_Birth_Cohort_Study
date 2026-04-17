@@ -1184,8 +1184,8 @@
       "f1": -0.001,
       "roc_auc": -0.0079
     },
-    "status": "Well Generalized",
-    "severity": "good",
-    "avg_gap": 0.0104
+    "status": "Mild Overfitting",
+    "severity": "warning",
+    "avg_gap": -0.0104
   }
 }

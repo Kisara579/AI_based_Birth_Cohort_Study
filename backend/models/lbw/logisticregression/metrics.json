@@ -1140,11 +1140,11 @@
   },
   "overfitting_analysis": {
     "train_metrics": {
-      "accuracy": 0.5675475625975829,
-      "precision": 0.09772859947991297,
-      "recall": 0.5207861990950227,
-      "f1": 0.1645739309173779,
-      "roc_auc": 0.5627622174097207
+      "accuracy": 0.5676053894639449,
+      "precision": 0.09848745728589971,
+      "recall": 0.5257352941176471,
+      "f1": 0.16589697253642102,
+      "roc_auc": 0.5628274687614219
     },
     "test_metrics": {
       "accuracy": 0.5649720127677291,
@@ -1155,13 +1155,13 @@
     },
     "gaps": {
       "accuracy": 0.0026,
-      "precision": 0.001,
-      "recall": 0.0027,
-      "f1": 0.0015,
+      "precision": 0.0017,
+      "recall": 0.0076,
+      "f1": 0.0028,
       "roc_auc": 0.0051
     },
     "status": "Well Generalized",
     "severity": "good",
-    "avg_gap": 0.0021
+    "avg_gap": 0.0052
   }
 }

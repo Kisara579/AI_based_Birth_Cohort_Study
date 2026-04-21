@@ -31,7 +31,11 @@
     }
   ],
   "selection_details": {
-    "method": "composite_with_safety_gate",
+    "method": "composite_with_safety_gate_and_generalization_preference",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
     "blocked_severities": [
       "critical",
       "danger"

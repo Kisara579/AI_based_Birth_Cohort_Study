@@ -180,6 +180,10 @@ def get_model_key(outcome_id: str) -> Optional[str]:
 MODELS_ROOT = Path(__file__).resolve().parents[1] / "models"
 
 BLOCKED_SEVERITIES = {"danger", "critical"}
+SEVERITY_RANK = {
+    "good": 2,
+    "warning": 1,
+}
 
 
 def _to_float(value: Any) -> float:
@@ -254,10 +258,13 @@ def select_best_model(outcome: str):
         recall_gap_pos = max(_to_float(gaps.get("recall", 0.0)), 0.0)
         f1_gap_pos = max(_to_float(gaps.get("f1", 0.0)), 0.0)
 
-        # Tie-breaker order: composite > configured metric > recall > smaller positive gaps > precision.
+        severity_rank = SEVERITY_RANK.get(severity, 0)
+
+        # Tie-breaker order: generalization severity > configured metric > composite > recall > smaller positive gaps > precision.
         rank = (
-            round(composite_score, 6),
+            severity_rank,
             round(primary_score, 6),
+            round(composite_score, 6),
             round(_to_float(metrics.get("recall", 0.0)), 6),
             round(-recall_gap_pos, 6),
             round(-f1_gap_pos, 6),
@@ -286,7 +293,8 @@ def select_best_model(outcome: str):
     # update registry
     registry["active_model"] = best_model
     registry["selection_details"] = {
-        "method": "composite_with_safety_gate",
+        "method": "composite_with_safety_gate_and_generalization_preference",
+        "severity_priority": ["good", "warning"],
         "blocked_severities": sorted(BLOCKED_SEVERITIES),
         "evaluated_models": evaluated,
         "blocked_models": blocked,

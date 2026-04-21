@@ -98,13 +98,14 @@ pipeline = Pipeline(steps=[
 
 pipeline.fit(X_train, y_train)
 
-from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_val_predict, StratifiedKFold
 import numpy as np
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, classification_report, confusion_matrix
 
 # 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 y_train_prob_cv = cross_val_predict(
-    pipeline, X_train, y_train, cv=5, method='predict_proba', n_jobs=-1
+    pipeline, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
 )[:, 1]
 
 # 2. Find best threshold dynamically on the OOF training predictions to prevent leakage

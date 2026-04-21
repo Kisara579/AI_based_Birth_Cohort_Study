@@ -3,7 +3,7 @@
   "outcome_id": "lbw",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "xgboost",
+  "active_model": "gradientboosting",
   "models": [
     {
       "algorithm": "logisticregression",
@@ -22,6 +22,33 @@
       "label": "XGBoost",
       "description": "Gradient-boosted tree classifier trained on CDC Natality data.",
       "trained": true
+    },
+    {
+      "algorithm": "gradientboosting",
+      "label": "Gradient Boosting",
+      "description": "Gradient Boosting classifier trained on CDC Natality data.",
+      "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "composite_with_safety_gate_and_generalization_preference",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 4,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "gradientboosting",
+      "selection_metric": "f1",
+      "selection_metric_value": 0.22469,
+      "composite_score": 0.34042,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

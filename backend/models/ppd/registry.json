@@ -11,5 +11,26 @@
       "description": "Extra Trees classifier trained on postpartum depression data.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "composite_with_safety_gate_and_generalization_preference",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 1,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "extratrees",
+      "selection_metric": "f1",
+      "selection_metric_value": 0.776,
+      "composite_score": 0.786218,
+      "severity": "warning",
+      "status": "Mild Overfitting"
+    }
+  }
 }

@@ -179,6 +179,29 @@ def get_model_key(outcome_id: str) -> Optional[str]:
 # select best algorithm 
 MODELS_ROOT = Path(__file__).resolve().parents[1] / "models"
 
+BLOCKED_SEVERITIES = {"danger", "critical"}
+SEVERITY_RANK = {
+    "good": 2,
+    "warning": 1,
+}
+
+
+def _to_float(value: Any) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _compute_selection_score(metrics: Dict[str, Any], severity: str) -> float:
+    """Score candidate models with a recall-sensitive composite metric."""
+    f1 = _to_float(metrics.get("f1", 0.0))
+    recall = _to_float(metrics.get("recall", 0.0))
+    roc_auc = _to_float(metrics.get("roc_auc", 0.0))
+
+    warning_penalty = 0.01 if severity == "warning" else 0.0
+    return (0.55 * f1) + (0.35 * recall) + (0.10 * roc_auc) - warning_penalty
+
 def select_best_model(outcome: str):
 
     outcome_dir = MODELS_ROOT / outcome
@@ -195,7 +218,10 @@ def select_best_model(outcome: str):
     metric_name = registry.get("selection_metric", "f1")
 
     best_model = None
-    best_score = -1
+    best_rank = None
+    best_context: Dict[str, Any] = {}
+    evaluated = 0
+    blocked: List[Dict[str, Any]] = []
 
     for model in registry.get("models", []):
 
@@ -203,28 +229,77 @@ def select_best_model(outcome: str):
             continue
 
         algo = model["algorithm"]
-
         metrics_path = outcome_dir / algo / "metrics.json"
 
         if not metrics_path.exists():
             continue
 
         metrics_data = json.loads(metrics_path.read_text())
-
-        score = metrics_data["metrics"].get(metric_name)
+        metrics = metrics_data.get("metrics", {})
+        score = metrics.get(metric_name)
 
         if score is None:
             continue
 
-        if score > best_score:
-            best_score = score
+        primary_score = _to_float(score)
+
+        overfitting = metrics_data.get("overfitting_analysis", {})
+        severity = overfitting.get("severity", "good")
+        if severity in BLOCKED_SEVERITIES:
+            blocked.append({
+                "algorithm": algo,
+                "severity": severity,
+                "status": overfitting.get("status"),
+            })
+            continue
+
+        composite_score = _compute_selection_score(metrics, severity)
+        gaps = overfitting.get("gaps", {})
+        recall_gap_pos = max(_to_float(gaps.get("recall", 0.0)), 0.0)
+        f1_gap_pos = max(_to_float(gaps.get("f1", 0.0)), 0.0)
+
+        severity_rank = SEVERITY_RANK.get(severity, 0)
+
+        # Tie-breaker order: generalization severity > configured metric > composite > recall > smaller positive gaps > precision.
+        rank = (
+            severity_rank,
+            round(primary_score, 6),
+            round(composite_score, 6),
+            round(_to_float(metrics.get("recall", 0.0)), 6),
+            round(-recall_gap_pos, 6),
+            round(-f1_gap_pos, 6),
+            round(_to_float(metrics.get("precision", 0.0)), 6),
+            algo,
+        )
+
+        evaluated += 1
+        if best_rank is None or rank > best_rank:
+            best_rank = rank
             best_model = algo
+            best_context = {
+                "algorithm": algo,
+                "selection_metric": metric_name,
+                "selection_metric_value": round(primary_score, 6),
+                "composite_score": round(composite_score, 6),
+                "severity": severity,
+                "status": overfitting.get("status", "Unknown"),
+            }
 
     if best_model is None:
+        if blocked:
+            raise RuntimeError(f"No safe trained model found for outcome '{outcome}' (all eligible models are blocked by overfitting severity)")
         raise RuntimeError("No valid trained model found")
 
     # update registry
     registry["active_model"] = best_model
+    registry["selection_details"] = {
+        "method": "composite_with_safety_gate_and_generalization_preference",
+        "severity_priority": ["good", "warning"],
+        "blocked_severities": sorted(BLOCKED_SEVERITIES),
+        "evaluated_models": evaluated,
+        "blocked_models": blocked,
+        "selected": best_context,
+    }
     registry_path.write_text(json.dumps(registry, indent=2))
 
     return best_model

@@ -92,7 +92,7 @@
   fill: none;
   stroke-width: 8;
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.8s ease;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .probCircleText {
@@ -227,7 +227,6 @@
 .progressBarFill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.6s ease;
 }
 
 /* Submitted inputs grid */
@@ -303,13 +302,37 @@ body[data-theme="light"] .inputCell {
 body[data-theme="light"] .riskHigh {
   background: rgba(220, 38, 38, 0.08);
   color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.15);
+}
+
+body[data-theme="light"] .riskMedium {
+  background: rgba(234, 88, 12, 0.08); /* Tailwind orange-600 */
+  color: #ea580c;
+  border-color: rgba(234, 88, 12, 0.15);
 }
 
 body[data-theme="light"] .riskLow {
   background: rgba(22, 163, 74, 0.08);
   color: #16a34a;
+  border-color: rgba(22, 163, 74, 0.15);
 }
 
 body[data-theme="light"] .probCircleBg {
   stroke: var(--border);
+}
+
+body[data-theme="light"] .text-riskHigh { color: #dc2626; }
+body[data-theme="light"] .text-riskMedium { color: #ea580c; }
+body[data-theme="light"] .text-riskLow { color: #16a34a; }
+
+body[data-theme="light"] .stroke-riskHigh { stroke: #dc2626; }
+body[data-theme="light"] .stroke-riskMedium { stroke: #ea580c; }
+body[data-theme="light"] .stroke-riskLow { stroke: #16a34a; }
+
+body[data-theme="light"] .bg-riskHigh { background-color: #dc2626; }
+body[data-theme="light"] .bg-riskMedium { background-color: #ea580c; }
+body[data-theme="light"] .bg-riskLow { background-color: #16a34a; }
+
+body[data-theme="light"] .progressBarWrap {
+  background: rgba(0, 0, 0, 0.06);
 }

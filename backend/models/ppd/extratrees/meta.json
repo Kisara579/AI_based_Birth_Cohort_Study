@@ -20,5 +20,5 @@
     "Occupation After Your Latest Childbirth",
     "Recieved Support"
   ],
-  "threshold": 0.25
+  "threshold": 0.1
 }

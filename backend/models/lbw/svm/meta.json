@@ -1,7 +1,7 @@
 {
   "outcome": "lbw",
   "outcome_id": "lbw",
-  "algorithm": "gradientboosting",
+  "algorithm": "svm",
   "target_column": "low_birth_weight",
   "positive_label": "Low Birth Weight (<2500g)",
   "negative_label": "Normal Birth Weight",
@@ -16,5 +16,5 @@
   "categorical_features": [
     "SEX"
   ],
-  "threshold": 0.45
+  "threshold": 0.1
 }

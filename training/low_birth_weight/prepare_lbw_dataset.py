@@ -35,9 +35,6 @@ corr = df.corr(numeric_only=True)["low_birth_weight"].abs().sort_values(ascendin
 print(corr.head(15))
 
 
-
-
-
 # Group by unique feature combinations and assign the majority label
 features = [col for col in df.columns if col != "low_birth_weight"]
 df = df.groupby(features)["low_birth_weight"].agg(lambda x: x.mode()[0]).reset_index()

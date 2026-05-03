@@ -1,7 +1,7 @@
 {
   "outcome": "pd",
   "outcome_id": "pd",
-  "algorithm": "gradientboosting",
+  "algorithm": "svm",
   "target_column": "premature_delivery",
   "positive_label": "premature delivery(week < 37)",
   "negative_label": "full-term delivery(week >= 37)",
@@ -17,5 +17,5 @@
     "PRETERM"
   ],
   "categorical_features": [],
-  "threshold": 0.5
+  "threshold": 0.2
 }

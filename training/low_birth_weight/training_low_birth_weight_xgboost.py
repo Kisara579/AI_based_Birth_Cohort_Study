@@ -27,6 +27,8 @@ DATA_PATH = Path("data/low_birth_weight/processed/lbw_train_processed.csv")
 
 df = pd.read_csv(DATA_PATH)
 
+
+
 # Separate features and target variable
 X = df.drop(columns=["low_birth_weight"])
 y = df["low_birth_weight"]
@@ -42,7 +44,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # identify numeric and categorical features
 numeric_features = X_train.select_dtypes(include=["int64", "float64"]).columns.tolist()
-categorical_features = X_train.select_dtypes(include=["object","string"]).columns.tolist()
+categorical_features = X.select_dtypes(include=["object","string"]).columns.tolist()
 
 # preprocessing
 from sklearn.impute import SimpleImputer
@@ -71,23 +73,49 @@ preprocessor = ColumnTransformer(
 # xgboost model
 model = XGBClassifier(
     n_estimators=100,
-    max_depth=3,
-    learning_rate=0.05,
+    max_depth=5,
+    learning_rate=0.1,
+    min_child_weight=5,
     subsample=0.8,
     colsample_bytree=0.8,
-    reg_alpha=5,
-    reg_lambda=5,
     random_state=42,
     eval_metric="logloss"
 )
 
-pipeline = Pipeline(steps=[
+# 1. Preprocess ALL data
+X_preprocessed = preprocessor.fit_transform(X)
+
+# 2. Apply SMOTE to the entire preprocessed dataset
+print("="*80)
+print("STEP 1: CLASS BALANCE (BEFORE SMOTE)")
+print("="*80)
+class_counts_before = y.value_counts().sort_index()
+print(f"  Class 0: {class_counts_before[0]}")
+print(f"  Class 1: {class_counts_before[1]}")
+
+from imblearn.over_sampling import SMOTE
+smote = SMOTE(random_state=42, k_neighbors=3)
+X_resampled, y_resampled = smote.fit_resample(X_preprocessed, y)
+
+import pandas as pd
+class_counts_after = pd.Series(y_resampled).value_counts().sort_index()
+print(f"\nAFTER SMOTE: Class 0={class_counts_after[0]}, Class 1={class_counts_after[1]} (1:1)\n")
+
+# 3. Split the RESAMPLED data into Train and Test sets
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(
+    X_resampled, y_resampled, test_size=0.2, random_state=42, stratify=y_resampled
+)
+
+# 4. Construct final pipeline for artifact saving
+from sklearn.pipeline import Pipeline as SklearnPipeline
+pipeline = SklearnPipeline(steps=[
     ("preprocess", preprocessor),
-    ("smote", SMOTE(random_state=42)),
-        ("model", model)
+    ("model", model)
 ])
 
-pipeline.fit(X_train, y_train)
+# Train model on balanced training split
+model.fit(X_train, y_train)
 
 from sklearn.model_selection import cross_val_predict, StratifiedKFold
 import numpy as np
@@ -96,7 +124,7 @@ from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_sc
 # Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 y_train_prob_cv = cross_val_predict(
-    pipeline, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
+    model, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
 )[:, 1]
 
 # Find best threshold dynamically on the OOF training predictions to prevent leakage
@@ -126,7 +154,7 @@ train_metrics = {
 }
 
 # Predict on absolute hold-out test set
-y_prob = pipeline.predict_proba(X_test)[:, 1]
+y_prob = model.predict_proba(X_test)[:, 1]
 y_pred = (y_prob >= best_threshold).astype(int)
 
 metrics = {

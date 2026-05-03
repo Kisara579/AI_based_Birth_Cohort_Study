@@ -17,5 +17,5 @@
     "PRETERM"
   ],
   "categorical_features": [],
-  "threshold": 0.45
+  "threshold": 0.3
 }

@@ -86,6 +86,13 @@ for col in numeric_cols:
 print("\nRemaining missing values:")
 print(df.isnull().sum().sum())
 
+# Group by unique feature combinations and assign the majority label
+features = [col for col in df.columns if col != "premature_delivery"]
+df = df.groupby(features)["premature_delivery"].agg(lambda x: x.mode()[0]).reset_index()
+
+print("Final unique dataset shape:", df.shape)
+print("Target summary:\n", df["premature_delivery"].value_counts())
+print("\nSample of final dataset:\n", df.head())
 
 PROCESSED_PATH = Path("data/premature_delivery/processed/premature_delivery_processed.csv")
 PROCESSED_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -94,10 +101,6 @@ df.to_csv(PROCESSED_PATH, index=False)
 
 print("\nSaved processed dataset to:")
 print(PROCESSED_PATH)
-
-print("Final shape:", df.shape)
-
-
 
 
 

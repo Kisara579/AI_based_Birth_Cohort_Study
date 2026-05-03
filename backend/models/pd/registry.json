@@ -24,14 +24,14 @@
       "trained": true
     },
     {
-      "algorithm": "gradientboosting",
-      "label": "Gradient Boosting",
-      "description": "Gradient Boosting classifier trained on birth dataset.",
+      "algorithm": "decisiontree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier trained on birth dataset.",
       "trained": true
     },
     {
-      "algorithm": "linearsvm",
-      "label": "Linear SVM",
+      "algorithm": "svm",
+      "label": "SVM",
       "description": "Calibrated Linear Support Vector Machine trained on premature birth dataset",
       "trained": true
     }

@@ -38,9 +38,13 @@ print(corr.head(15))
 
 
 
-# check distribution of target
-print("Final dataset shape:", df.shape)
-print("LBW distribution:\n", df["low_birth_weight"].value_counts())
+# Group by unique feature combinations and assign the majority label
+features = [col for col in df.columns if col != "low_birth_weight"]
+df = df.groupby(features)["low_birth_weight"].agg(lambda x: x.mode()[0]).reset_index()
+
+print("Final unique dataset shape:", df.shape)
+print("Target summary:\n", df["low_birth_weight"].value_counts())
+print("\nSample of final dataset:\n", df.head())
 
 
 PROCESSED_PATH = Path("data/low_birth_weight/processed/lbw_train_processed.csv")

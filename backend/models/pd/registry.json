@@ -3,7 +3,7 @@
   "outcome_id": "pd",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "linearsvm",
+  "active_model": "logisticregression",
   "models": [
     {
       "algorithm": "randomforest",
@@ -49,12 +49,12 @@
     "evaluated_models": 5,
     "blocked_models": [],
     "selected": {
-      "algorithm": "linearsvm",
+      "algorithm": "logisticregression",
       "selection_metric": "f1",
-      "selection_metric_value": 0.209306,
-      "composite_score": 0.515961,
-      "severity": "good",
-      "status": "Well Generalized"
+      "selection_metric_value": 0.411765,
+      "composite_score": 0.473171,
+      "severity": "warning",
+      "status": "Mild Overfitting"
     }
   }
 }

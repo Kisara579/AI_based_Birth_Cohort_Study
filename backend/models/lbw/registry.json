@@ -3,7 +3,7 @@
   "outcome_id": "lbw",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "xgboost",
+  "active_model": "randomforest",
   "models": [
     {
       "algorithm": "logisticregression",
@@ -49,10 +49,10 @@
     "evaluated_models": 5,
     "blocked_models": [],
     "selected": {
-      "algorithm": "xgboost",
+      "algorithm": "randomforest",
       "selection_metric": "f1",
-      "selection_metric_value": 0.827487,
-      "composite_score": 0.816452,
+      "selection_metric_value": 0.22893,
+      "composite_score": 0.32578,
       "severity": "good",
       "status": "Well Generalized"
     }

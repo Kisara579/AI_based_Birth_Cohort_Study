@@ -24,7 +24,8 @@ from sklearn.metrics import (
 )
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline
+from imblearn.over_sampling import SMOTE
 from xgboost import XGBClassifier
 
 
@@ -35,6 +36,7 @@ df = pd.read_csv(DATA_PATH)
 # Separate features and target
 X = df.drop(columns=["premature_delivery"])
 y = df["premature_delivery"]
+
 
 # Train test split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -50,31 +52,60 @@ numeric_features = X_train.select_dtypes(include=["int64", "float64"]).columns.t
 categorical_features = X_train.select_dtypes(include=["object","string"]).columns.tolist()
 
 # Preprocessing
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline as SklearnPipeline
+from sklearn.preprocessing import StandardScaler
+
+numeric_transformer = SklearnPipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+categorical_transformer = SklearnPipeline(steps=[
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore"))
+])
+
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline as SklearnPipeline
+from sklearn.preprocessing import StandardScaler
+
+numeric_transformer = SklearnPipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+categorical_transformer = SklearnPipeline(steps=[
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore"))
+])
+
 preprocessor = ColumnTransformer(
     transformers=[
-        ("num", StandardScaler(), numeric_features),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
-    ]
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features)
+    ],
+    remainder="passthrough"
 )
 
 
 # XGBOOST MODEL
 model = XGBClassifier(
-    n_estimators=300,
-    max_depth=6,
+    n_estimators=100,
+    max_depth=3,
     learning_rate=0.05,
     subsample=0.8,
     colsample_bytree=0.8,
+    reg_alpha=5,
+    reg_lambda=5,
     random_state=42,
-    eval_metric="logloss",
-    use_label_encoder=False
+    eval_metric="logloss"
 )
 
-
-# PIPELINE
 pipeline = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
+        ("smote", SMOTE(random_state=42)),
         ("model", model)
     ]
 )
@@ -84,27 +115,44 @@ pipeline = Pipeline(
 # Train
 pipeline.fit(X_train, y_train)
 
-# Predict
-y_pred = pipeline.predict(X_test)
-y_prob = pipeline.predict_proba(X_test)[:, 1]
+from sklearn.model_selection import cross_val_predict, StratifiedKFold
+import numpy as np
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, classification_report, confusion_matrix
 
-# Find best threshold by F1
+# 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+y_train_prob_cv = cross_val_predict(
+    pipeline, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
+)[:, 1]
+
+# 2. Find best threshold dynamically on the OOF training predictions to prevent leakage
 thresholds = np.arange(0.1, 0.91, 0.05)
 best_threshold = 0.5
 best_f1 = 0
 
 for t in thresholds:
-    y_pred_t = (y_prob >= t).astype(int)
-    f1 = f1_score(y_test, y_pred_t, zero_division=0)
+    y_pred_t = (y_train_prob_cv >= t).astype(int)
+    f1 = f1_score(y_train, y_pred_t, zero_division=0)
     if f1 > best_f1:
         best_f1 = f1
         best_threshold = t
 
 best_threshold = float(round(best_threshold, 2))
-print("Best threshold:", best_threshold)
-print("Best F1:", best_f1)
+print("Best threshold found on CV:", best_threshold)
 
-# Final predictions using best threshold
+# 3. Compute train_metrics purely on the cross_val predictions at the BEST threshold
+y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred_cv)),
+    "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
+}
+
+# 4. Predict on absolute hold-out test set
+y_prob = pipeline.predict_proba(X_test)[:, 1]
 y_pred = (y_prob >= best_threshold).astype(int)
 
 metrics = {
@@ -115,7 +163,7 @@ metrics = {
     "roc_auc": float(roc_auc_score(y_test, y_prob))
 }
 
-report = classification_report(y_test, y_pred, output_dict=True)
+report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
 cm = confusion_matrix(y_test, y_pred).tolist()
 
 metrics_payload = {
@@ -123,11 +171,6 @@ metrics_payload = {
     "classification_report": report,
     "confusion_matrix": cm
 }
-
-print("\nModel Metrics:")
-for k, v in metrics.items():
-    print(f"{k}: {v:.4f}")
-
 
 from shared.model_artifacts import save_model_artifacts
 
@@ -144,5 +187,8 @@ save_model_artifacts(
     metrics_payload=metrics_payload,
     positive_label="premature delivery(week < 37)",
     negative_label="full-term delivery(week >= 37)",
-    threshold=best_threshold
+    threshold=best_threshold,
+    y_test=y_test,
+    y_prob=y_prob,
+    train_metrics=train_metrics,
 )

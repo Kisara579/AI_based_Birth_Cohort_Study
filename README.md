@@ -8,6 +8,13 @@
 - Node.js 18+ and npm (for frontend)
 - Git
 
+### Dependency Separation
+
+This repository separates runtime and full development dependencies:
+
+- `backend/requirements.txt`: minimal FastAPI inference runtime
+- `requirements/full-requirements.txt`: full dev + training + notebooks
+
 ### Backend Setup
 
 1. **Clone the repository**
@@ -41,6 +48,14 @@ source .venv/bin/activate
 
 ```bash
 pip install -r backend/requirements.txt
+```
+
+### Full Development + Training Setup
+
+Use this when you need model training, experiments, or notebooks.
+
+```bash
+pip install -r requirements/full-requirements.txt
 ```
 
 ### Frontend Setup
@@ -115,6 +130,20 @@ Open browser to `http://localhost:5173` to view the application.
 - NumPy - Numerical computing
 - Imbalanced-learn - Handling class imbalance
 - Uvicorn - ASGI server
+
+### Project Structure (key folders)
+
+- `backend/` FastAPI inference service
+- `frontend/` React dashboard
+- `training/` Model training scripts
+- `notebooks/` Exploratory notebooks
+- `requirements/` Dependency sets
+
+### Deployment Notes (Vercel)
+
+- Use `backend/requirements.txt` for production to minimize bundle size.
+- Keep `xgboost` and `imbalanced-learn` in runtime if you use XGBoost models or imbalanced-learn pipelines.
+- Ensure `backend/models/` artifacts are present in the deployment output.
 
 **Frontend:**
 

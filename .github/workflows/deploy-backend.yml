@@ -1,0 +1,31 @@
+name: Deploy Backend to Hugging Face Space
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "backend/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Push backend to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+
+          git clone https://huggingface:${HF_TOKEN}@huggingface.co/spaces/kisarab/birth-cohort-api hf-space
+
+          rsync -av --delete backend/ hf-space/
+
+          cd hf-space
+          git add .
+          git commit -m "Auto deploy backend from GitHub"
+          git push

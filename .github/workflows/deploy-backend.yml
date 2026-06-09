@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "backend/**"
 
   workflow_dispatch:
 
@@ -15,27 +17,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.HF_SSH_KEY }}
-
-      - name: Debug SSH
+      - name: Configure Git
         run: |
-          which ssh
-          ssh -V
-          nslookup huggingface.co || true
-          ping -c 2 huggingface.co || true
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
 
-      - name: Check connectivity
+      - name: Clone Hugging Face Space (HTTPS)
         run: |
-          nc -vz huggingface.co 22 || true
+          git clone https://kisarab:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/kisarab/birth-cohort-api.git hf-space
 
-      - name: Test SSH authentication
+      - name: Sync backend folder only
         run: |
-          ssh -vvv -o ConnectTimeout=15 -o StrictHostKeyChecking=no -T git@huggingface.co
+          rsync -av --delete backend/ hf-space/
 
-      - name: Test clone of Space
+      - name: Commit and push
         run: |
-          git clone git@huggingface.co:spaces/kisarab/birth-cohort-api.git hf-space
-          ls -la hf-space
+          cd hf-space
+          git add .
+          git diff --cached --quiet || git commit -m "Auto deploy backend"
+          git push origin main

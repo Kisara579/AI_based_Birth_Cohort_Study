@@ -2,11 +2,12 @@ name: Deploy Backend to Hugging Face Space
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
     paths:
       - "backend/**"
-  workflow_dispatch:
 
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -16,18 +17,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HF_TOKEN }}
+
+      - name: Add Hugging Face to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan huggingface.co >> ~/.ssh/known_hosts
+
       - name: Push backend to Hugging Face Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
 
-          git clone https://huggingface:${HF_TOKEN}@huggingface.co/spaces/kisarab/birth-cohort-api hf-space
+          git clone git@huggingface.co:spaces/kisarab/birth-cohort-api.git hf-space
 
           rsync -av --delete backend/ hf-space/
 
           cd hf-space
+
           git add .
-          git commit -m "Auto deploy backend from GitHub"
-          git push
+
+          git diff --cached --quiet || git commit -m "Auto deploy backend from GitHub"
+
+          git push origin main

@@ -27,9 +27,13 @@ jobs:
           nslookup huggingface.co || true
           ping -c 2 huggingface.co || true
 
+      - name: Check connectivity
+        run: |
+          nc -vz huggingface.co 22 || true
+
       - name: Test SSH authentication
         run: |
-          ssh -o StrictHostKeyChecking=no -T git@huggingface.co || true
+          ssh -vvv -o ConnectTimeout=15 -o StrictHostKeyChecking=no -T git@huggingface.co
 
       - name: Test clone of Space
         run: |

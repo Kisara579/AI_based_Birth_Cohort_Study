@@ -24,7 +24,7 @@ jobs:
 
       - name: Sync backend folder only
         run: |
-          rsync -av --delete backend/ hf-space/
+          rsync -av --delete --exclude='.git/' backend/ hf-space/
 
       - name: Commit and push
         run: |

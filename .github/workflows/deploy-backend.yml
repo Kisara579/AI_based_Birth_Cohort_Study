@@ -3,9 +3,7 @@ name: Deploy Backend to Hugging Face Space
 on:
   push:
     branches:
-      - "main"
-    paths:
-      - "backend/**"
+      - main
 
   workflow_dispatch:
 
@@ -17,36 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH Agent
+      - name: Load SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.HF_TOKEN }}
+          ssh-private-key: ${{ secrets.HF_SSH_KEY }}
 
-      - name: Disable strict host checking
+      - name: Add Hugging Face to known hosts
         run: |
           mkdir -p ~/.ssh
-          echo -e "Host huggingface.co\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          ssh-keyscan huggingface.co >> ~/.ssh/known_hosts
 
-      - name: Test SSH connection
+      - name: Test SSH authentication
         run: |
-          ssh -T -o StrictHostKeyChecking=no git@huggingface.co || true
-      
-      - name: Push backend to Hugging Face Space
+          ssh -T git@huggingface.co
+
+      - name: Test clone of Space
         run: |
-          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
-
-          
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "github-actions"
-
           git clone git@huggingface.co:spaces/kisarab/birth-cohort-api.git hf-space
-
-          rsync -av --delete backend/ hf-space/
-
-          cd hf-space
-
-          git add .
-
-          git diff --cached --quiet || git commit -m "Auto deploy backend from GitHub"
-
-          git push origin main
+          ls -la hf-space

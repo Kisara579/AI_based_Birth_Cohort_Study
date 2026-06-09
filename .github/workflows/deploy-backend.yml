@@ -26,9 +26,16 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo -e "Host huggingface.co\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+      - name: Test SSH connection
+        run: |
+          ssh -T -o StrictHostKeyChecking=no git@huggingface.co || true
       
       - name: Push backend to Hugging Face Space
         run: |
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+
+          
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
 

@@ -44,6 +44,29 @@ textarea {
   margin: 0 auto;
 }
 
+@media (max-width: 640px) {
+  .container {
+    width: min(100% - 20px, 1100px);
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageHeader > * {
+    width: 100%;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .pageSubtitle {
+    font-size: 14px;
+  }
+}
+
 /* api status dot */
 .apiDot {
   width: 10px;

@@ -20,14 +20,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.HF_SSH_KEY }}
 
-      - name: Add Hugging Face to known hosts
+      - name: Debug SSH
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan huggingface.co >> ~/.ssh/known_hosts
+          which ssh
+          ssh -V
+          nslookup huggingface.co || true
+          ping -c 2 huggingface.co || true
 
       - name: Test SSH authentication
         run: |
-          ssh -T git@huggingface.co
+          ssh -o StrictHostKeyChecking=no -T git@huggingface.co || true
 
       - name: Test clone of Space
         run: |

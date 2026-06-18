@@ -17,6 +17,7 @@ OUTCOME_FOLDER: dict[str, str] = {
     "lbw": "lbw",
     "pd": "pd",
     "ppd": "ppd",
+    "feeding": "feeding",
 }
 
 

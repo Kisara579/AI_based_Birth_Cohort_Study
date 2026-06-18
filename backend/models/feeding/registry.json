@@ -1,0 +1,96 @@
+{
+  "outcome": "feeding",
+  "outcome_id": "feeding",
+  "selection_mode": "auto",
+  "selection_metric": "f1",
+  "active_model": "rftuned",
+  "models": [
+    {
+      "algorithm": "logisticregression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "decisiontree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "randomforest",
+      "label": "Random Forest",
+      "description": "Random Forest classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "gradientboosting",
+      "label": "Gradient Boosting",
+      "description": "Gradient Boosting classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "svm",
+      "label": "SVM",
+      "description": "SVM classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "knn",
+      "label": "KNN",
+      "description": "KNN classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "balancedbagging",
+      "label": "Balanced Bagging",
+      "description": "Balanced Bagging classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "votingensemble",
+      "label": "Voting Ensemble",
+      "description": "Voting Ensemble classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "stackingensemble",
+      "label": "Stacking Ensemble",
+      "description": "Stacking Ensemble classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "rftuned",
+      "label": "RF Tuned",
+      "description": "RF Tuned classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "rfcalibrated",
+      "label": "RF Calibrated",
+      "description": "RF Calibrated classifier trained on breastfeeding dataset.",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "composite_with_safety_gate_and_generalization_preference",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 11,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "rftuned",
+      "selection_metric": "f1",
+      "selection_metric_value": 0.978399,
+      "composite_score": 0.930717,
+      "severity": "good",
+      "status": "Unknown"
+    }
+  }
+}

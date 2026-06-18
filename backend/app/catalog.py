@@ -139,7 +139,9 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "NICU",
         "description": "Predict probability of NICU admission.",
         "model_key": "nicu",
-        "schema": {"title": "NICU Inputs", "sections": []}
+        "schema": {
+            "title": "NICU Inputs", 
+            "sections": []}
     },
 
     
@@ -149,7 +151,46 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "FP",
         "description": "Predict risk of feeding problems in newborns.",
         "model_key": "feeding",
-        "schema": {"title": "Feeding Problems Inputs", "sections": []}
+        "schema": {
+            "title": "Feeding Problems Inputs", 
+            "sections": [
+                {
+                    "fields":[
+                        {"name": "maternal_age", "label": "Maternal age (years)", "type": "number", "min": 20, "max": 53, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "maternal_education", "label": "Maternal education level", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Primary school"},
+                            {"value": 2, "label": "High school"},
+                            {"value": 3, "label": "College"},
+                            {"value": 4, "label": "Vocational / Associate"},
+                            {"value": 5, "label": "University (Undergraduate)"},
+                            {"value": 6, "label": "Postgraduate University"},
+                            {"value": 99, "label": "Unknown / Prefer not to say"}
+                        ]},
+                        {"name": "child_birthweight_kgs", "label": "Child birthweight (kg)", "type": "number", "min": 0.5, "max": 6.0, "required": True, "placeholder": "e.g., 3.2"},
+                        {"name": "child_medical_complications", "label": "Child medical complications at birth", "type": "select", "required": True, "options": [
+                            {"value": 2, "label": "No"},
+                            {"value": 1, "label": "Yes"}
+                        ]},
+                        {"name": "delivery_method", "label": "Delivery method", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Spontaneous Vaginal"},
+                            {"value": 2, "label": "Planned Cesarean"},
+                            {"value": 3, "label": "Emergency Cesarean"},
+                            {"value": 4, "label": "Instrumental Vaginal (Forceps/Vacuum)"},
+                            {"value": 5, "label": "Other"},
+                            {"value": 99, "label": "Unknown"}
+                        ]},
+                        {"name": "breastfeeding_duration_months", "label": "Breastfeeding duration (months)", "type": "number", "min": 0, "max": 82, "required": True, "placeholder": "e.g., 6"},
+                        {"name": "MH_postnatal_depression", "label": "Maternal postnatal depression", "type": "select", "required": True, "options": [
+                            {"value": 0, "label": "No"},
+                            {"value": 1, "label": "Yes"}
+                        ]},
+                        {"name": "MH_postnatal_anxiety", "label": "Maternal postnatal anxiety", "type": "select", "required": True, "options": [
+                            {"value": 0, "label": "No"},
+                            {"value": 1, "label": "Yes"}
+                        ]}
+                    ]
+                }
+            ]}
     }, 
 
 }

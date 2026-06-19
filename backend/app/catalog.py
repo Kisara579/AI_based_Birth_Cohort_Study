@@ -141,7 +141,21 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "model_key": "nicu",
         "schema": {
             "title": "NICU Inputs", 
-            "sections": []}
+            "sections": [
+                {
+                    "fields": [
+                        {"name": "Insulin_treatment_during_pregnancy", "label": "Insulin treatment during pregnancy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Pregnancy_complications_hypertensive_disorders", "label": "Hypertensive disorders during pregnancy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Pregnancy_complications_preterm_delivery", "label": "Preterm delivery complications", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Abnormal_OGTT_results", "label": "Abnormal OGTT results", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Insulin_x_Preterm", "label": "Insulin & Preterm Delivery", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Hypertension_x_OGTT", "label": "Hypertension & Abnormal OGTT", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Insulin_x_Hypertension", "label": "Insulin & Hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Risk_score", "label": "Risk Score (0-4)", "type": "number", "min": 0, "max": 4, "required": True, "placeholder": "e.g., 2"}
+                    ]
+                }
+            ]
+        }
     },
 
     

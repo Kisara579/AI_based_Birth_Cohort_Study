@@ -330,6 +330,59 @@ preprocessor = ColumnTransformer([
     ("passthrough", "passthrough",    BINARY_IDX),
 ])
 
+def get_oof_train_metrics(estimator, X_train, y_train, scaled, name):
+    from sklearn.model_selection import cross_val_predict, StratifiedKFold
+    cv_oof = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=42)
+
+    if scaled:
+        from sklearn.pipeline import Pipeline as SkPipeline
+        oof_pipeline = SkPipeline([
+            ("preprocessor", preprocessor),
+            ("model", clone(estimator))
+        ])
+    else:
+        oof_pipeline = clone(estimator)
+
+    try:
+        y_train_prob_cv = cross_val_predict(
+            oof_pipeline, X_train, y_train, cv=cv_oof,
+            method='predict_proba', n_jobs=-1
+        )[:, 1]
+    except Exception:
+        y_train_prob_cv = None
+
+    if y_train_prob_cv is not None:
+        thresholds_search = np.arange(0.1, 0.91, 0.05)
+        best_threshold_cv = 0.5
+        best_f1_cv = 0
+
+        for t in thresholds_search:
+            y_pred_t = (y_train_prob_cv >= t).astype(int)
+            f1_t = f1_score(y_train, y_pred_t, zero_division=0)
+            if f1_t > best_f1_cv:
+                best_f1_cv = f1_t
+                best_threshold_cv = t
+
+        best_threshold_cv = float(round(best_threshold_cv, 2))
+        print(f"  Best OOF threshold (CV, F1) for {name}: {best_threshold_cv}")
+
+        y_train_pred_cv = (y_train_prob_cv >= best_threshold_cv).astype(int)
+
+        oof_train_metrics = {
+            "accuracy":  float(accuracy_score(y_train, y_train_pred_cv)),
+            "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
+            "recall":    float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
+            "f1":        float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
+            "roc_auc":   float(roc_auc_score(y_train, y_train_prob_cv)),
+        }
+        print(f"  OOF Train ({name}) -> Acc={oof_train_metrics['accuracy']:.4f}  "
+              f"F1={oof_train_metrics['f1']:.4f}  "
+              f"AUC={oof_train_metrics['roc_auc']:.4f}")
+        return oof_train_metrics
+    else:
+        print(f"  (cross_val_predict not available for {name}, using defaults)")
+        return {}
+
 X_train_res_s = preprocessor.fit_transform(X_train_res)
 X_test_scaled = preprocessor.transform(X_test)
 
@@ -420,6 +473,7 @@ trained        = {}
 probs_test     = {}
 preds_test     = {}
 fold_summaries = {}
+oof_train_metrics_dict = {}
 
 for name, estimator, scaled in MODEL_DEFS:
     Xtr = X_train_res_s if scaled else X_train_res
@@ -449,62 +503,9 @@ for name, estimator, scaled in MODEL_DEFS:
                           "Recall": rec, "F1": f1,
                           "ROC-AUC": auc_, "PR-AUC": ap})
 
-    # -- Artifact code (mirrored from gradient boosting reference) -------------
-    # 1. Out-of-Fold probabilities via cross_val_predict (no data leakage)
-    from sklearn.model_selection import cross_val_predict
-    cv_oof = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=42)
-
-    if scaled:
-        from sklearn.pipeline import Pipeline as SkPipeline
-        oof_pipeline = SkPipeline([
-            ("scaler", StandardScaler()),
-            ("model", clone(estimator))
-        ])
-    else:
-        oof_pipeline = clone(estimator)
-
-    try:
-        y_train_prob_cv = cross_val_predict(
-            oof_pipeline, X_train, y_train, cv=cv_oof,
-            method='predict_proba', n_jobs=-1
-        )[:, 1]
-    except Exception:
-        # Fallback: use training-set predictions if cross_val_predict fails
-        y_train_prob_cv = None
-
-    if y_train_prob_cv is not None:
-        # 2. Dynamic best-threshold search on OOF predictions (maximise F1)
-        thresholds_search = np.arange(0.1, 0.91, 0.05)
-        best_threshold_cv = 0.5
-        best_f1_cv = 0
-
-        for t in thresholds_search:
-            y_pred_t = (y_train_prob_cv >= t).astype(int)
-            f1_t = f1_score(y_train, y_pred_t, zero_division=0)
-            if f1_t > best_f1_cv:
-                best_f1_cv = f1_t
-                best_threshold_cv = t
-
-        best_threshold_cv = float(round(best_threshold_cv, 2))
-        print(f"  Best OOF threshold (CV, F1): {best_threshold_cv}")
-
-        # 3. Train metrics computed purely on OOF cross-val predictions
-        y_train_pred_cv = (y_train_prob_cv >= best_threshold_cv).astype(int)
-
-        oof_train_metrics = {
-            "accuracy":  float(accuracy_score(y_train, y_train_pred_cv)),
-            "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
-            "recall":    float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
-            "f1":        float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
-            "roc_auc":   float(roc_auc_score(y_train, y_train_prob_cv)),
-        }
-        print(f"  OOF Train -> Acc={oof_train_metrics['accuracy']:.4f}  "
-              f"F1={oof_train_metrics['f1']:.4f}  "
-              f"AUC={oof_train_metrics['roc_auc']:.4f}")
-    else:
-        best_threshold_cv = 0.5
-        oof_train_metrics = {}
-        print(f"  (cross_val_predict not available for {name}, using defaults)")
+   
+    oof_train_metrics = get_oof_train_metrics(estimator, X_train, y_train, scaled, name)
+    oof_train_metrics_dict[name] = oof_train_metrics
     # -- End artifact code -----------------------------------------------------
 
     print(f"\n{'-'*70}")
@@ -580,6 +581,12 @@ print(f"\n  Tuned RF on test ->"
       f"  Rec={recall_score(y_test,y_pred_tuned):.4f}"
       f"  F1={f1_score(y_test,y_pred_tuned):.4f}"
       f"  AUC={roc_auc_score(y_test,y_prob_tuned):.4f}")
+
+# Compute OOF training metrics for Tuned RF
+print("  Computing Out-of-Fold training metrics for RF Tuned...")
+oof_train_metrics_dict["RF Tuned"] = get_oof_train_metrics(
+    rf_tuned.best_estimator_, X_train, y_train, scaled=False, name="RF Tuned"
+)
 print("\n  Classification Report (Tuned RF):")
 for line in classification_report(
         y_test, y_pred_tuned,
@@ -613,6 +620,12 @@ print(f"  Calibrated RF -> Recall={recall_score(y_test,y_pred_cal):.4f}  "
 probs_test["RF Calibrated"] = y_prob_cal
 preds_test["RF Calibrated"] = y_pred_cal
 trained["RF Calibrated"]    = rf_calibrated
+
+# Compute OOF training metrics for Calibrated RF
+print("  Computing Out-of-Fold training metrics for RF Calibrated...")
+oof_train_metrics_dict["RF Calibrated"] = get_oof_train_metrics(
+    rf_calibrated, X_train, y_train, scaled=False, name="RF Calibrated"
+)
 
 summary_rows.append({
     "Model"    : "RF Calibrated",
@@ -717,6 +730,7 @@ for name, model in trained.items():
     
     y_pred = preds_test[name]
     y_prob = probs_test[name]
+    best_threshold = threshold_results.get(name, {}).get("threshold", 0.5)
     
     if y_prob is None:
         auc_score = float('nan')
@@ -724,6 +738,7 @@ for name, model in trained.items():
     else:
         auc_score = float(roc_auc_score(y_test, y_prob))
         y_prob_out = y_prob
+        y_pred = (y_prob >= best_threshold).astype(int)
         
     metrics = {
         "accuracy": float(accuracy_score(y_test, y_pred)),
@@ -755,16 +770,7 @@ for name, model in trained.items():
 
     best_threshold = threshold_results.get(name, {}).get("threshold", 0.5)
 
-    train_metrics = {}
-    if name in fold_summaries:
-        mean_row = fold_summaries[name].loc["-- Mean --"]
-        train_metrics = {
-            "accuracy": float(mean_row.get("Accuracy", 0)),
-            "precision": float(mean_row.get("Precision", 0)),
-            "recall": float(mean_row.get("Recall", 0)),
-            "f1": float(mean_row.get("F1", 0)),
-            "roc_auc": float(mean_row.get("ROC-AUC", 0))
-        }
+    train_metrics = oof_train_metrics_dict.get(name, {})
 
     algo_id = name.lower().replace(" ", "")
 

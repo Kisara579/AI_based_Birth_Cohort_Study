@@ -3,7 +3,7 @@
   "outcome_id": "feeding",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "rftuned",
+  "active_model": "gradientboosting",
   "models": [
     {
       "algorithm": "logisticregression",
@@ -70,6 +70,18 @@
       "label": "RF Calibrated",
       "description": "RF Calibrated classifier trained on breastfeeding dataset.",
       "trained": true
+    },
+    {
+      "algorithm": "voting(rf+gb+dt)",
+      "label": "Voting (RF+GB+DT)",
+      "description": "Voting (RF+GB+DT) classifier trained on breastfeeding dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "stacking(rf+gb+dt)",
+      "label": "Stacking (RF+GB+DT)",
+      "description": "Stacking (RF+GB+DT) classifier trained on breastfeeding dataset.",
+      "trained": true
     }
   ],
   "selection_details": {
@@ -82,15 +94,15 @@
       "critical",
       "danger"
     ],
-    "evaluated_models": 11,
+    "evaluated_models": 13,
     "blocked_models": [],
     "selected": {
-      "algorithm": "rftuned",
+      "algorithm": "gradientboosting",
       "selection_metric": "f1",
       "selection_metric_value": 0.978399,
-      "composite_score": 0.930717,
+      "composite_score": 0.937058,
       "severity": "good",
-      "status": "Unknown"
+      "status": "Well Generalized"
     }
   }
 }

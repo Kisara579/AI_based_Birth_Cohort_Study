@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -272,18 +279,18 @@ print(classification_report(y_test, y_test_pred, zero_division=0))
 
 cm = confusion_matrix(y_test, y_test_pred)
 
-ConfusionMatrixDisplay(cm).plot()
-plt.title("Confusion Matrix - Extra Trees with SMOTE")
-plt.show()
+# ConfusionMatrixDisplay(cm).plot()
+# plt.title("Confusion Matrix - Extra Trees with SMOTE")
+# plt.show()
 
 
 # =====================================================
 # 17. ROC CURVE
 # =====================================================
 
-RocCurveDisplay.from_predictions(y_test, y_test_prob)
-plt.title("ROC Curve - Extra Trees with SMOTE")
-plt.show()
+# RocCurveDisplay.from_predictions(y_test, y_test_prob)
+# plt.title("ROC Curve - Extra Trees with SMOTE")
+# plt.show()
 
 
 # =====================================================
@@ -307,19 +314,99 @@ print(feature_importance_df.to_string(index=False))
 # 19. FEATURE IMPORTANCE CHART
 # =====================================================
 
-plt.figure(figsize=(10, 6))
+# plt.figure(figsize=(10, 6))
 
-top_features = feature_importance_df.head(10)
+# top_features = feature_importance_df.head(10)
 
-plt.barh(
-    top_features["Feature"],
-    top_features["Importance"]
+# plt.barh(
+#     top_features["Feature"],
+#     top_features["Importance"]
+# )
+
+# plt.gca().invert_yaxis()
+
+# plt.xlabel("Importance Score")
+# plt.title("Top 10 Feature Importance - Extra Trees with SMOTE")
+
+# plt.tight_layout()
+# plt.show()
+
+
+# =====================================================
+# 20. SAVE MODEL ARTIFACTS
+# =====================================================
+
+# 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
+from sklearn.model_selection import cross_val_predict
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+y_train_prob_cv = cross_val_predict(
+    pipeline, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
+)[:, 1]
+
+# 2. Find best threshold dynamically on the OOF training predictions to prevent leakage
+thresholds = np.arange(0.1, 0.91, 0.05)
+best_threshold = 0.5
+best_f1 = 0
+
+for t in thresholds:
+    y_pred_t = (y_train_prob_cv >= t).astype(int)
+    f1 = f1_score(y_train, y_pred_t, zero_division=0)
+    if f1 > best_f1:
+        best_f1 = f1
+        best_threshold = t
+
+best_threshold = float(round(best_threshold, 2))
+print("Best threshold found on CV:", best_threshold)
+
+# 3. Compute train_metrics purely on the cross_val predictions at the BEST threshold
+y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred_cv)),
+    "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
+}
+
+# 4. Predict on absolute hold-out test set
+y_prob = pipeline.predict_proba(X_test)[:, 1]
+y_pred = (y_prob >= best_threshold).astype(int)
+
+metrics = {
+    "accuracy": float(accuracy_score(y_test, y_pred)),
+    "precision": float(precision_score(y_test, y_pred, zero_division=0)),
+    "recall": float(recall_score(y_test, y_pred, zero_division=0)),
+    "f1": float(f1_score(y_test, y_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_test, y_prob))
+}
+
+report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
+cm = confusion_matrix(y_test, y_pred).tolist()
+
+metrics_payload = {
+    "metrics": metrics,
+    "classification_report": report,
+    "confusion_matrix": cm
+}
+
+from shared.model_artifacts import save_model_artifacts
+
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="ppd",
+    outcome_id="ppd",
+    algorithm="logisticregression",
+    label="Logistic Regression",
+    description="Logistic Regression classifier trained on postpartum depression data.",
+    target_column="EPDS Result",
+    feature_order=X.columns.tolist(),
+    categorical_features=categorical_cols,
+    metrics_payload=metrics_payload,
+    positive_label="Postpartum Depression",
+    negative_label="No Postpartum Depression",
+    threshold=best_threshold,
+    y_test=y_test,
+    y_prob=y_prob,
+    train_metrics=train_metrics,
 )
-
-plt.gca().invert_yaxis()
-
-plt.xlabel("Importance Score")
-plt.title("Top 10 Feature Importance - Extra Trees with SMOTE")
-
-plt.tight_layout()
-plt.show()

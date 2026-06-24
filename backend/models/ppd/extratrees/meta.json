@@ -17,8 +17,7 @@
     "Education Level",
     "Marital status",
     "Husband's education level",
-    "Occupation After Your Latest Childbirth",
-    "Recieved Support"
+    "Occupation After Your Latest Childbirth"
   ],
   "threshold": 0.1
 }

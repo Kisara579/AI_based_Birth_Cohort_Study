@@ -10,6 +10,30 @@
       "label": "ExtraTrees",
       "description": "Extra Trees classifier trained on postpartum depression data.",
       "trained": true
+    },
+    {
+      "algorithm": "bagginglr",
+      "label": "Bagging Logistic Regression",
+      "description": "Bagging Logistic Regression classifier trained on postpartum depression data.",
+      "trained": true
+    },
+    {
+      "algorithm": "equalsoftvoting(lr+xrt)",
+      "label": "Equal Soft Voting (LR+XRT)",
+      "description": "Equal Soft Voting classifier (Logistic Regression and Extra Trees) trained on postpartum depression data.",
+      "trained": true
+    },
+    {
+      "algorithm": "logisticregression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression classifier trained on postpartum depression data.",
+      "trained": true
+    },
+    {
+      "algorithm": "weightedsoftvoting(lr+xrt{3,1})",
+      "label": "Weighted Soft Voting (LR+XRT{3,1})",
+      "description": "Weighted Soft Voting classifier (Logistic Regression and Extra Trees with weight ratio 3:1) trained on postpartum depression data.",
+      "trained": true
     }
   ],
   "selection_details": {

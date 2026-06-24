@@ -73,7 +73,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                         {"name": "Marital status", "label": "Marital status", "type": "select", "required": True, "options": [{"value": "Married", "label": "Married"},{"value": "Divorced", "label": "Divorced"}]},
                         {"name": "Husband's education level", "label": "Husband's education level", "type": "select", "required": True, "options": [{"value": "Primary school", "label": "Primary school"},{"value": "High school", "label": "High school"},{"value": "College", "label": "College"},{"value": "University", "label": "University"}]},
                         {"name": "Occupation After Your Latest Childbirth", "label": "Occupation", "type": "select", "required": True, "options": [{"value": "Housewife", "label": "Housewife"},{"value": "Student", "label": "Student"},{"value": "Teacher", "label": "Teacher"},{"value": "Doctor", "label": "Doctor"},{"value": "Service", "label": "Service"},{"value": "Business", "label": "Business"},{"value": "Other", "label": "Other"}]},
-                        {"name": "Recieved Support", "label": "Received support", "type": "select", "required": True, "options": [{"value": "Low", "label": "Low"},{"value": "Medium", "label": "Medium"},{"value": "High", "label": "High"}]},
+                        {"name": "Recieved Support", "label": "Received support", "type": "select", "required": True, "options": [{"value": "1", "label": "Low"},{"value": "2", "label": "Medium"},{"value": "3", "label": "High"}]},
                     ]
                 }
             ]

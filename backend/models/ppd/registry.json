@@ -3,44 +3,8 @@
   "outcome_id": "ppd",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "bagginglr",
+  "active_model": null,
   "models": [
-    {
-      "algorithm": "extratrees",
-      "label": "ExtraTrees",
-      "description": "Extra Trees classifier trained on postpartum depression data.",
-      "trained": true
-    },
-    {
-      "algorithm": "bagginglr",
-      "label": "Bagging Logistic Regression",
-      "description": "Bagging Logistic Regression classifier trained on postpartum depression data.",
-      "trained": true
-    },
-    {
-      "algorithm": "equalsoftvoting(lr+xrt)",
-      "label": "Equal Soft Voting (LR+XRT)",
-      "description": "Equal Soft Voting classifier (Logistic Regression and Extra Trees) trained on postpartum depression data.",
-      "trained": true
-    },
-    {
-      "algorithm": "logisticregression",
-      "label": "Logistic Regression",
-      "description": "Logistic Regression classifier trained on postpartum depression data.",
-      "trained": true
-    },
-    {
-      "algorithm": "weightedsoftvoting(lr+xrt{3,1})",
-      "label": "Weighted Soft Voting (LR+XRT{3,1})",
-      "description": "Weighted Soft Voting classifier (Logistic Regression and Extra Trees with weight ratio 3:1) trained on postpartum depression data.",
-      "trained": true
-    },
-    {
-      "algorithm": "Bagging Logistic Regression",
-      "label": "Bagging Logistic Regression",
-      "description": "Bagging Logistic Regression model for predicting postpartum depression using SMOTE for class imbalance.",
-      "trained": true
-    },
     {
       "algorithm": "bagging_logistic_regression",
       "label": "Bagging Logistic Regression",
@@ -54,12 +18,6 @@
       "trained": true
     },
     {
-      "algorithm": "extra_trees",
-      "label": "Extra Trees",
-      "description": "Extra Trees model for predicting postpartum depression using SMOTE for class imbalance.",
-      "trained": true
-    },
-    {
       "algorithm": "logistic_regression",
       "label": "Logistic Regression",
       "description": "Logistic Regression model for predicting postpartum depression using SMOTE for class imbalance.",
@@ -70,27 +28,12 @@
       "label": "Weighted Soft Voting(LR+XRT{3,1})",
       "description": "Weighted Soft Voting model (Logistic Regression + Extra Trees{3,1}) for predicting postpartum depression using SMOTE for class imbalance.",
       "trained": true
+    },
+    {
+      "algorithm": "extra_trees",
+      "label": "Extra Trees",
+      "description": "Extra Trees model for predicting postpartum depression using SMOTE for class imbalance.",
+      "trained": true
     }
-  ],
-  "selection_details": {
-    "method": "composite_with_safety_gate_and_generalization_preference",
-    "severity_priority": [
-      "good",
-      "warning"
-    ],
-    "blocked_severities": [
-      "critical",
-      "danger"
-    ],
-    "evaluated_models": 5,
-    "blocked_models": [],
-    "selected": {
-      "algorithm": "bagginglr",
-      "selection_metric": "f1",
-      "selection_metric_value": 0.80597,
-      "composite_score": 0.854021,
-      "severity": "good",
-      "status": "Well Generalized"
-    }
-  }
+  ]
 }

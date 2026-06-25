@@ -233,7 +233,7 @@ print(classification_report(y_test, y_test_pred, zero_division=0))
 # 16. CONFUSION MATRIX
 # =====================================================
 
-cm = confusion_matrix(y_test, y_test_pred)
+# cm = confusion_matrix(y_test, y_test_pred)
 
 # ConfusionMatrixDisplay(cm).plot()
 # plt.title("Confusion Matrix - Bagging Logistic Regression")
@@ -285,41 +285,19 @@ feature_importance_df = pd.DataFrame({
 # plt.show()
 
 
-# =====================================================
-# 20. SAVE MODEL ARTIFACTS
-# =====================================================
 
-# 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
-from sklearn.model_selection import cross_val_predict
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-y_train_prob_cv = cross_val_predict(
-    pipeline, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
-)[:, 1]
-
-# 2. Find best threshold dynamically on the OOF training predictions to prevent leakage
-thresholds = np.arange(0.1, 0.91, 0.05)
-best_threshold = 0.5
-best_f1 = 0
-
-for t in thresholds:
-    y_pred_t = (y_train_prob_cv >= t).astype(int)
-    f1 = f1_score(y_train, y_pred_t, zero_division=0)
-    if f1 > best_f1:
-        best_f1 = f1
-        best_threshold = t
-
-best_threshold = float(round(best_threshold, 2))
+best_threshold = float(round(threshold, 2))
 print("Best threshold found on CV:", best_threshold)
 
 # 3. Compute train_metrics purely on the cross_val predictions at the BEST threshold
-y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
+y_train_pred_cv = (y_train_prob >= best_threshold).astype(int)
 
 train_metrics = {
     "accuracy": float(accuracy_score(y_train, y_train_pred_cv)),
     "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
     "recall": float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
     "f1": float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
-    "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob)),
 }
 
 # 4. Predict on absolute hold-out test set
@@ -349,18 +327,17 @@ save_model_artifacts(
     pipeline=pipeline,
     outcome="ppd",
     outcome_id="ppd",
-    algorithm="bagginglr",
+    algorithm="bagging_logistic_regression",
     label="Bagging Logistic Regression",
-    description="Bagging Logistic Regression classifier trained on postpartum depression data.",
-    target_column="EPDS Result",
+    description="Bagging Logistic Regression model for predicting postpartum depression using SMOTE for class imbalance.",
+    target_column="postpartum_depression",
     feature_order=X.columns.tolist(),
     categorical_features=categorical_cols,
     metrics_payload=metrics_payload,
-    positive_label="Postpartum Depression",
-    negative_label="No Postpartum Depression",
+    positive_label="postpartum_depression (EPDS Result = 1)",
+    negative_label="postpartum_depression (EPDS Result = 0)",
     threshold=best_threshold,
     y_test=y_test,
     y_prob=y_prob,
     train_metrics=train_metrics,
 )
-

@@ -1,10 +1,10 @@
 {
   "outcome": "ppd",
   "outcome_id": "ppd",
-  "algorithm": "logisticregression",
-  "target_column": "EPDS Result",
-  "positive_label": "Postpartum Depression",
-  "negative_label": "No Postpartum Depression",
+  "algorithm": "weighted_soft_voting(logistic_regression+extra_trees{3,1})",
+  "target_column": "postpartum_depression",
+  "positive_label": "postpartum_depression (EPDS Result = 1)",
+  "negative_label": "postpartum_depression (EPDS Result = 0)",
   "feature_order": [
     "Age",
     "Education Level",
@@ -19,5 +19,5 @@
     "Husband's education level",
     "Occupation After Your Latest Childbirth"
   ],
-  "threshold": 0.1
+  "threshold": 0.4
 }

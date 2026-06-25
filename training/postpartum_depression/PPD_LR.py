@@ -8,8 +8,6 @@ if str(PROJECT_ROOT) not in sys.path:
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
-import sys
 
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -22,7 +20,7 @@ from sklearn.metrics import (
     roc_auc_score, RocCurveDisplay
 )
 
-from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.linear_model import LogisticRegression
 
 from imblearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
@@ -32,16 +30,7 @@ from imblearn.over_sampling import SMOTE
 # 1. LOAD DATASET
 # =====================================================
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_PATH = BASE_DIR / "AI_based_Birth_Cohort_Study" / "data" / "postpartum_depression" / "Processed" / "ppd.csv"
-
-if not DATA_PATH.exists():
-    raise FileNotFoundError(
-        f"Could not find dataset at {DATA_PATH}.\n"
-        "Make sure you run this script from the Desktop or update the path to the data location."
-    )
-
-df = pd.read_csv(DATA_PATH)
+df = pd.read_csv("data/postpartum_depression/Processed/ppd.csv")
 df.columns = df.columns.str.strip()
 
 
@@ -82,8 +71,7 @@ y = df["EPDS Result"].astype(int)
 # =====================================================
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
+    X, y,
     test_size=0.2,
     random_state=42,
     stratify=y
@@ -124,14 +112,12 @@ preprocessor = ColumnTransformer(
 
 
 # =====================================================
-# 8. EXTRA TREES MODEL
+# 8. LOGISTIC REGRESSION MODEL
 # =====================================================
 
-model = ExtraTreesClassifier(
-    n_estimators=300,
-    max_depth=10,
-    min_samples_split=5,
-    min_samples_leaf=2,
+model = LogisticRegression(
+    C=0.5,
+    max_iter=2000,
     random_state=42
 )
 
@@ -173,7 +159,6 @@ y_test_pred = (y_test_prob >= threshold).astype(int)
 
 training_accuracy = accuracy_score(y_train, y_train_pred)
 testing_accuracy = accuracy_score(y_test, y_test_pred)
-
 accuracy_difference = training_accuracy - testing_accuracy
 
 if accuracy_difference > 0.10:
@@ -189,36 +174,14 @@ else:
 # =====================================================
 
 accuracy = testing_accuracy
-
-precision = precision_score(
-    y_test,
-    y_test_pred,
-    pos_label=1,
-    zero_division=0
-)
-
-recall = recall_score(
-    y_test,
-    y_test_pred,
-    pos_label=1,
-    zero_division=0
-)
-
-f1 = f1_score(
-    y_test,
-    y_test_pred,
-    pos_label=1,
-    zero_division=0
-)
-
-roc_auc = roc_auc_score(
-    y_test,
-    y_test_prob
-)
+precision = precision_score(y_test, y_test_pred, pos_label=1, zero_division=0)
+recall = recall_score(y_test, y_test_pred, pos_label=1, zero_division=0)
+f1 = f1_score(y_test, y_test_pred, pos_label=1, zero_division=0)
+roc_auc = roc_auc_score(y_test, y_test_prob)
 
 
 # =====================================================
-# 14. CROSS VALIDATION
+# 14. 5-FOLD CROSS VALIDATION
 # =====================================================
 
 skf = StratifiedKFold(
@@ -235,38 +198,23 @@ cv_accuracy = cross_val_score(
     scoring="accuracy"
 )
 
-cv_roc_auc = cross_val_score(
-    pipeline,
-    X,
-    y,
-    cv=skf,
-    scoring="roc_auc"
-)
-
 
 # =====================================================
 # 15. PRINT RESULTS
 # =====================================================
 
-print("\n========== EXTRA TREES RESULTS WITH SMOTE ==========")
-
+print("\n========== LOGISTIC REGRESSION RESULTS WITH SMOTE ==========")
 print(f"Threshold           : {threshold}")
 print(f"Training Accuracy   : {training_accuracy:.4f}")
 print(f"Testing Accuracy    : {testing_accuracy:.4f}")
 print(f"Accuracy Difference : {accuracy_difference:.4f}")
-
 print(f"Accuracy            : {accuracy:.4f}")
 print(f"Precision           : {precision:.4f}")
 print(f"Recall              : {recall:.4f}")
 print(f"F1 Score            : {f1:.4f}")
 print(f"ROC AUC             : {roc_auc:.4f}")
-
 print(f"CV Accuracy Scores  : {cv_accuracy}")
 print(f"Mean CV Accuracy    : {np.mean(cv_accuracy):.4f}")
-
-print(f"CV ROC AUC Scores   : {cv_roc_auc}")
-print(f"Mean CV ROC AUC     : {np.mean(cv_roc_auc):.4f}")
-
 print(f"Overfitting Status  : {overfitting_status}")
 
 print("\nClassification Report:\n")
@@ -280,7 +228,7 @@ print(classification_report(y_test, y_test_pred, zero_division=0))
 cm = confusion_matrix(y_test, y_test_pred)
 
 # ConfusionMatrixDisplay(cm).plot()
-# plt.title("Confusion Matrix - Extra Trees with SMOTE")
+# plt.title("Confusion Matrix - Logistic Regression with SMOTE")
 # plt.show()
 
 
@@ -289,7 +237,7 @@ cm = confusion_matrix(y_test, y_test_pred)
 # =====================================================
 
 # RocCurveDisplay.from_predictions(y_test, y_test_prob)
-# plt.title("ROC Curve - Extra Trees with SMOTE")
+# plt.title("ROC Curve - Logistic Regression with SMOTE")
 # plt.show()
 
 
@@ -298,15 +246,14 @@ cm = confusion_matrix(y_test, y_test_pred)
 # =====================================================
 
 feature_names = pipeline.named_steps["preprocess"].get_feature_names_out()
-
-importances = pipeline.named_steps["model"].feature_importances_
+coefficients = pipeline.named_steps["model"].coef_[0]
 
 feature_importance_df = pd.DataFrame({
     "Feature": feature_names,
-    "Importance": importances
+    "Importance": np.abs(coefficients)
 }).sort_values(by="Importance", ascending=False)
 
-print("\nFeature Importance:\n")
+print("\nFeature Importance Based on Absolute Coefficients:\n")
 print(feature_importance_df.to_string(index=False))
 
 
@@ -318,55 +265,26 @@ print(feature_importance_df.to_string(index=False))
 
 # top_features = feature_importance_df.head(10)
 
-# plt.barh(
-#     top_features["Feature"],
-#     top_features["Importance"]
-# )
-
+# plt.barh(top_features["Feature"], top_features["Importance"])
 # plt.gca().invert_yaxis()
-
-# plt.xlabel("Importance Score")
-# plt.title("Top 10 Feature Importance - Extra Trees with SMOTE")
-
+# plt.xlabel("Absolute Coefficient Value")
+# plt.title("Top 10 Feature Importance - Logistic Regression with SMOTE")
 # plt.tight_layout()
 # plt.show()
 
 
-# =====================================================
-# 20. SAVE MODEL ARTIFACTS
-# =====================================================
-
-# 1. Use 5-fold cross_val_predict to get Out-of-Fold probabilities safely
-from sklearn.model_selection import cross_val_predict
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-y_train_prob_cv = cross_val_predict(
-    pipeline, X_train, y_train, cv=cv, method='predict_proba', n_jobs=-1
-)[:, 1]
-
-# 2. Find best threshold dynamically on the OOF training predictions to prevent leakage
-thresholds = np.arange(0.1, 0.91, 0.05)
-best_threshold = 0.5
-best_f1 = 0
-
-for t in thresholds:
-    y_pred_t = (y_train_prob_cv >= t).astype(int)
-    f1 = f1_score(y_train, y_pred_t, zero_division=0)
-    if f1 > best_f1:
-        best_f1 = f1
-        best_threshold = t
-
-best_threshold = float(round(best_threshold, 2))
+best_threshold = float(round(threshold, 2))
 print("Best threshold found on CV:", best_threshold)
 
 # 3. Compute train_metrics purely on the cross_val predictions at the BEST threshold
-y_train_pred_cv = (y_train_prob_cv >= best_threshold).astype(int)
+y_train_pred_cv = (y_train_prob >= best_threshold).astype(int)
 
 train_metrics = {
     "accuracy": float(accuracy_score(y_train, y_train_pred_cv)),
     "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
     "recall": float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
     "f1": float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
-    "roc_auc": float(roc_auc_score(y_train, y_train_prob_cv)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob)),
 }
 
 # 4. Predict on absolute hold-out test set
@@ -396,15 +314,15 @@ save_model_artifacts(
     pipeline=pipeline,
     outcome="ppd",
     outcome_id="ppd",
-    algorithm="logisticregression",
+    algorithm="logistic_regression",
     label="Logistic Regression",
-    description="Logistic Regression classifier trained on postpartum depression data.",
-    target_column="EPDS Result",
+    description="Logistic Regression model for predicting postpartum depression using SMOTE for class imbalance.",
+    target_column="postpartum_depression",
     feature_order=X.columns.tolist(),
     categorical_features=categorical_cols,
     metrics_payload=metrics_payload,
-    positive_label="Postpartum Depression",
-    negative_label="No Postpartum Depression",
+    positive_label="postpartum_depression (EPDS Result = 1)",
+    negative_label="postpartum_depression (EPDS Result = 0)",
     threshold=best_threshold,
     y_test=y_test,
     y_prob=y_prob,

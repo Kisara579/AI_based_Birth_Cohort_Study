@@ -1,46 +1,46 @@
 {
   "metrics": {
-    "accuracy": 0.675,
-    "precision": 0.675,
-    "recall": 1.0,
-    "f1": 0.8059701492537313,
+    "accuracy": 0.70625,
+    "precision": 0.725925925925926,
+    "recall": 0.9074074074074074,
+    "f1": 0.8065843621399177,
     "roc_auc": 0.6073717948717948
   },
   "classification_report": {
     "0": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
+      "precision": 0.6,
+      "recall": 0.28846153846153844,
+      "f1-score": 0.38961038961038963,
       "support": 52.0
     },
     "1": {
-      "precision": 0.675,
-      "recall": 1.0,
-      "f1-score": 0.8059701492537313,
+      "precision": 0.725925925925926,
+      "recall": 0.9074074074074074,
+      "f1-score": 0.8065843621399177,
       "support": 108.0
     },
-    "accuracy": 0.675,
+    "accuracy": 0.70625,
     "macro avg": {
-      "precision": 0.3375,
-      "recall": 0.5,
-      "f1-score": 0.40298507462686567,
+      "precision": 0.662962962962963,
+      "recall": 0.5979344729344729,
+      "f1-score": 0.5980973758751537,
       "support": 160.0
     },
     "weighted avg": {
-      "precision": 0.45562500000000006,
-      "recall": 0.675,
-      "f1-score": 0.5440298507462686,
+      "precision": 0.685,
+      "recall": 0.70625,
+      "f1-score": 0.671067821067821,
       "support": 160.0
     }
   },
   "confusion_matrix": [
     [
-      0,
-      52
+      15,
+      37
     ],
     [
-      0,
-      108
+      10,
+      98
     ]
   ],
   "roc_curve": {
@@ -662,28 +662,28 @@
   },
   "overfitting_analysis": {
     "train_metrics": {
-      "accuracy": 0.675,
-      "precision": 0.675,
-      "recall": 1.0,
-      "f1": 0.8059701492537313,
-      "roc_auc": 0.5848190438034188
+      "accuracy": 0.6953125,
+      "precision": 0.724007561436673,
+      "recall": 0.8865740740740741,
+      "f1": 0.7970863683662851,
+      "roc_auc": 0.6504462695868947
     },
     "test_metrics": {
-      "accuracy": 0.675,
-      "precision": 0.675,
-      "recall": 1.0,
-      "f1": 0.8059701492537313,
+      "accuracy": 0.70625,
+      "precision": 0.725925925925926,
+      "recall": 0.9074074074074074,
+      "f1": 0.8065843621399177,
       "roc_auc": 0.6073717948717948
     },
     "gaps": {
-      "accuracy": 0.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "roc_auc": -0.0226
+      "accuracy": -0.0109,
+      "precision": -0.0019,
+      "recall": -0.0208,
+      "f1": -0.0095,
+      "roc_auc": 0.0431
     },
-    "status": "Well Generalized",
-    "severity": "good",
-    "avg_gap": 0.0
+    "status": "Mild Overfitting",
+    "severity": "warning",
+    "avg_gap": -0.0152
   }
 }

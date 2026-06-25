@@ -3,7 +3,7 @@
   "outcome_id": "ppd",
   "selection_mode": "auto",
   "selection_metric": "f1",
-  "active_model": "extratrees",
+  "active_model": "bagginglr",
   "models": [
     {
       "algorithm": "extratrees",
@@ -46,15 +46,15 @@
       "critical",
       "danger"
     ],
-    "evaluated_models": 1,
+    "evaluated_models": 5,
     "blocked_models": [],
     "selected": {
-      "algorithm": "extratrees",
+      "algorithm": "bagginglr",
       "selection_metric": "f1",
-      "selection_metric_value": 0.776,
-      "composite_score": 0.786218,
-      "severity": "warning",
-      "status": "Mild Overfitting"
+      "selection_metric_value": 0.80597,
+      "composite_score": 0.854021,
+      "severity": "good",
+      "status": "Well Generalized"
     }
   }
 }

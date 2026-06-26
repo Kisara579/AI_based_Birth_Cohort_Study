@@ -322,28 +322,27 @@ export default function About() {
       linkedin: "https://linkedin.com",
     },
   ];
-
   const overfittingReferences = [
     {
-      title: "A Study of Cross-Validation and Bootstrap for Accuracy Estimation and Model Selection",
-      authors: "Kohavi, R.",
-      year: "1995",
-      journal: "International Joint Conference on Artificial Intelligence (IJCAI)",
-      link: "https://dl.acm.org/doi/10.5555/1625855.1625980"
+      title: "A Guide to Cross-Validation for Artificial Intelligence in Medical Imaging",
+      authors: "Bradshaw, T. J., Huemann, Z., Hu, J., & Rahmim, A.",
+      year: "2023",
+      journal: "Radiology: Artificial Intelligence",
+      link: "https://doi.org/10.1148/ryai.220232"
     },
     {
-      title: "The Problem of Overfitting",
-      authors: "Hawkins, D. M.",
-      year: "2004",
-      journal: "Journal of Chemical Information and Computer Sciences",
-      link: "https://pubs.acs.org/doi/10.1021/ci034247d"
+      title: "Twelve key challenges in medical machine learning and solutions",
+      authors: "Ellis, R. J., Sander, R. M., & Limon, A.",
+      year: "2022",
+      journal: "Intelligence-Based Medicine",
+      link: "https://www.sciencedirect.com/science/article/pii/S2666521222000217"
     },
     {
-      title: "Approximate Statistical Tests for Comparing Supervised Classification Learning Algorithms",
-      authors: "Dietterich, T. G.",
-      year: "1998",
-      journal: "Neural Computation",
-      link: "https://ieeexplore.ieee.org/document/6790518"
+      title: "Machine learning for medical imaging: methodological failures and recommendations for the future",
+      authors: "Varoquaux, G., & Cheplygina, V.",
+      year: "2022",
+      journal: "npj Digital Medicine",
+      link: "https://www.nature.com/articles/s41746-022-00592-y"
     }
   ];
 
@@ -640,19 +639,26 @@ export default function About() {
               </h3>
               <button className="modalCloseBtn" onClick={closeReferences}>&times;</button>
             </div>
-            <div className="modalBody">
+             <div className="modalBody">
               {(activeReferences === "overfitting" ? overfittingReferences : selectionReferences).map((ref, idx) => (
-                <div key={idx} className="refItem">
-                  <div className="refCitation">
-                    <strong>{ref.title}</strong>
-                    <p className="refAuthors">{ref.authors} ({ref.year}). <em>{ref.journal}</em>.</p>
+                <div key={idx} className="refItem" style={{flexDirection: 'column', alignItems: 'stretch'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px'}}>
+                    <div className="refCitation">
+                      <strong>{ref.title}</strong>
+                      <p className="refAuthors">{ref.authors} ({ref.year}). <em>{ref.journal}</em>.</p>
+                    </div>
+                    <a href={ref.link} target="_blank" rel="noopener noreferrer" className="refLinkBtn">
+                      View Paper
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft: '6px'}}>
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+                      </svg>
+                    </a>
                   </div>
-                  <a href={ref.link} target="_blank" rel="noopener noreferrer" className="refLinkBtn">
-                    View Paper
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft: '6px'}}>
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-                    </svg>
-                  </a>
+                  {ref.evidence && (
+                    <div className="refEvidence">
+                      <strong>Research Evidence:</strong> {ref.evidence}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -709,3 +709,82 @@ body[data-theme="light"] .methodCard:hover {
   line-height: 1.6;
   margin: 0;
 }
+
+.modalList {
+  margin: 8px 0 16px 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.modalList li {
+  margin-bottom: 8px;
+}
+
+.modalList li:last-child {
+  margin-bottom: 0;
+}
+
+.evidenceCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  margin-top: 10px;
+}
+
+.evidenceCard:hover {
+  border-color: var(--border2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.evidenceCard:last-child {
+  margin-bottom: 0;
+}
+
+.evidenceTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 4px 0;
+}
+
+.evidenceJournal {
+  font-size: 12px;
+  color: var(--accent);
+  margin: 0 0 10px 0;
+}
+
+.evidenceText {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.evidenceLink {
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.evidenceLink a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.evidenceLink a:hover {
+  text-decoration: underline;
+}
+
+.refEvidence {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.015);
+  border-left: 2px solid var(--accent);
+  padding: 6px 12px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}

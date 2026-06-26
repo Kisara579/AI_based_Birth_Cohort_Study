@@ -23,31 +23,32 @@ def _compute_overfitting_analysis(train_metrics, test_metrics):
         test_val = float(test_metrics.get(key, 0.0))
         analysis["gaps"][key] = round(train_val - test_val, 4)
 
-    f1_gap = analysis["gaps"].get("f1", 0.0)
-    recall_gap = analysis["gaps"].get("recall", 0.0)
-    avg_gap = (f1_gap + recall_gap) / 2
+    gaps = analysis["gaps"]
+    max_gap = max(gaps.get(key, 0.0) for key in METRIC_KEYS)
+    min_gap = min(gaps.get(key, 0.0) for key in METRIC_KEYS)
+    avg_gap = sum(gaps.get(key, 0.0) for key in METRIC_KEYS) / len(METRIC_KEYS)
 
-    # Medical + imbalance focus: positive F1/Recall train-test gaps are most concerning.
-    if f1_gap > 0.15 or recall_gap > 0.18:
+    # Overfitting check based on the 5% (0.05) threshold across all metrics:
+    if max_gap > 0.10:
         status = "Severe Overfitting"
         severity = "critical"
-        note = "Very large train-test gap; high risk of poor minority-class recall"
-    elif f1_gap > 0.08 or recall_gap > 0.10:
+        note = "Train-to-validation gap exceeds 10% on one or more metrics"
+    elif max_gap > 0.05:
         status = "Overfitting"
         severity = "danger"
-        note = "Large train-test gap, with potential false-negative risk"
-    elif f1_gap < -0.03 and recall_gap < -0.03:
+        note = "Train-to-validation gap exceeds the 5% threshold on one or more metrics"
+    elif min_gap < -0.05:
         status = "Possible Underfitting/Split Instability"
         severity = "warning"
-        note = "Test metrics exceed train metrics; check data split stability"
-    elif 0 <= f1_gap <= 0.03 and -0.03 <= recall_gap <= 0.05:
+        note = "Validation performance exceeds train performance by more than 5% on one or more metrics"
+    elif max_gap <= 0.03 and min_gap >= -0.03:
         status = "Well Generalized"
         severity = "good"
-        note = "Small F1/Recall gap between train and test"
+        note = "Small gaps (within 3%) across all evaluation metrics"
     else:
         status = "Mild Overfitting"
         severity = "warning"
-        note = "Generalization gap is present but moderate"
+        note = "Generalization gap is present but remains under the 5% threshold across all metrics"
 
     analysis["status"] = status
     analysis["severity"] = severity

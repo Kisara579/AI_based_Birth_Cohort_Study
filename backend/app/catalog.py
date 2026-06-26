@@ -270,8 +270,6 @@ def select_best_model(outcome: str):
     if registry.get("selection_mode") != "auto":
         return registry.get("active_model")
 
-    metric_name = registry.get("selection_metric", "f1")
-
     best_model = None
     best_rank = None
     best_context: Dict[str, Any] = {}
@@ -291,12 +289,6 @@ def select_best_model(outcome: str):
 
         metrics_data = json.loads(metrics_path.read_text())
         metrics = metrics_data.get("metrics", {})
-        score = metrics.get(metric_name)
-
-        if score is None:
-            continue
-
-        primary_score = _to_float(score)
 
         overfitting = metrics_data.get("overfitting_analysis", {})
         severity = overfitting.get("severity", "good")
@@ -308,22 +300,28 @@ def select_best_model(outcome: str):
             })
             continue
 
-        composite_score = _compute_selection_score(metrics, severity)
-        gaps = overfitting.get("gaps", {})
-        recall_gap_pos = max(_to_float(gaps.get("recall", 0.0)), 0.0)
-        f1_gap_pos = max(_to_float(gaps.get("f1", 0.0)), 0.0)
+        # Clinical priority metric hierarchy: 
+        # 1. Recall (Sensitivity)
+        # 2. F1-score
+        # 3. ROC-AUC
+        # 4. Precision
+        # 5. Accuracy
+        recall = _to_float(metrics.get("recall", 0.0))
+        f1 = _to_float(metrics.get("f1", 0.0))
+        roc_auc = _to_float(metrics.get("roc_auc", 0.0))
+        precision = _to_float(metrics.get("precision", 0.0))
+        accuracy = _to_float(metrics.get("accuracy", 0.0))
 
+        # We also prefer models that are well-generalized (good > warning)
         severity_rank = SEVERITY_RANK.get(severity, 0)
 
-        # Tie-breaker order: generalization severity > configured metric > composite > recall > smaller positive gaps > precision.
         rank = (
             severity_rank,
-            round(primary_score, 6),
-            round(composite_score, 6),
-            round(_to_float(metrics.get("recall", 0.0)), 6),
-            round(-recall_gap_pos, 6),
-            round(-f1_gap_pos, 6),
-            round(_to_float(metrics.get("precision", 0.0)), 6),
+            round(recall, 6),
+            round(f1, 6),
+            round(roc_auc, 6),
+            round(precision, 6),
+            round(accuracy, 6),
             algo,
         )
 
@@ -333,9 +331,12 @@ def select_best_model(outcome: str):
             best_model = algo
             best_context = {
                 "algorithm": algo,
-                "selection_metric": metric_name,
-                "selection_metric_value": round(primary_score, 6),
-                "composite_score": round(composite_score, 6),
+                "selection_metric": "recall",
+                "selection_metric_value": round(recall, 6),
+                "f1": round(f1, 6),
+                "roc_auc": round(roc_auc, 6),
+                "precision": round(precision, 6),
+                "accuracy": round(accuracy, 6),
                 "severity": severity,
                 "status": overfitting.get("status", "Unknown"),
             }
@@ -347,8 +348,9 @@ def select_best_model(outcome: str):
 
     # update registry
     registry["active_model"] = best_model
+    registry["selection_metric"] = "recall"
     registry["selection_details"] = {
-        "method": "composite_with_safety_gate_and_generalization_preference",
+        "method": "clinical_priority_hierarchy_with_safety_gate",
         "severity_priority": ["good", "warning"],
         "blocked_severities": sorted(BLOCKED_SEVERITIES),
         "evaluated_models": evaluated,

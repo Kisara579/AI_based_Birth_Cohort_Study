@@ -272,6 +272,93 @@
   height: 15px;
 }
 
+.metricPriorityContainer {
+  margin-top: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.priorityTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin: 0 0 10px 0;
+}
+
+.priorityTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.priorityTable th {
+  padding: 8px 12px;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.priorityTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.priorityTable tr:last-child td {
+  border-bottom: none;
+}
+
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.priorityBadge.badge1 {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.priorityBadge.badge2 {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+}
+
+.priorityBadge.badge3 {
+  background: rgba(96, 165, 250, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: var(--accent);
+}
+
+.priorityBadge.badge4 {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.priorityBadge.badge5 {
+  background: rgba(107, 114, 128, 0.15);
+  border: 1px solid rgba(107, 114, 128, 0.3);
+  color: var(--muted);
+}
+
+body[data-theme="light"] .priorityTable td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 /* Modal Styling */
 .modalOverlay {
   position: fixed;
@@ -549,4 +636,76 @@ body[data-theme="light"] .methodCard:hover {
 @keyframes slideUp {
   from { transform: translateY(15px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+.methodCardActions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.priorityModalContent {
+  width: min(800px, calc(100% - 32px)) !important;
+}
+
+.modalIntroText {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.modalTableContainer {
+  margin-top: 0;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.metricSubtext {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.rationaleBrief {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.rationaleDetail {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.01);
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+  margin-top: 6px;
+}
+
+.modalDetailsSection {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  margin-top: 8px;
+}
+
+.detailsSubtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailsText {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
 }

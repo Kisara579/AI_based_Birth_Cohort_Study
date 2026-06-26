@@ -3,6 +3,7 @@ import "./About.css";
 
 export default function About() {
   const [activeReferences, setActiveReferences] = useState(null);
+  const [showPriorityModal, setShowPriorityModal] = useState(false);
 
   const openReferences = (sectionKey) => {
     setActiveReferences(sectionKey);
@@ -348,25 +349,32 @@ export default function About() {
 
   const selectionReferences = [
     {
-      title: "The Precision-Recall Plot Is More Informative than the ROC Plot when Evaluating Binary Classifiers on Imbalanced Datasets",
-      authors: "Saito, T., & Rehmsmeier, M.",
-      year: "2015",
-      journal: "PLOS ONE",
-      link: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118595"
+      title: "Prediction of high-risk pregnancy based on machine learning algorithms",
+      authors: "Pi, X., Wang, J., Chu, L., Zhang, G., & Zhang, W.",
+      year: "2025",
+      journal: "Scientific Reports",
+      link: "https://pmc.ncbi.nlm.nih.gov/articles/PMC12049423/#:~:text=Six%20machine%20learning%20algorithms%E2%80%94multilayer,employed%20to%20construct%20predictive%20models."
     },
     {
-      title: "Predicting Good Probabilities with Supervised Learning",
-      authors: "Niculescu-Mizil, A., & Caruana, R.",
-      year: "2005",
-      journal: "International Conference on Machine Learning (ICML)",
-      link: "https://dl.acm.org/doi/10.1145/1102351.1102430"
+      title: "Evaluation",
+      authors: "Simon, G. J., & Aliferis, C.",
+      year: "2024",
+      journal: "Artificial Intelligence and Machine Learning in Health Care and Medical Sciences: Best Practices and Pitfalls",
+      link: "https://www.ncbi.nlm.nih.gov/books/NBK610543/"
     },
     {
-      title: "Assessing the performance of prediction models: a framework for traditional and novel performance measures",
-      authors: "Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., & Kattan, M. W.",
-      year: "2010",
-      journal: "Epidemiology (Cambridge, Mass.)",
-      link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3575184/"
+      title: "Evaluation of machine learning algorithms for health and wellness applications: A tutorial",
+      authors: "Tohka, J., & van Gils, M.",
+      year: "2021",
+      journal: "Computers in Biology and Medicine",
+      link: "https://www.sciencedirect.com/science/article/pii/S0010482521001189"
+    },
+    {
+      title: "Decision Analytics and Machine Learning Model Selection for Healthcare Predictions",
+      authors: "Elsevier Research Consortium",
+      year: "2024",
+      journal: "Decision Analytics Journal",
+      link: "https://www.sciencedirect.com/science/article/pii/S2772662224001279"
     }
   ];
 
@@ -508,14 +516,24 @@ export default function About() {
             </div>
             <h3 className="methodTitle">Best Model Selection Framework</h3>
             <p className="methodText">
-              From the non-overfitted candidate algorithms, the best model is selected by evaluating clinical metrics. Because neonatal datasets are highly imbalanced, we prioritize PR-AUC and F1-scores over raw accuracy, and optimize Brier scores for probability calibration.
+              From the non-overfitted candidate algorithms, the best model is selected based on a structured clinical metric hierarchy. Because maternal and neonatal outcomes require minimizing false negatives, we prioritize Recall and balanced metrics over raw correctness.
             </p>
-            <button className="referenceBtn" onClick={() => openReferences("selection")}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btnIcon">
-                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              References
-            </button>
+            <div className="methodCardActions">
+              <button className="referenceBtn" onClick={() => setShowPriorityModal(true)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btnIcon">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                More Details
+              </button>
+              <button className="referenceBtn" onClick={() => openReferences("selection")}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btnIcon">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                References
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -637,6 +655,119 @@ export default function About() {
                   </a>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Priority Modal */}
+      {showPriorityModal && (
+        <div className="modalOverlay" onClick={() => setShowPriorityModal(false)}>
+          <div className="modalContent priorityModalContent" onClick={(e) => e.stopPropagation()}>
+            <div className="modalHeader">
+              <h3 className="modalTitle">Selection Metric Priority Hierarchy</h3>
+              <button className="modalCloseBtn" onClick={() => setShowPriorityModal(false)}>&times;</button>
+            </div>
+            <div className="modalBody">
+              <p className="modalIntroText">
+                To select the active predictive model, the development team uses a strict clinical metric hierarchy. This ensures that the selected model prioritizes minimizing high-risk clinical misses while maintaining optimal probability calibration and classification performance.
+              </p>
+              
+              <div className="metricPriorityContainer modalTableContainer">
+                <table className="priorityTable">
+                  <thead>
+                    <tr>
+                      <th>Priority</th>
+                      <th>Metric</th>
+                      <th>Clinical Rationale & Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span className="priorityBadge badge1">1</span></td>
+                      <td>
+                        <strong>Recall</strong>
+                        <div className="metricSubtext">(Sensitivity)</div>
+                      </td>
+                      <td>
+                        <div className="rationaleBrief">Missing a patient with the condition (false negative) has serious clinical consequences.</div>
+                        <div className="rationaleDetail">
+                          <strong>Formula:</strong> TP / (TP + FN)
+                          <br />
+                          <strong>Clinical Importance:</strong> In clinical prediction (e.g., preeclampsia, PPH, or NICU admission), failing to identify a patient at risk can delay critical preventative care. High recall ensures the system captures as many true positive cases as possible.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge2">2</span></td>
+                      <td>
+                        <strong>F1-score</strong>
+                        <div className="metricSubtext">(Harmonic Mean)</div>
+                      </td>
+                      <td>
+                        <div className="rationaleBrief">Balances Recall and Precision, especially useful when classes are imbalanced.</div>
+                        <div className="rationaleDetail">
+                          <strong>Formula:</strong> 2 &times; (Precision &times; Recall) / (Precision + Recall)
+                          <br />
+                          <strong>Clinical Importance:</strong> Adverse perinatal outcomes are relatively rare (high class imbalance). F1-score prevents selecting a model that achieves high recall simply by predicting everyone as high-risk, which would make the model clinically useless.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge3">3</span></td>
+                      <td>
+                        <strong>ROC-AUC</strong>
+                        <div className="metricSubtext">(Discrimination)</div>
+                      </td>
+                      <td>
+                        <div className="rationaleBrief">Measures the model's ability to distinguish between positive and negative cases across thresholds.</div>
+                        <div className="rationaleDetail">
+                          <strong>Definition:</strong> Area Under the Receiver Operating Characteristic curve.
+                          <br />
+                          <strong>Clinical Importance:</strong> Evaluates overall model discrimination power. A high ROC-AUC demonstrates that the risk scores assigned by the model are well-ordered (i.e. patients with adverse outcomes get higher scores than normal patients).
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge4">4</span></td>
+                      <td>
+                        <strong>Precision</strong>
+                        <div className="metricSubtext">(Positive Predictive Value)</div>
+                      </td>
+                      <td>
+                        <div className="rationaleBrief">Reduces false positive predictions.</div>
+                        <div className="rationaleDetail">
+                          <strong>Formula:</strong> TP / (TP + FP)
+                          <br />
+                          <strong>Clinical Importance:</strong> Keeping precision reasonable reduces "alarm fatigue" for clinical staff and avoids triggering unnecessary anxiety, screening procedures, or follow-ups for healthy families.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge5">5</span></td>
+                      <td>
+                        <strong>Accuracy</strong>
+                        <div className="metricSubtext">(Overall Correctness)</div>
+                      </td>
+                      <td>
+                        <div className="rationaleBrief">Overall correctness, but should not be the sole criterion.</div>
+                        <div className="rationaleDetail">
+                          <strong>Formula:</strong> (TP + TN) / (TP + TN + FP + FN)
+                          <br />
+                          <strong>Clinical Importance:</strong> On highly imbalanced data, accuracy is misleadingly high (e.g. 98% accuracy by predicting "no risk" everywhere). Thus, accuracy is only checked as a general baseline sanity metric.
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="modalDetailsSection">
+                <h4 className="detailsSubtitle">Generalization & Calibration Safeguards</h4>
+                <p className="detailsText">
+                  Before applying this priority rank, our automated pipeline first filters out models that exhibit signs of overfitting (where the train-to-validation metric gap exceeds 5%). Ties between models are resolved by selecting the one with the superior Brier score (measuring probability calibration) to ensure the output risk percentages are reliable.
+                </p>
+              </div>
             </div>
           </div>
         </div>

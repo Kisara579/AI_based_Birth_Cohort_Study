@@ -131,7 +131,7 @@ def save_model_artifacts(
             "outcome": outcome,
             "outcome_id": outcome_id,
             "selection_mode": "auto",
-            "selection_metric": "f1",
+            "selection_metric": "recall",
             "active_model": None,
             "models": [],
         }

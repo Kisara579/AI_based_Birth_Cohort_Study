@@ -1,0 +1,29 @@
+{
+  "outcome": "nicu",
+  "outcome_id": "nicu",
+  "algorithm": "softvotinglr_dt_rf_gb_svm_knn_xgb_lgbm",
+  "target_column": "NICU_admission",
+  "positive_label": "NICU (1)",
+  "negative_label": "No NICU (0)",
+  "feature_order": [
+    "Insulin_treatment_during_pregnancy",
+    "Pregnancy_complications_hypertensive_disorders",
+    "Pregnancy_complications_preterm_delivery",
+    "Abnormal_OGTT_results",
+    "Insulin_x_Preterm",
+    "Hypertension_x_OGTT",
+    "Insulin_x_Hypertension",
+    "Risk_score"
+  ],
+  "categorical_features": [
+    "Insulin_treatment_during_pregnancy",
+    "Pregnancy_complications_hypertensive_disorders",
+    "Pregnancy_complications_preterm_delivery",
+    "Abnormal_OGTT_results",
+    "Insulin_x_Preterm",
+    "Hypertension_x_OGTT",
+    "Insulin_x_Hypertension",
+    "Risk_score"
+  ],
+  "threshold": 0.22
+}

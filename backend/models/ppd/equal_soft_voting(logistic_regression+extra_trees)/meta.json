@@ -1,0 +1,23 @@
+{
+  "outcome": "ppd",
+  "outcome_id": "ppd",
+  "algorithm": "equal_soft_voting(logistic_regression+extra_trees)",
+  "target_column": "postpartum_depression",
+  "positive_label": "postpartum_depression (EPDS Result = 1)",
+  "negative_label": "postpartum_depression (EPDS Result = 0)",
+  "feature_order": [
+    "Age",
+    "Education Level",
+    "Marital status",
+    "Husband's education level",
+    "Occupation After Your Latest Childbirth",
+    "Recieved Support"
+  ],
+  "categorical_features": [
+    "Education Level",
+    "Marital status",
+    "Husband's education level",
+    "Occupation After Your Latest Childbirth"
+  ],
+  "threshold": 0.4
+}

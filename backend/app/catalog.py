@@ -72,8 +72,8 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                         {"name": "Education Level", "label": "Education level", "type": "select", "required": True, "options": [{"value": "Primary school", "label": "Primary school"},{"value": "High school", "label": "High school"},{"value": "College", "label": "College"},{"value": "University", "label": "University"}]},
                         {"name": "Marital status", "label": "Marital status", "type": "select", "required": True, "options": [{"value": "Married", "label": "Married"},{"value": "Divorced", "label": "Divorced"}]},
                         {"name": "Husband's education level", "label": "Husband's education level", "type": "select", "required": True, "options": [{"value": "Primary school", "label": "Primary school"},{"value": "High school", "label": "High school"},{"value": "College", "label": "College"},{"value": "University", "label": "University"}]},
-                        {"name": "Occupation After Your Latest Childbirth", "label": "Occupation", "type": "select", "required": True, "options": [{"value": "Housewife", "label": "Housewife"},{"value": "Student", "label": "Student"},{"value": "Teacher", "label": "Teacher"},{"value": "Doctor", "label": "Doctor"},{"value": "Service", "label": "Service"},{"value": "Business", "label": "Business"},{"value": "Other", "label": "Other"}]},
-                        {"name": "Recieved Support", "label": "Received support", "type": "select", "required": True, "options": [{"value": "Low", "label": "Low"},{"value": "Medium", "label": "Medium"},{"value": "High", "label": "High"}]},
+                        {"name": "Occupation After Your Latest Childbirth", "label": "Occupation After Latest Childbirth ", "type": "select", "required": True, "options": [{"value": "Housewife", "label": "Housewife"},{"value": "Student", "label": "Student"},{"value": "Teacher", "label": "Teacher"},{"value": "Doctor", "label": "Doctor"},{"value": "Service", "label": "Service"},{"value": "Business", "label": "Business"},{"value": "Other", "label": "Other"}]},
+                        {"name": "Recieved Support", "label": "Received support", "type": "select", "required": True, "options": [{"value": "1", "label": "Low"},{"value": "2", "label": "Medium"},{"value": "3", "label": "High"}]},
                     ]
                 }
             ]
@@ -139,7 +139,23 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "NICU",
         "description": "Predict probability of NICU admission.",
         "model_key": "nicu",
-        "schema": {"title": "NICU Inputs", "sections": []}
+        "schema": {
+            "title": "NICU Inputs", 
+            "sections": [
+                {
+                    "fields": [
+                        {"name": "Insulin_treatment_during_pregnancy", "label": "Insulin treatment during pregnancy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Pregnancy_complications_hypertensive_disorders", "label": "Hypertensive disorders during pregnancy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Pregnancy_complications_preterm_delivery", "label": "Preterm delivery complications", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Abnormal_OGTT_results", "label": "Abnormal OGTT results", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Insulin_x_Preterm", "label": "Insulin & Preterm Delivery", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Hypertension_x_OGTT", "label": "Hypertension & Abnormal OGTT", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Insulin_x_Hypertension", "label": "Insulin & Hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "Risk_score", "label": "Risk Score (0-4)", "type": "number", "min": 0, "max": 4, "required": True, "placeholder": "e.g., 2"}
+                    ]
+                }
+            ]
+        }
     },
 
     
@@ -149,7 +165,46 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "FP",
         "description": "Predict risk of feeding problems in newborns.",
         "model_key": "feeding",
-        "schema": {"title": "Feeding Problems Inputs", "sections": []}
+        "schema": {
+            "title": "Feeding Problems Inputs", 
+            "sections": [
+                {
+                    "fields":[
+                        {"name": "maternal_age", "label": "Maternal age (years)", "type": "number", "min": 20, "max": 53, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "maternal_education", "label": "Maternal education level", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Primary school"},
+                            {"value": 2, "label": "High school"},
+                            {"value": 3, "label": "College"},
+                            {"value": 4, "label": "Vocational / Associate"},
+                            {"value": 5, "label": "University (Undergraduate)"},
+                            {"value": 6, "label": "Postgraduate University"},
+                            {"value": 99, "label": "Unknown / Prefer not to say"}
+                        ]},
+                        {"name": "child_birthweight_kgs", "label": "Child birthweight (kg)", "type": "number", "min": 0.5, "max": 6.0, "required": True, "placeholder": "e.g., 3.2"},
+                        {"name": "child_medical_complications", "label": "Child medical complications at birth", "type": "select", "required": True, "options": [
+                            {"value": 2, "label": "No"},
+                            {"value": 1, "label": "Yes"}
+                        ]},
+                        {"name": "delivery_method", "label": "Delivery method", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Spontaneous Vaginal"},
+                            {"value": 2, "label": "Planned Cesarean"},
+                            {"value": 3, "label": "Emergency Cesarean"},
+                            {"value": 4, "label": "Instrumental Vaginal (Forceps/Vacuum)"},
+                            {"value": 5, "label": "Other"},
+                            {"value": 99, "label": "Unknown"}
+                        ]},
+                        {"name": "breastfeeding_duration_months", "label": "Breastfeeding duration (months)", "type": "number", "min": 0, "max": 82, "required": True, "placeholder": "e.g., 6"},
+                        {"name": "MH_postnatal_depression", "label": "Maternal postnatal depression", "type": "select", "required": True, "options": [
+                            {"value": 0, "label": "No"},
+                            {"value": 1, "label": "Yes"}
+                        ]},
+                        {"name": "MH_postnatal_anxiety", "label": "Maternal postnatal anxiety", "type": "select", "required": True, "options": [
+                            {"value": 0, "label": "No"},
+                            {"value": 1, "label": "Yes"}
+                        ]}
+                    ]
+                }
+            ]}
     }, 
 
 }
@@ -215,8 +270,6 @@ def select_best_model(outcome: str):
     if registry.get("selection_mode") != "auto":
         return registry.get("active_model")
 
-    metric_name = registry.get("selection_metric", "f1")
-
     best_model = None
     best_rank = None
     best_context: Dict[str, Any] = {}
@@ -236,12 +289,6 @@ def select_best_model(outcome: str):
 
         metrics_data = json.loads(metrics_path.read_text())
         metrics = metrics_data.get("metrics", {})
-        score = metrics.get(metric_name)
-
-        if score is None:
-            continue
-
-        primary_score = _to_float(score)
 
         overfitting = metrics_data.get("overfitting_analysis", {})
         severity = overfitting.get("severity", "good")
@@ -253,22 +300,28 @@ def select_best_model(outcome: str):
             })
             continue
 
-        composite_score = _compute_selection_score(metrics, severity)
-        gaps = overfitting.get("gaps", {})
-        recall_gap_pos = max(_to_float(gaps.get("recall", 0.0)), 0.0)
-        f1_gap_pos = max(_to_float(gaps.get("f1", 0.0)), 0.0)
+        # Clinical priority metric hierarchy: 
+        # 1. Recall (Sensitivity)
+        # 2. F1-score
+        # 3. ROC-AUC
+        # 4. Precision
+        # 5. Accuracy
+        recall = _to_float(metrics.get("recall", 0.0))
+        f1 = _to_float(metrics.get("f1", 0.0))
+        roc_auc = _to_float(metrics.get("roc_auc", 0.0))
+        precision = _to_float(metrics.get("precision", 0.0))
+        accuracy = _to_float(metrics.get("accuracy", 0.0))
 
+        # We also prefer models that are well-generalized (good > warning)
         severity_rank = SEVERITY_RANK.get(severity, 0)
 
-        # Tie-breaker order: generalization severity > configured metric > composite > recall > smaller positive gaps > precision.
         rank = (
             severity_rank,
-            round(primary_score, 6),
-            round(composite_score, 6),
-            round(_to_float(metrics.get("recall", 0.0)), 6),
-            round(-recall_gap_pos, 6),
-            round(-f1_gap_pos, 6),
-            round(_to_float(metrics.get("precision", 0.0)), 6),
+            round(recall, 6),
+            round(f1, 6),
+            round(roc_auc, 6),
+            round(precision, 6),
+            round(accuracy, 6),
             algo,
         )
 
@@ -278,9 +331,12 @@ def select_best_model(outcome: str):
             best_model = algo
             best_context = {
                 "algorithm": algo,
-                "selection_metric": metric_name,
-                "selection_metric_value": round(primary_score, 6),
-                "composite_score": round(composite_score, 6),
+                "selection_metric": "recall",
+                "selection_metric_value": round(recall, 6),
+                "f1": round(f1, 6),
+                "roc_auc": round(roc_auc, 6),
+                "precision": round(precision, 6),
+                "accuracy": round(accuracy, 6),
                 "severity": severity,
                 "status": overfitting.get("status", "Unknown"),
             }
@@ -292,8 +348,9 @@ def select_best_model(outcome: str):
 
     # update registry
     registry["active_model"] = best_model
+    registry["selection_metric"] = "recall"
     registry["selection_details"] = {
-        "method": "composite_with_safety_gate_and_generalization_preference",
+        "method": "clinical_priority_hierarchy_with_safety_gate",
         "severity_priority": ["good", "warning"],
         "blocked_severities": sorted(BLOCKED_SEVERITIES),
         "evaluated_models": evaluated,

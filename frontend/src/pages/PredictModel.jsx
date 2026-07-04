@@ -166,7 +166,7 @@ export default function PredictModel() {
 
       <Card
         title="Prediction Model"
-        subtitle="Best-performing algorithm selected by F1 score"
+        subtitle="Active model selected via clinical metric priority hierarchy (Recall > F1-score > ROC-AUC > Precision > Accuracy)"
         className="predictModelPanel"
       >
         <div className="predictModelInfo">

@@ -2,8 +2,8 @@
   "outcome": "lbw",
   "outcome_id": "lbw",
   "selection_mode": "auto",
-  "selection_metric": "f1",
-  "active_model": "gradientboosting",
+  "selection_metric": "recall",
+  "active_model": "logisticregression",
   "models": [
     {
       "algorithm": "logisticregression",
@@ -31,7 +31,7 @@
     }
   ],
   "selection_details": {
-    "method": "composite_with_safety_gate_and_generalization_preference",
+    "method": "clinical_priority_hierarchy_with_safety_gate",
     "severity_priority": [
       "good",
       "warning"
@@ -43,10 +43,13 @@
     "evaluated_models": 4,
     "blocked_models": [],
     "selected": {
-      "algorithm": "gradientboosting",
-      "selection_metric": "f1",
-      "selection_metric_value": 0.22469,
-      "composite_score": 0.34042,
+      "algorithm": "logisticregression",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.5181,
+      "f1": 0.163047,
+      "roc_auc": 0.557683,
+      "precision": 0.096747,
+      "accuracy": 0.564972,
       "severity": "good",
       "status": "Well Generalized"
     }

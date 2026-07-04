@@ -2,7 +2,7 @@
   "outcome": "feeding",
   "outcome_id": "feeding",
   "selection_mode": "auto",
-  "selection_metric": "f1",
+  "selection_metric": "recall",
   "active_model": "gradientboosting",
   "models": [
     {
@@ -85,7 +85,7 @@
     }
   ],
   "selection_details": {
-    "method": "composite_with_safety_gate_and_generalization_preference",
+    "method": "clinical_priority_hierarchy_with_safety_gate",
     "severity_priority": [
       "good",
       "warning"
@@ -98,9 +98,12 @@
     "blocked_models": [],
     "selected": {
       "algorithm": "gradientboosting",
-      "selection_metric": "f1",
-      "selection_metric_value": 0.978399,
-      "composite_score": 0.937058,
+      "selection_metric": "recall",
+      "selection_metric_value": 1.0,
+      "f1": 0.978399,
+      "roc_auc": 0.489381,
+      "precision": 0.957711,
+      "accuracy": 0.957711,
       "severity": "good",
       "status": "Well Generalized"
     }

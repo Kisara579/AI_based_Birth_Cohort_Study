@@ -2,8 +2,8 @@
   "outcome": "nicu",
   "outcome_id": "nicu",
   "selection_mode": "auto",
-  "selection_metric": "f1",
-  "active_model": "xgboost",
+  "selection_metric": "recall",
+  "active_model": "logisticregression",
   "models": [
     {
       "algorithm": "logisticregression",
@@ -67,7 +67,7 @@
     }
   ],
   "selection_details": {
-    "method": "composite_with_safety_gate_and_generalization_preference",
+    "method": "clinical_priority_hierarchy_with_safety_gate",
     "severity_priority": [
       "good",
       "warning"
@@ -90,12 +90,15 @@
       }
     ],
     "selected": {
-      "algorithm": "xgboost",
-      "selection_metric": "f1",
-      "selection_metric_value": 0.466292,
-      "composite_score": 0.671519,
+      "algorithm": "logisticregression",
+      "selection_metric": "recall",
+      "selection_metric_value": 1.0,
+      "f1": 0.135198,
+      "roc_auc": 0.873687,
+      "precision": 0.0725,
+      "accuracy": 0.0725,
       "severity": "warning",
-      "status": "Mild Overfitting"
+      "status": "Possible Underfitting/Split Instability"
     }
   }
 }

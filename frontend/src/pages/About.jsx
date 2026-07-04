@@ -4,6 +4,7 @@ import "./About.css";
 export default function About() {
   const [activeReferences, setActiveReferences] = useState(null);
   const [showPriorityModal, setShowPriorityModal] = useState(false);
+  const [showOverfitModal, setShowOverfitModal] = useState(false);
 
   const openReferences = (sectionKey) => {
     setActiveReferences(sectionKey);
@@ -499,12 +500,22 @@ export default function About() {
             <p className="methodText">
               To prevent models from memorizing training data, we employ Stratified 5-Fold Cross-Validation, ensuring consistent class ratios. We actively monitor learning curves to verify that the generalization gap between train and validation scores remains minimal.
             </p>
-            <button className="referenceBtn" onClick={() => openReferences("overfitting")}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btnIcon">
-                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              References
-            </button>
+            <div className="methodCardActions">
+              <button className="referenceBtn" onClick={() => setShowOverfitModal(true)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btnIcon">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                More Details
+              </button>
+              <button className="referenceBtn" onClick={() => openReferences("overfitting")}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btnIcon">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                References
+              </button>
+            </div>
           </div>
 
           <div className="card methodCard">
@@ -773,6 +784,84 @@ export default function About() {
                 <p className="detailsText">
                   Before applying this priority rank, our automated pipeline first filters out models that exhibit signs of overfitting (where the train-to-validation metric gap exceeds 5%). Ties between models are resolved by selecting the one with the superior Brier score (measuring probability calibration) to ensure the output risk percentages are reliable.
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Overfit Details Modal */}
+      {showOverfitModal && (
+        <div className="modalOverlay" onClick={() => setShowOverfitModal(false)}>
+          <div className="modalContent priorityModal" onClick={(e) => e.stopPropagation()}>
+            <div className="modalHeader">
+              <h3 className="modalTitle">Overfitting Categorization Rules</h3>
+              <button className="modalCloseBtn" onClick={() => setShowOverfitModal(false)}>
+                ✕
+              </button>
+            </div>
+            
+            <div className="modalBody">
+              <p className="modalIntro">
+                Models are strictly categorized based on their "Generalization Gap"—the difference between their training performance and validation performance.
+              </p>
+              
+              <div className="priorityTableContainer">
+                <table className="priorityTable">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Condition</th>
+                      <th>Meaning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span className="priorityBadge badge1" style={{backgroundColor: "rgba(16,185,129,0.15)", color: "#10b981"}}>Good</span></td>
+                      <td>Max Gap ≤ 3%</td>
+                      <td>
+                        <div className="rationaleDetail">
+                          <strong>Well Generalized:</strong> Model performs consistently on both seen and unseen data.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge2" style={{backgroundColor: "rgba(245,158,11,0.15)", color: "#f59e0b"}}>Warning</span></td>
+                      <td>Max Gap between 3% and 5%</td>
+                      <td>
+                        <div className="rationaleDetail">
+                          <strong>Mild Overfitting:</strong> Slight generalization gap but remains under the safety threshold.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge3" style={{backgroundColor: "rgba(239,68,68,0.15)", color: "#ef4444"}}>Danger</span></td>
+                      <td>Max Gap &gt; 5%</td>
+                      <td>
+                        <div className="rationaleDetail">
+                          <strong>Overfitting:</strong> The model has started to memorize the training data and is losing its ability to generalize.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge4" style={{backgroundColor: "rgba(220,38,38,0.25)", color: "#dc2626"}}>Critical</span></td>
+                      <td>Max Gap &gt; 10%</td>
+                      <td>
+                        <div className="rationaleDetail">
+                          <strong>Severe Overfitting:</strong> Very unstable model. Highly restricted from being selected as the active clinical model.
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span className="priorityBadge badge5" style={{backgroundColor: "rgba(168,85,247,0.15)", color: "#a855f7"}}>Warning</span></td>
+                      <td>Min Gap &lt; -5%</td>
+                      <td>
+                        <div className="rationaleDetail">
+                          <strong>Underfitting / Split Instability:</strong> Validation performance is suspiciously better than training, indicating potential data leakage or an unrepresentative validation split.
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

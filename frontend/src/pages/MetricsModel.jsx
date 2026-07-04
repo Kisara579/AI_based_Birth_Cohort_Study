@@ -367,11 +367,41 @@ export default function MetricsModel() {
     const validModels = modelsData.filter((m) => m.data?.metrics);
     if (validModels.length === 0) return null;
 
+    const SEVERITY_RANK = { good: 2, warning: 1 }; 
+
+    const getRank = (m) => {
+      const severity = m.data?.overfitting_analysis?.severity || "unknown";
+      const sRank = SEVERITY_RANK[severity] || 0;
+      const metrics = m.data.metrics;
+      
+      return [
+        sRank,
+        metrics.recall ?? 0,
+        metrics.f1 ?? 0,
+        metrics.roc_auc ?? 0,
+        metrics.precision ?? 0,
+        metrics.accuracy ?? 0
+      ];
+    };
+
+    const top5Models = [...validModels]
+      .sort((a, b) => {
+        const rankA = getRank(a);
+        const rankB = getRank(b);
+        for (let i = 0; i < rankA.length; i++) {
+          if (rankA[i] !== rankB[i]) {
+            return rankB[i] - rankA[i]; 
+          }
+        }
+        return 0;
+      })
+      .slice(0, 5);
+
     return {
-      labels: validModels.map((m) => m.label),
+      labels: top5Models.map((m) => m.label),
       datasets: METRIC_KEYS.map((key, i) => ({
         label: METRIC_LABELS[i],
-        data: validModels.map((m) => m.data.metrics[key] ?? 0),
+        data: top5Models.map((m) => m.data.metrics[key] ?? 0),
         backgroundColor: METRIC_COLORS[key].bg,
         borderColor: METRIC_COLORS[key].border,
         borderWidth: 1.5,
@@ -919,7 +949,7 @@ export default function MetricsModel() {
               <div className="chartPanel chartPanelFull">
                 <h4 className="chartTitle">
                   <span className="chartTitleIcon">||</span>
-                  Model Performance Comparison
+                  Top 5 Model Performance Comparison
                 </h4>
                 <div className="chartWrapAuto">
                   <Bar

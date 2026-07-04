@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import ApiStatusDot from "./ApiStatusDot.jsx";
+// import ApiStatusDot from "./ApiStatusDot.jsx";
 import { useEffect, useState } from "react";
 import "./Navbar.css";
 
@@ -50,7 +50,7 @@ export default function Navbar() {
             <line x1="10" y1="11" x2="14" y2="11" />
           </svg>
           <span className="brandText">AI Birth Cohort Study</span>
-          <ApiStatusDot />
+          {/* <ApiStatusDot /> */}
         </NavLink>
 
         <div className="navActions">

@@ -1056,8 +1056,7 @@ export default function MetricsModel() {
                               </div>
                             ) : (
                               <p className="noDataMsg">
-                                No feature importance data available. Re-train
-                                the model to generate this data.
+                                No feature importance data available. 
                               </p>
                             )}
                           </div>

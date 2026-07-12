@@ -1,0 +1,69 @@
+{
+  "outcome": "pd",
+  "outcome_id": "pd",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": null,
+  "models": [
+    {
+      "algorithm": "catboost_bagging",
+      "label": "CatBoost Bagging",
+      "description": "Bagged CatBoost ensemble for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "catboost_dt_lgbm_soft_voting",
+      "label": "CatBoost + Decision Tree + LightGBM Soft Voting",
+      "description": "Soft Voting ensemble (CatBoost + Decision Tree + LGBM) for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "catboost_dt_soft_voting",
+      "label": "CatBoost + Decision Tree Soft Voting",
+      "description": "Soft Voting ensemble (CatBoost + Decision Tree) for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "catboost",
+      "label": "CatBoost",
+      "description": "CatBoost classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "decision_tree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "lightgbm",
+      "label": "LightGBM",
+      "description": "LightGBM classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "linear_svm",
+      "label": "Linear SVM",
+      "description": "Calibrated Linear SVM for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Random Forest classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost classifier for premature delivery prediction.",
+      "trained": true
+    }
+  ]
+}

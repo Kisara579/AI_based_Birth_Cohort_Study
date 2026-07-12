@@ -3,7 +3,7 @@
   "outcome_id": "lbw",
   "selection_mode": "auto",
   "selection_metric": "recall",
-  "active_model": "lightgbm",
+  "active_model": "xgboost",
   "models": [
     {
       "algorithm": "catboost",
@@ -76,16 +76,16 @@
       "critical",
       "danger"
     ],
-    "evaluated_models": 6,
+    "evaluated_models": 10,
     "blocked_models": [],
     "selected": {
-      "algorithm": "lightgbm",
+      "algorithm": "xgboost",
       "selection_metric": "recall",
-      "selection_metric_value": 0.575234,
-      "f1": 0.577598,
-      "roc_auc": 0.893341,
-      "precision": 0.579982,
-      "accuracy": 0.936144,
+      "selection_metric_value": 0.576014,
+      "f1": 0.578419,
+      "roc_auc": 0.89238,
+      "precision": 0.580844,
+      "accuracy": 0.936272,
       "severity": "good",
       "status": "Well Generalized"
     }

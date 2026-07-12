@@ -75,9 +75,13 @@ def save_model_artifacts(
     y_test=None,
     y_prob=None,
     train_metrics=None,
+    project_root=None
 ):
 
-    base_dir = Path("backend/models") / outcome
+    if project_root is not None:
+        base_dir = Path(project_root) / "backend" / "models" / outcome
+    else:
+        base_dir = Path("backend/models") / outcome
     model_dir = base_dir / algorithm
     model_dir.mkdir(parents=True, exist_ok=True)
 

@@ -2,20 +2,23 @@
   "outcome": "pd",
   "outcome_id": "pd",
   "algorithm": "xgboost",
-  "target_column": "premature_delivery",
-  "positive_label": "premature delivery(week < 37)",
-  "negative_label": "full-term delivery(week >= 37)",
+  "target_column": "premature",
+  "positive_label": "Premature (1)",
+  "negative_label": "Full Term (0)",
   "feature_order": [
-    "MAGE",
-    "CARDIAC",
-    "ACLUNG",
-    "DIABETES",
-    "HYPERCH",
-    "HYPERPR",
-    "PINFANT",
-    "RENAL",
-    "PRETERM"
+    "GEST",
+    "DILATE",
+    "EFFACE",
+    "CONSIS",
+    "CONTR",
+    "MEMBRAN",
+    "AGE",
+    "STRAT",
+    "GRAVID",
+    "PARIT",
+    "TRANSF",
+    "GEMEL"
   ],
   "categorical_features": [],
-  "threshold": 0.5
+  "threshold": 0.19
 }

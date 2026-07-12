@@ -3,18 +3,36 @@
   "outcome_id": "lbw",
   "algorithm": "xgboost",
   "target_column": "low_birth_weight",
-  "positive_label": "Low Birth Weight (<2500g)",
-  "negative_label": "Normal Birth Weight",
+  "positive_label": "Low Birth Weight (1)",
+  "negative_label": "Normal Weight (0)",
   "feature_order": [
-    "BMI",
-    "CIG_0",
-    "MAGER",
-    "MEDUC",
-    "PREVIS",
-    "SEX"
+    "MARITAL",
+    "GAINED",
+    "VISITS",
+    "TOTALP",
+    "BDEAD",
+    "TERMS",
+    "WEEKS",
+    "RACEMOM",
+    "RACEDAD",
+    "CIGNUM",
+    "HYDRAM",
+    "HYPERCH",
+    "HYPERPR",
+    "ECLAMP",
+    "CERVIX",
+    "PRETERM",
+    "UTERINE",
+    "HYPER_ECLAMP",
+    "HYPER_CHRONIC",
+    "DIABETES_HYPER",
+    "PRETERM_CERVIX",
+    "MEDICAL_RISK_SCORE",
+    "HAS_ANY_CONDITION",
+    "HIGH_RISK",
+    "WEEKS_SQUARED",
+    "CIG_DRINK_COMBO"
   ],
-  "categorical_features": [
-    "SEX"
-  ],
-  "threshold": 0.45
+  "categorical_features": [],
+  "threshold": 0.71
 }

@@ -3,7 +3,7 @@
   "outcome_id": "pd",
   "selection_mode": "auto",
   "selection_metric": "recall",
-  "active_model": null,
+  "active_model": "logistic_regression",
   "models": [
     {
       "algorithm": "catboost_bagging",
@@ -65,5 +65,70 @@
       "description": "XGBoost classifier for premature delivery prediction.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 2,
+    "blocked_models": [
+      {
+        "algorithm": "catboost_bagging",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "catboost_dt_lgbm_soft_voting",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "catboost_dt_soft_voting",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "catboost",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "decision_tree",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "lightgbm",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "random_forest",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "xgboost",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      }
+    ],
+    "selected": {
+      "algorithm": "logistic_regression",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.890977,
+      "f1": 0.825784,
+      "roc_auc": 0.793415,
+      "precision": 0.769481,
+      "accuracy": 0.74359,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

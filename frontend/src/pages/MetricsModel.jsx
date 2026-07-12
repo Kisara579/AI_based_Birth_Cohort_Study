@@ -630,6 +630,47 @@ export default function MetricsModel() {
     [tickColor, gridColor, tooltipBg, tooltipTitle, tooltipBody, tooltipBorder],
   );
 
+  /* Dedicated options for Top-5 comparison bar chart:
+     Keeps model names horizontal and wraps long names into multiple lines */
+  const comparisonBarOpts = useMemo(
+    () => ({
+      ...baseBarOpts,
+      scales: {
+        ...baseBarOpts.scales,
+        x: {
+          ...baseBarOpts.scales.x,
+          ticks: {
+            ...baseBarOpts.scales.x.ticks,
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: false,
+            callback: function (value) {
+              const label = this.getLabelForValue(value);
+              if (!label) return label;
+              // Split long labels into multiple lines (~16 chars per line)
+              const maxWidth = 16;
+              if (label.length <= maxWidth) return label;
+              const words = label.split(/[\s_-]+/);
+              const lines = [];
+              let currentLine = '';
+              for (const word of words) {
+                if (currentLine && (currentLine + ' ' + word).length > maxWidth) {
+                  lines.push(currentLine);
+                  currentLine = word;
+                } else {
+                  currentLine = currentLine ? currentLine + ' ' + word : word;
+                }
+              }
+              if (currentLine) lines.push(currentLine);
+              return lines;
+            },
+          },
+        },
+      },
+    }),
+    [baseBarOpts],
+  );
+
   const fiOpts = useMemo(
     () => ({
       indexAxis: "y",
@@ -955,7 +996,7 @@ export default function MetricsModel() {
                   <Bar
                     key={isDarkMode ? "dark-comp" : "light-comp"}
                     data={comparisonBarData}
-                    options={baseBarOpts}
+                    options={comparisonBarOpts}
                   />
                 </div>
               </div>

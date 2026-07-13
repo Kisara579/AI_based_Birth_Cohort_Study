@@ -18,7 +18,9 @@ OUTCOME_FOLDER: dict[str, str] = {
     "pd": "pd",
     "ppd": "ppd",
     "feeding": "feeding",
-    "nicu":"nicu"
+    "nicu":"nicu",
+    "iol":"iol",
+    "c_section":"c_section"
 }
 
 

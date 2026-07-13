@@ -1,0 +1,107 @@
+{
+  "outcome": "c_section",
+  "outcome_id": "c_section",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": "logistic_regression",
+  "models": [
+    {
+      "algorithm": "lightgbm",
+      "label": "LightGBM",
+      "description": "LightGBM model for predicting Caesarean Section.",
+      "trained": true
+    },
+    {
+      "algorithm": "lr_lgbm_ensemble",
+      "label": "Logistic Regression, LightGBM Stacking Ensemble",
+      "description": "Logistic Regression and LightGBM Stacking Ensemble model for predicting Caesarean Section.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression model for predicting Caesarean Section.",
+      "trained": true
+    },
+    {
+      "algorithm": "rf+xgb+lr voting_ensemble",
+      "label": "Random Forest, XGBoost, Logistic Regression - Voting Ensemble",
+      "description": "Voting Ensemble classifier combining Random Forest, XGBoost, and Logistic Regression.",
+      "trained": true
+    },
+    {
+      "algorithm": "rf+xgb+lr stacking_ensemble",
+      "label": "Random Forest, XGBoost, Logistic Regression - Stacking Ensemble",
+      "description": "Stacking Ensemble classifier combining Random Forest, XGBoost, and Logistic Regression with a Logistic Regression meta-estimator.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Random Forest model for predicting Caesarean Section.",
+      "trained": true
+    },
+    {
+      "algorithm": "svm",
+      "label": "Support Vector Machine",
+      "description": "Support Vector Machine model for predicting Caesarean Section.",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost model for predicting Caesarean Section.",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 3,
+    "blocked_models": [
+      {
+        "algorithm": "lr_lgbm_ensemble",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "rf+xgb+lr voting_ensemble",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "rf+xgb+lr stacking_ensemble",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "random_forest",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "xgboost",
+        "severity": "danger",
+        "status": "Overfitting"
+      }
+    ],
+    "selected": {
+      "algorithm": "logistic_regression",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.664835,
+      "f1": 0.699422,
+      "roc_auc": 0.840844,
+      "precision": 0.737805,
+      "accuracy": 0.86059,
+      "severity": "warning",
+      "status": "Mild Overfitting"
+    }
+  }
+}

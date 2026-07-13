@@ -7,7 +7,7 @@ import pandas as pd
 
 from fastapi import HTTPException
 from .config import model_paths
-from .catalog import select_best_model
+from .catalog import select_best_model, get_feature_engineer
 
 
 _MODEL_CACHE: Dict[str, Any] = {}
@@ -74,6 +74,11 @@ def predict_with_model_key(model_key: str, values: Dict[str, Any], algorithm: st
         threshold = round(float(threshold), 2)
     except Exception:
         threshold = 0.5
+
+    # Apply outcome-specific feature engineering from the catalog (e.g. interaction terms for LBW)
+    engineer_fn = get_feature_engineer(model_key)
+    if engineer_fn:
+        values = engineer_fn(values)
 
     missing = [f for f in feature_order if f not in values]
     if missing:

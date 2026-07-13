@@ -1,0 +1,23 @@
+{
+  "outcome": "c_section",
+  "outcome_id": "c_section",
+  "algorithm": "svm",
+  "target_column": "cesarean_section",
+  "positive_label": "cesarean_section (1)",
+  "negative_label": "vaginal_delivery (0)",
+  "feature_order": [
+    "labor_induction",
+    "spontaneous_labor_onset",
+    "bmi_delivery",
+    "bmi_pre",
+    "bmi_difference",
+    "maternal_age",
+    "maternal_height",
+    "maternal_weight_delivery",
+    "maternal_weight_pre",
+    "gestational_diabetes",
+    "occiput_posterior"
+  ],
+  "categorical_features": [],
+  "threshold": 0.5
+}

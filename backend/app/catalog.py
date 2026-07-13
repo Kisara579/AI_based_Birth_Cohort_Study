@@ -1,6 +1,48 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Callable
 import json
 from pathlib import Path
+
+# Medical condition columns used for aggregate risk score in LBW feature engineering
+_LBW_MEDICAL_CONDITIONS = [
+    "ANEMIA", "CARDIAC", "ACLUNG", "DIABETES", "HERPES", "HYDRAM",
+    "HEMOGLOB", "HYPERCH", "HYPERPR", "ECLAMP", "CERVIX", "PINFANT",
+    "PRETERM", "RENAL", "RHSEN", "UTERINE",
+]
+
+
+def _engineer_lbw_features(values: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Compute the engineered features for the LBW outcome that were created
+    during training.  This must mirror exactly the feature-engineering cell
+    in the training notebooks so the model receives the inputs it expects.
+    """
+    v = dict(values)  # shallow copy – don't mutate caller's dict
+
+    def _num(key: str) -> float:
+        """Safely cast a value to float, defaulting to 0."""
+        try:
+            return float(v.get(key, 0))
+        except (TypeError, ValueError):
+            return 0.0
+
+    # (a) Interaction features between key medical conditions
+    v.setdefault("HYPER_ECLAMP",   _num("HYPERPR") * _num("ECLAMP"))
+    v.setdefault("HYPER_CHRONIC",  _num("HYPERCH") * _num("HYPERPR"))
+    v.setdefault("DIABETES_HYPER", _num("DIABETES") * _num("HYPERPR"))
+    v.setdefault("PRETERM_CERVIX", _num("PRETERM") * _num("CERVIX"))
+
+    # (b) Aggregate medical risk score
+    risk_score = sum(_num(c) for c in _LBW_MEDICAL_CONDITIONS)
+    v.setdefault("MEDICAL_RISK_SCORE", risk_score)
+    v.setdefault("HAS_ANY_CONDITION",  int(risk_score > 0))
+    v.setdefault("HIGH_RISK",          int(risk_score >= 2))
+
+    # (c) Polynomial / combined features
+    v.setdefault("WEEKS_SQUARED",   _num("WEEKS") ** 2)
+    v.setdefault("CIG_DRINK_COMBO", _num("CIGNUM") + _num("DRINKNUM"))
+
+    return v
+
 
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
@@ -27,7 +69,7 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "IUGR",
         "description": "Predict risk of intrauterine growth restriction.",
         "model_key": "iugr",
-        "schema": {"title": "IUGR Inputs", "sections": []}
+        "schema": {"title": "Intrauterine Growth Restriction Inputs", "sections": []}
     },
 
     "gdm": {
@@ -87,12 +129,13 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "LBW",
         "description": "Predict risk of low birth weight based on maternal and delivery factors.",
         "model_key": "lbw",
+        "feature_engineer": _engineer_lbw_features,
         "schema": {
             "title": "Low Birth Weight Inputs",
             "sections": [
                 {
                     "fields": [
-                        {"name": "SEX", "label": "Sex", "type": "select", "required": True, "options": [{"value": 1, "label": "Male"}, {"value": 2, "label": "Female"}]},
+                        {"name": "SEX", "label": "Baby Sex", "type": "select", "required": True, "options": [{"value": 1, "label": "Male"}, {"value": 2, "label": "Female"}]},
                         {"name": "MARITAL", "label": "Mother's Marital Status", "type": "select", "required": True, "options": [{"value": 1, "label": "Married"}, {"value": 2, "label": "Unmarried"}]},
                         {"name": "MAGE", "label": "Mother's Age (years)", "type": "number", "min": 11, "max": 53, "required": True, "placeholder": "e.g., 28"},
                         {"name": "FAGE", "label": "Father's Age (years)", "type": "number", "min": 14, "max": 74, "required": True, "placeholder": "e.g., 30"},
@@ -262,6 +305,14 @@ def get_model_key(outcome_id: str) -> Optional[str]:
     if not outcome:
         return None
     return outcome.get("model_key")
+
+
+def get_feature_engineer(outcome_id: str) -> Optional[Callable[[Dict[str, Any]], Dict[str, Any]]]:
+    outcome = OUTCOMES.get(outcome_id)
+    if not outcome:
+        return None
+    return outcome.get("feature_engineer")
+
 
 
 # select best algorithm 

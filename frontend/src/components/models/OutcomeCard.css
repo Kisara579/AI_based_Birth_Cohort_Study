@@ -1,6 +1,6 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   margin-top: 16px;
   align-items: stretch;
@@ -8,12 +8,6 @@
 
 .grid > * {
   height: 100%;
-}
-
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 560px) {
@@ -34,6 +28,8 @@
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .outcomeCard:hover {
@@ -42,18 +38,33 @@
   transform: translateY(-2px);
 }
 
+.outcomeNumber {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 28px;
+  font-weight: 900;
+  opacity: 0.05;
+  color: var(--text);
+  pointer-events: none;
+}
+
+.outcomeCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
 .outcomeTop {
   min-height: 120px;
 }
 
 .outcomeTitle {
-  margin: 10px 0 6px;
-  font-size: 17px;
+  margin: 0;
+  font-size: 15px;
   font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--text);
 }
 
@@ -62,10 +73,10 @@
   font-size: 13px;
   line-height: 1.55;
   color: var(--muted);
-  height: calc(1.55em * 2);
+  height: calc(1.55em * 3);
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
@@ -125,14 +136,18 @@
 
 /* OutcomeCard icon */
 .outcomeIconWrap {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-bottom: 10px;
+}
+
+.outcomeIconWrap svg {
+  width: 20px;
+  height: 20px;
 }
 
 .outcomeIconBlue {
@@ -167,13 +182,25 @@ body[data-theme="light"] .outcomeFooter {
 }
 
 body[data-theme="light"] .outcomeIconBlue {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.2);
+  color: #3b82f6;
+}
+
+body[data-theme="light"] .outcomeIconGreen {
   background: rgba(34, 197, 94, 0.1);
   border-color: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
+  color: #16a34a;
 }
 
 body[data-theme="light"] .tagBlue {
+  background: rgba(96, 165, 250, 0.1);
+  color: #3b82f6;
+  border-color: rgba(96, 165, 250, 0.2);
+}
+
+body[data-theme="light"] .tagGreen {
   background: rgba(34, 197, 94, 0.1);
-  color: #4ade80;
+  color: #16a34a;
   border-color: rgba(34, 197, 94, 0.2);
 }

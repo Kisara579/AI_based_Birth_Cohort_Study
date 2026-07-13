@@ -146,15 +146,19 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
             "sections": [
                 {
                     "fields": [
-                        {"name": "MAGE", "label": "Mother age", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
-                        {"name": "CARDIAC", "label": "Cardiac disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "ACLUNG", "label": "Acute or chronic lung disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "DIABETES", "label": "Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "HYPERCH", "label": "Chronic hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "HYPERPR", "label": "Pregnancy hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "PINFANT", "label": "Previous infant over 4000 grams", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "RENAL", "label": "Renal disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "PRETERM", "label": "Previous preterm or small infant", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
+                        {"name": "GEST", "label": "Gestation Period at Admission (weeks)", "type": "number", "min": 20, "max": 35, "required": True, "placeholder": "e.g., 30"},
+                        {"name": "DILATE", "label": "Cervical Dilation (cm)", "type": "number", "min": 0, "max": 8, "required": True, "placeholder": "e.g., 2"},
+                        {"name": "EFFACE", "label": "Cervical Effacement (%)", "type": "number", "min": 0, "max": 100, "required": True, "placeholder": "e.g., 50"},
+                        {"name": "CONSIS", "label": "Cervical Consistency", "type": "select", "required": True, "options": [{"value": 1, "label": "Firm"}, {"value": 2, "label": "Medium"}, {"value": 3, "label": "Soft"}]},
+                        {"name": "CONTR", "label": "Uterine Contractions", "type": "select", "required": True, "options": [{"value": 1, "label": "None"}, {"value": 2, "label": "Irregular / Mild"}, {"value": 3, "label": "Regular / Strong"}]},
+                        {"name": "MEMBRAN", "label": "Amniotic Membranes Status", "type": "select", "required": True, "options": [{"value": 1, "label": "Intact"}, {"value": 2, "label": "Ruptured"}, {"value": 3, "label": "Unknown"}]},
+                        {"name": "AGE", "label": "Mother's Age (years)", "type": "number", "min": 15, "max": 42, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "STRAT", "label": "Socio-economic Stratum", "type": "select", "required": True, "options": [{"value": 1, "label": "1 (Low)"}, {"value": 2, "label": "2 (Lower-Middle)"}, {"value": 3, "label": "3 (Upper-Middle)"}, {"value": 4, "label": "4 (High)"}]},
+                        {"name": "GRAVID", "label": "Gravidity (Total Number of Pregnancies)", "type": "number", "min": 0, "max": 13, "required": True, "placeholder": "e.g., 1"},
+                        {"name": "PARIT", "label": "Parity (Number of Previous Births)", "type": "number", "min": 0, "max": 7, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "DIAB", "label": "Mother has Diabetes?", "type": "select", "required": True, "options": [{"value": 1, "label": "Yes"}, {"value": 2, "label": "No"}, {"value": 9, "label": "Unknown"}]},
+                        {"name": "TRANSF", "label": "Patient Transferred from Another Facility?", "type": "select", "required": True, "options": [{"value": 1, "label": "Yes"}, {"value": 2, "label": "No"}]},
+                        {"name": "GEMEL", "label": "Is this a Multiple Pregnancy? (Twins, etc.)", "type": "select", "required": True, "options": [{"value": 1, "label": "Singleton"}, {"value": 2, "label": "Multiple (Twins/Triplets+)"}]}
                     ]
                 }
             ]

@@ -1,0 +1,106 @@
+{
+  "outcome": "iol",
+  "outcome_id": "iol",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": "logistic_regression",
+  "models": [
+    {
+      "algorithm": "lightgbm",
+      "label": "LightGBM",
+      "description": "LightGBM model for predicting Induction of Labor.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression model for predicting Induction of Labor.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Random Forest model for predicting Induction of Labor.",
+      "trained": true
+    },
+    {
+      "algorithm": "rf+xgb+lr stacking_classifier",
+      "label": "Random Forest, Xgboost, Logistic Regression Stacking Ensemble",
+      "description": "Stacking Classifier model for predicting Induction of Labor.",
+      "trained": true
+    },
+    {
+      "algorithm": "svm",
+      "label": "Support Vector Machine",
+      "description": "Support Vector Machine model for predicting Induction of Labor.",
+      "trained": true
+    },
+    {
+      "algorithm": "lr+rf+xgb voting_classifier",
+      "label": "Logistic Regression, Random Forest, Xgboost Voting Classifier",
+      "description": "Voting Classifier model for predicting Induction of Labor.",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost model for predicting Induction of Labor.",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 1,
+    "blocked_models": [
+      {
+        "algorithm": "lightgbm",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "random_forest",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "rf+xgb+lr stacking_classifier",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "svm",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "lr+rf+xgb voting_classifier",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "xgboost",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      }
+    ],
+    "selected": {
+      "algorithm": "logistic_regression",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.467949,
+      "f1": 0.326622,
+      "roc_auc": 0.573778,
+      "precision": 0.250859,
+      "accuracy": 0.596515,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
+}

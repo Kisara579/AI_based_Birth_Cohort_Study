@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
 import numpy as np
 import joblib
@@ -221,9 +228,56 @@ else:
 # SAVE MODEL
 # =====================================================
 
-joblib.dump(
-    pipeline,
-    "lr_lgbm_ensemble.pkl"
+# joblib.dump(
+#     pipeline,
+#     "lr_lgbm_ensemble.pkl"
+# )
+
+# print("\nModel saved as lr_lgbm_ensemble.pkl")
+
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from shared.model_artifacts import save_model_artifacts
+
+# Compute metrics
+metrics = {
+    "accuracy": float(accuracy_score(y_test, y_pred)),
+    "precision": float(precision_score(y_test, y_pred, zero_division=0)),
+    "recall": float(recall_score(y_test, y_pred, zero_division=0)),
+    "f1": float(f1_score(y_test, y_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_test, y_prob))
+}
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred)),
+    "precision": float(precision_score(y_train, y_train_pred, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_prob))
+}
+
+metrics_payload = {
+    "metrics": metrics,
+    "classification_report": classification_report(y_test, y_pred, output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test, y_pred).tolist()
+}
+
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="c_section",
+    outcome_id="c_section",
+    algorithm="lr_lgbm_ensemble",
+    label="Logistic Regression, LightGBM Stacking Ensemble",
+    description="Logistic Regression and LightGBM Stacking Ensemble model for predicting Caesarean Section.",
+    target_column="cesarean_section",
+    feature_order=X_train.columns.tolist(),
+    categorical_features=categorical_features,
+    metrics_payload=metrics_payload,
+    positive_label="cesarean_section (1)",
+    negative_label="vaginal_delivery (0)",
+    threshold=0.5,
+    y_test=y_test,
+    y_prob=y_prob,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
 )
 
-print("\nModel saved as lr_lgbm_ensemble.pkl")

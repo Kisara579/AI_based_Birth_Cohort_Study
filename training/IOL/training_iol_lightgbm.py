@@ -1,7 +1,14 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 from sklearn.model_selection import train_test_split, cross_val_score, learning_curve, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
@@ -66,12 +73,59 @@ print(importances.sort_values(ascending=False))
 train_sizes_abs, train_scores, val_scores = learning_curve(
     pipeline, X_train, y_train, cv=cv, scoring='roc_auc', random_state=42, n_jobs=-1
 )
-plt.figure(figsize=(8, 6))
-plt.plot(train_sizes_abs, np.mean(train_scores, axis=1), 'o-', color='blue', label='Training score')
-plt.plot(train_sizes_abs, np.mean(val_scores, axis=1), 'o-', color='orange', label='Cross-validation score')
-plt.title('LightGBM Learning Curves'); plt.legend(); plt.grid(True); plt.show()
+# plt.figure(figsize=(8, 6))
+# plt.plot(train_sizes_abs, np.mean(train_scores, axis=1), 'o-', color='blue', label='Training score')
+# plt.plot(train_sizes_abs, np.mean(val_scores, axis=1), 'o-', color='orange', label='Cross-validation score')
+# plt.title('LightGBM Learning Curves'); plt.legend(); plt.grid(True); plt.show()
 
 # 8. Feature Importance Plot
-plt.figure(figsize=(8, 5))
-importances.sort_values().plot(kind='barh')
-plt.title('LightGBM Feature Importance'); plt.show()
+# plt.figure(figsize=(8, 5))
+# importances.sort_values().plot(kind='barh')
+# plt.title('LightGBM Feature Importance'); plt.show()
+
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report, confusion_matrix, accuracy_score
+from shared.model_artifacts import save_model_artifacts
+
+# Compute metrics
+metrics = {
+    "accuracy": float(accuracy_score(y_test, y_test_pred)),
+    "precision": float(precision_score(y_test, y_test_pred, zero_division=0)),
+    "recall": float(recall_score(y_test, y_test_pred, zero_division=0)),
+    "f1": float(f1_score(y_test, y_test_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_test, y_test_proba))
+}
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, y_train_pred)),
+    "precision": float(precision_score(y_train, y_train_pred, zero_division=0)),
+    "recall": float(recall_score(y_train, y_train_pred, zero_division=0)),
+    "f1": float(f1_score(y_train, y_train_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, y_train_proba))
+}
+
+metrics_payload = {
+    "metrics": metrics,
+    "classification_report": classification_report(y_test, y_test_pred, output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test, y_test_pred).tolist()
+}
+
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="iol",
+    outcome_id="iol",
+    algorithm="lightgbm",
+    label="LightGBM",
+    description="LightGBM model for predicting Induction of Labor.",
+    target_column="labor_induction",
+    feature_order=features,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="labor_induction (1)",
+    negative_label="spontaneous_labor_onset (0)",
+    threshold=0.5,
+    y_test=y_test,
+    y_prob=y_test_proba,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
+

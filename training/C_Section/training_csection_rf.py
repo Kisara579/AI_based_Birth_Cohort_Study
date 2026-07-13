@@ -1,7 +1,14 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 import joblib
 import warnings
 import os
@@ -173,27 +180,27 @@ print(f"Train ROC-AUC : {train_auc:.4f} | Test ROC-AUC : {test_auc:.4f} | Diff: 
 # 13. Confusion Matrix
 # -------------------------------------------------------------------
 cm = confusion_matrix(y_test, y_pred)
-plt.figure(figsize=(5, 4))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-            xticklabels=['Vaginal', 'C-Section'],
-            yticklabels=['Vaginal', 'C-Section'])
-plt.title("Confusion Matrix")
-plt.tight_layout()
-plt.show()
+# plt.figure(figsize=(5, 4))
+# sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            # xticklabels=['Vaginal', 'C-Section'],
+            # yticklabels=['Vaginal', 'C-Section'])
+# plt.title("Confusion Matrix")
+# plt.tight_layout()
+# plt.show()
 
 # -------------------------------------------------------------------
 # 14. ROC Curve
 # -------------------------------------------------------------------
 fpr, tpr, _ = roc_curve(y_test, y_proba)
-plt.figure(figsize=(6, 5))
-plt.plot(fpr, tpr, linewidth=2, label=f'ROC-AUC = {test_auc:.3f}')
-plt.plot([0, 1], [0, 1], '--')
-plt.xlabel("False Positive Rate")
-plt.ylabel("True Positive Rate")
-plt.title("ROC Curve")
-plt.legend()
-plt.grid(True)
-plt.show()
+# plt.figure(figsize=(6, 5))
+# plt.plot(fpr, tpr, linewidth=2, label=f'ROC-AUC = {test_auc:.3f}')
+# plt.plot([0, 1], [0, 1], '--')
+# plt.xlabel("False Positive Rate")
+# plt.ylabel("True Positive Rate")
+# plt.title("ROC Curve")
+# plt.legend()
+# plt.grid(True)
+# plt.show()
 
 # -------------------------------------------------------------------
 # 15. Feature Importance
@@ -203,18 +210,65 @@ try:
     importances = best_model.named_steps['model'].feature_importances_
     indices = np.argsort(importances)[::-1][:15]
 
-    plt.figure(figsize=(10, 6))
-    plt.barh(range(len(indices)), importances[indices])
-    plt.yticks(range(len(indices)), [feature_names[i] for i in indices])
-    plt.gca().invert_yaxis()
-    plt.title("Top 15 Feature Importances (Random Forest)")
-    plt.tight_layout()
-    plt.show()
+#     plt.figure(figsize=(10, 6))
+#     plt.barh(range(len(indices)), importances[indices])
+#     plt.yticks(range(len(indices)), [feature_names[i] for i in indices])
+#     plt.gca().invert_yaxis()
+#     plt.title("Top 15 Feature Importances (Random Forest)")
+#     plt.tight_layout()
+#     plt.show()
 except Exception as e:
     print("Feature importance error:", e)
 
 # -------------------------------------------------------------------
 # 16. Save model
 # -------------------------------------------------------------------
-joblib.dump(best_model, 'c_section_rf_pipeline.pkl')
-print("\nModel saved as 'c_section_rf_pipeline.pkl'")
+# joblib.dump(best_model, 'c_section_rf_pipeline.pkl')
+# print("\nModel saved as 'c_section_rf_pipeline.pkl'")
+
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from shared.model_artifacts import save_model_artifacts
+
+# Compute metrics
+metrics = {
+    "accuracy": float(accuracy_score(y_test, y_pred)),
+    "precision": float(precision_score(y_test, y_pred, zero_division=0)),
+    "recall": float(recall_score(y_test, y_pred, zero_division=0)),
+    "f1": float(f1_score(y_test, y_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_test, y_proba))
+}
+
+train_metrics = {
+    "accuracy": float(accuracy_score(y_train, train_pred)),
+    "precision": float(precision_score(y_train, train_pred, zero_division=0)),
+    "recall": float(recall_score(y_train, train_pred, zero_division=0)),
+    "f1": float(f1_score(y_train, train_pred, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_train, train_proba))
+}
+
+metrics_payload = {
+    "metrics": metrics,
+    "classification_report": classification_report(y_test, y_pred, output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test, y_pred).tolist()
+}
+
+save_model_artifacts(
+    pipeline=best_model,
+    outcome="c_section",
+    outcome_id="c_section",
+    algorithm="random_forest",
+    label="Random Forest",
+    description="Random Forest model for predicting Caesarean Section.",
+    target_column="cesarean_section",
+    feature_order=X_train.columns.tolist(),
+    categorical_features=categorical_features,
+    metrics_payload=metrics_payload,
+    positive_label="cesarean_section (1)",
+    negative_label="vaginal_delivery (0)",
+    threshold=0.5,
+    y_test=y_test,
+    y_prob=y_proba,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
+

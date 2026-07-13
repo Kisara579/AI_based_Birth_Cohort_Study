@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
 import numpy as np
 import joblib
@@ -349,19 +356,19 @@ print(
 # 16. SAVE MODELS
 # =====================================================
 
-joblib.dump(
-    voting_pipeline,
-    "voting_ensemble.pkl"
-)
+# joblib.dump(
+#     voting_pipeline,
+#     "voting_ensemble.pkl"
+# )
 
-joblib.dump(
-    stacking_pipeline,
-    "stacking_ensemble.pkl"
-)
+# joblib.dump(
+#     stacking_pipeline,
+#     "stacking_ensemble.pkl"
+# )
 
-print("\nModels Saved Successfully")
-print("voting_ensemble.pkl")
-print("stacking_ensemble.pkl")
+# print("\nModels Saved Successfully")
+# print("voting_ensemble.pkl")
+# print("stacking_ensemble.pkl")
 
 # =====================================================
 # OVERFITTING CHECK - VOTING
@@ -408,3 +415,81 @@ print(f"Test ROC-AUC   : {stack_auc:.4f}")
 
 print(f"Accuracy Gap   : {train_acc_stack - stack_acc:.4f}")
 print(f"ROC-AUC Gap    : {train_auc_stack - stack_auc:.4f}")
+
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from shared.model_artifacts import save_model_artifacts
+
+# Save voting ensemble
+save_model_artifacts(
+    pipeline=voting_pipeline,
+    outcome="c_section",
+    outcome_id="c_section",
+    algorithm="rf+xgb+lr voting_ensemble",
+    label="Random Forest, XGBoost, Logistic Regression - Voting Ensemble",
+    description="Voting Ensemble classifier combining Random Forest, XGBoost, and Logistic Regression.",
+    target_column="cesarean_section",
+    feature_order=X_train.columns.tolist(),
+    categorical_features=categorical_features,
+    metrics_payload={
+        "metrics": {
+            "accuracy": float(vote_acc),
+            "precision": float(precision_score(y_test, vote_pred, zero_division=0)),
+            "recall": float(recall_score(y_test, vote_pred, zero_division=0)),
+            "f1": float(f1_score(y_test, vote_pred, zero_division=0)),
+            "roc_auc": float(vote_auc)
+        },
+        "classification_report": classification_report(y_test, vote_pred, output_dict=True, zero_division=0),
+        "confusion_matrix": confusion_matrix(y_test, vote_pred).tolist()
+    },
+    positive_label="cesarean_section (1)",
+    negative_label="vaginal_delivery (0)",
+    threshold=0.5,
+    y_test=y_test,
+    y_prob=vote_prob,
+    train_metrics={
+        "accuracy": float(train_acc_vote),
+        "precision": float(precision_score(y_train, train_pred_vote, zero_division=0)),
+        "recall": float(recall_score(y_train, train_pred_vote, zero_division=0)),
+        "f1": float(f1_score(y_train, train_pred_vote, zero_division=0)),
+        "roc_auc": float(train_auc_vote)
+    },
+    project_root=PROJECT_ROOT
+)
+
+# Save stacking ensemble
+save_model_artifacts(
+    pipeline=stacking_pipeline,
+    outcome="c_section",
+    outcome_id="c_section",
+    algorithm="rf+xgb+lr stacking_ensemble",
+    label="Random Forest, XGBoost, Logistic Regression - Stacking Ensemble",
+    description="Stacking Ensemble classifier combining Random Forest, XGBoost, and Logistic Regression with a Logistic Regression meta-estimator.",
+    target_column="cesarean_section",
+    feature_order=X_train.columns.tolist(),
+    categorical_features=categorical_features,
+    metrics_payload={
+        "metrics": {
+            "accuracy": float(stack_acc),
+            "precision": float(precision_score(y_test, stack_pred, zero_division=0)),
+            "recall": float(recall_score(y_test, stack_pred, zero_division=0)),
+            "f1": float(f1_score(y_test, stack_pred, zero_division=0)),
+            "roc_auc": float(stack_auc)
+        },
+        "classification_report": classification_report(y_test, stack_pred, output_dict=True, zero_division=0),
+        "confusion_matrix": confusion_matrix(y_test, stack_pred).tolist()
+    },
+    positive_label="cesarean_section (1)",
+    negative_label="vaginal_delivery (0)",
+    threshold=0.5,
+    y_test=y_test,
+    y_prob=stack_prob,
+    train_metrics={
+        "accuracy": float(train_acc_stack),
+        "precision": float(precision_score(y_train, train_pred_stack, zero_division=0)),
+        "recall": float(recall_score(y_train, train_pred_stack, zero_division=0)),
+        "f1": float(f1_score(y_train, train_pred_stack, zero_division=0)),
+        "roc_auc": float(train_auc_stack)
+    },
+    project_root=PROJECT_ROOT
+)
+

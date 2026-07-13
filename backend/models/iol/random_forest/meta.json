@@ -1,0 +1,18 @@
+{
+  "outcome": "iol",
+  "outcome_id": "iol",
+  "algorithm": "random_forest",
+  "target_column": "labor_induction",
+  "positive_label": "labor_induction (1)",
+  "negative_label": "spontaneous_labor_onset (0)",
+  "feature_order": [
+    "maternal_age",
+    "maternal_height",
+    "maternal_weight_pre",
+    "bmi_pre",
+    "gestational_diabetes",
+    "occiput_posterior"
+  ],
+  "categorical_features": [],
+  "threshold": 0.5
+}

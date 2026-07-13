@@ -92,12 +92,41 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
             "sections": [
                 {
                     "fields": [
-                        {"name": "MAGER", "label": "Mother age (years)", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
-                        {"name": "MEDUC", "label": "Mother education level", "type": "select", "required": True, "options": [{"value": 1, "label": "No formal education / Primary"},{"value": 2, "label": "Grade 6–11"},{"value": 3, "label": "Passed O/L"},{"value": 4, "label": "Passed A/L"},{"value": 5, "label": "Diploma / Associate"},{"value": 6, "label": "Degree"},{"value": 7, "label": "Postgraduate"},{"value": 8, "label": "Doctorate"},{"value": 9, "label": "Unknown"}]},
-                        {"name": "BMI", "label": "Body Mass Index (BMI)", "type": "number", "min": 10, "max": 80, "required": True, "placeholder": "e.g., 23.4"},
-                        {"name": "CIG_0", "label": "Cigarettes before pregnancy (per day)", "type": "number", "min": 0, "max": 60, "required": True, "placeholder": "e.g., 0"},
-                        {"name": "PREVIS", "label": "Number of prenatal visits", "type": "number", "min": 0, "max": 50, "required": True, "placeholder": "e.g., 10"},
-                        {"name": "SEX", "label": "Sex", "type": "select", "required": True, "options": [{"value":"M","label":"Male"}, {"value":"F","label":"Female"}]}
+                        {"name": "SEX", "label": "Sex", "type": "select", "required": True, "options": [{"value": 1, "label": "Male"}, {"value": 2, "label": "Female"}]},
+                        {"name": "MARITAL", "label": "Mother's Marital Status", "type": "select", "required": True, "options": [{"value": 1, "label": "Married"}, {"value": 2, "label": "Unmarried"}]},
+                        {"name": "MAGE", "label": "Mother's Age (years)", "type": "number", "min": 11, "max": 53, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "FAGE", "label": "Father's Age (years)", "type": "number", "min": 14, "max": 74, "required": True, "placeholder": "e.g., 30"},
+                        {"name": "MEDUC", "label": "Mother's Education Level", "type": "select", "required": True, "options": [{"value": 0, "label": "No formal education"}, {"value": 5, "label": "Primary School"}, {"value": 10, "label": "Grade 6-10"}, {"value": 11, "label": "Passed O/L"}, {"value": 13, "label": "Passed A/L"}, {"value": 15, "label": "Diploma / Associate"}, {"value": 16, "label": "Degree"}, {"value": 17, "label": "Postgraduate / Doctorate"}]},
+                        {"name": "FEDUC", "label": "Father's Education Level", "type": "select", "required": True, "options": [{"value": 0, "label": "No formal education"}, {"value": 5, "label": "Primary School"}, {"value": 10, "label": "Grade 6-10"}, {"value": 11, "label": "Passed O/L"}, {"value": 13, "label": "Passed A/L"}, {"value": 15, "label": "Diploma / Associate"}, {"value": 16, "label": "Degree"}, {"value": 17, "label": "Postgraduate / Doctorate"}]},
+                        {"name": "GAINED", "label": "Weight Gained during Pregnancy (lbs)", "type": "number", "min": 0, "max": 98, "required": True, "placeholder": "e.g., 30"},
+                        {"name": "VISITS", "label": "Total Number of Prenatal Visits", "type": "number", "min": 0, "max": 49, "required": True, "placeholder": "e.g., 12"},
+                        {"name": "WEEKS", "label": "Gestation Period (weeks)", "type": "number", "min": 18, "max": 45, "required": True, "placeholder": "e.g., 38"},
+                        {"name": "TOTALP", "label": "Total Previous Pregnancies", "type": "number", "min": 1, "max": 20, "required": True, "placeholder": "e.g., 1"},
+                        {"name": "BDEAD", "label": "Previous Children Born Dead", "type": "number", "min": 0, "max": 6, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "TERMS", "label": "Previous Pregnancies Terminated", "type": "number", "min": 0, "max": 16, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "LOUTCOME", "label": "Months Since Last Pregnancy Outcome", "type": "number", "min": 1, "max": 9, "required": True, "placeholder": "e.g., 2"},
+                        {"name": "RACEMOM", "label": "Mother's Race", "type": "select", "required": True, "options": [{"value": 1, "label": "White"}, {"value": 2, "label": "Black"}, {"value": 3, "label": "American Indian"}, {"value": 4, "label": "Chinese"}, {"value": 5, "label": "Japanese"}, {"value": 6, "label": "Hawaiian"}, {"value": 7, "label": "Filipino"}, {"value": 8, "label": "Other Asian/Pacific Islander"}]},
+                        {"name": "RACEDAD", "label": "Father's Race", "type": "select", "required": True, "options": [{"value": 1, "label": "White"}, {"value": 2, "label": "Black"}, {"value": 3, "label": "American Indian"}, {"value": 4, "label": "Chinese"}, {"value": 5, "label": "Japanese"}, {"value": 6, "label": "Hawaiian"}, {"value": 7, "label": "Filipino"}, {"value": 8, "label": "Other Asian/Pacific Islander"}]},
+                        {"name": "HISPMOM", "label": "Mother's Hispanic Origin", "type": "select", "required": True, "options": [{"value": "M", "label": "Mexican"}, {"value": "P", "label": "Puerto Rican"}, {"value": "C", "label": "Cuban"}, {"value": "O", "label": "Other Hispanic"}, {"value": "N", "label": "Non-Hispanic"}, {"value": "U", "label": "Unknown"}]},
+                        {"name": "HISPDAD", "label": "Father's Hispanic Origin", "type": "select", "required": True, "options": [{"value": "M", "label": "Mexican"}, {"value": "P", "label": "Puerto Rican"}, {"value": "C", "label": "Cuban"}, {"value": "O", "label": "Other Hispanic"}, {"value": "N", "label": "Non-Hispanic"}, {"value": "U", "label": "Unknown"}]},
+                        {"name": "CIGNUM", "label": "Cigarettes Smoked Per Day", "type": "number", "min": 0, "max": 60, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "DRINKNUM", "label": "Alcoholic Drinks Per Day", "type": "number", "min": 0, "max": 40, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "ANEMIA", "label": "Mother Has Anemia", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "CARDIAC", "label": "Mother Has Cardiac Disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "ACLUNG", "label": "Mother Has Acute or Chronic Lung Disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "DIABETES", "label": "Mother Has Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HERPES", "label": "Mother Has Genital Herpes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HYDRAM", "label": "Hydramnios/Oligohydramnios (Amniotic fluid disorder)", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HEMOGLOB", "label": "Hemoglobinopathy (Blood disorder)", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HYPERCH", "label": "Chronic Hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "HYPERPR", "label": "Pregnancy-associated Hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "ECLAMP", "label": "Eclampsia", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "CERVIX", "label": "Incompetent Cervix", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "PINFANT", "label": "Previous Infant Born 4000+ grams", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "PRETERM", "label": "Previous Preterm or Small-for-Gestational-Age Infant", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "RENAL", "label": "Mother Has Renal (Kidney) Disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "RHSEN", "label": "Rh Sensitization", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "UTERINE", "label": "Uterine Bleeding during Pregnancy", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
                     ],
                 }
             ],
@@ -117,15 +146,19 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
             "sections": [
                 {
                     "fields": [
-                        {"name": "MAGE", "label": "Mother age", "type": "number", "min": 10, "max": 60, "required": True, "placeholder": "e.g., 28"},
-                        {"name": "CARDIAC", "label": "Cardiac disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "ACLUNG", "label": "Acute or chronic lung disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "DIABETES", "label": "Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "HYPERCH", "label": "Chronic hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "HYPERPR", "label": "Pregnancy hypertension", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "PINFANT", "label": "Previous infant over 4000 grams", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "RENAL", "label": "Renal disease", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
-                        {"name": "PRETERM", "label": "Previous preterm or small infant", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
+                        {"name": "GEST", "label": "Gestation Period at Admission (weeks)", "type": "number", "min": 20, "max": 35, "required": True, "placeholder": "e.g., 30"},
+                        {"name": "DILATE", "label": "Cervical Dilation (cm)", "type": "number", "min": 0, "max": 8, "required": True, "placeholder": "e.g., 2"},
+                        {"name": "EFFACE", "label": "Cervical Effacement (%)", "type": "number", "min": 0, "max": 100, "required": True, "placeholder": "e.g., 50"},
+                        {"name": "CONSIS", "label": "Cervical Consistency", "type": "select", "required": True, "options": [{"value": 1, "label": "Firm"}, {"value": 2, "label": "Medium"}, {"value": 3, "label": "Soft"}]},
+                        {"name": "CONTR", "label": "Uterine Contractions", "type": "select", "required": True, "options": [{"value": 1, "label": "None"}, {"value": 2, "label": "Irregular / Mild"}, {"value": 3, "label": "Regular / Strong"}]},
+                        {"name": "MEMBRAN", "label": "Amniotic Membranes Status", "type": "select", "required": True, "options": [{"value": 1, "label": "Intact"}, {"value": 2, "label": "Ruptured"}, {"value": 3, "label": "Unknown"}]},
+                        {"name": "AGE", "label": "Mother's Age (years)", "type": "number", "min": 15, "max": 42, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "STRAT", "label": "Socio-economic Stratum", "type": "select", "required": True, "options": [{"value": 1, "label": "1 (Low)"}, {"value": 2, "label": "2 (Lower-Middle)"}, {"value": 3, "label": "3 (Upper-Middle)"}, {"value": 4, "label": "4 (High)"}]},
+                        {"name": "GRAVID", "label": "Gravidity (Total Number of Pregnancies)", "type": "number", "min": 0, "max": 13, "required": True, "placeholder": "e.g., 1"},
+                        {"name": "PARIT", "label": "Parity (Number of Previous Births)", "type": "number", "min": 0, "max": 7, "required": True, "placeholder": "e.g., 0"},
+                        {"name": "DIAB", "label": "Mother has Diabetes?", "type": "select", "required": True, "options": [{"value": 1, "label": "Yes"}, {"value": 2, "label": "No"}, {"value": 9, "label": "Unknown"}]},
+                        {"name": "TRANSF", "label": "Patient Transferred from Another Facility?", "type": "select", "required": True, "options": [{"value": 1, "label": "Yes"}, {"value": 2, "label": "No"}]},
+                        {"name": "GEMEL", "label": "Is this a Multiple Pregnancy? (Twins, etc.)", "type": "select", "required": True, "options": [{"value": 1, "label": "Singleton"}, {"value": 2, "label": "Multiple (Twins/Triplets+)"}]}
                     ]
                 }
             ]

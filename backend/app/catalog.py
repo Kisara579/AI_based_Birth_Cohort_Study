@@ -87,7 +87,21 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "IOL",
         "description": "Predict risk of intrauterine onset of labor.",
         "model_key": "iol",
-        "schema": {"title": "IOL Inputs", "sections": []}
+        "schema": {
+            "title": "IOL Inputs", 
+            "sections": [
+                {
+                    "fields": [
+                        {"name": "maternal_age", "label": "Maternal Age (years)", "type": "number", "min": 16, "max": 46, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "maternal_height", "label": "Maternal Height (cm)", "type": "number", "min": 150, "max": 190, "required": True, "placeholder": "e.g., 160"},
+                        {"name": "maternal_weight_pre", "label": "Pre-pregnancy Maternal Weight (kg)", "type": "number", "min": 40.0, "max": 129.0, "required": True, "placeholder": "e.g., 60"},
+                        {"name": "bmi_pre", "label": "Pre-pregnancy BMI", "type": "number", "min": 14.0, "max": 45.0, "required": True, "placeholder": "e.g., 22.0"},
+                        {"name": "gestational_diabetes", "label": "Gestational Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "occiput_posterior", "label": "Occiput Posterior Position", "type": "select", "required": True, "options": [{"value": 1, "label": "No"}, {"value": 2, "label": "Yes"}]}
+                    ]
+                }
+            ]
+        }
     },
 
     "c_section": {
@@ -96,7 +110,26 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "CS",
         "description": "Predict likelihood of cesarean delivery.",
         "model_key": "c_section",
-        "schema": {"title": "C-Section Inputs", "sections": []}
+        "schema": {
+            "title": "C-Section Inputs", 
+            "sections": [
+                {
+                    "fields": [
+                        {"name": "labor_induction", "label": "Labor Induction", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "spontaneous_labor_onset", "label": "Spontaneous Labor Onset", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "bmi_delivery", "label": "BMI at Delivery", "type": "number", "min": 18.0, "max": 52.0, "required": True, "placeholder": "e.g., 25.5"},
+                        {"name": "bmi_pre", "label": "Pre-pregnancy BMI", "type": "number", "min": 14.0, "max": 45.0, "required": True, "placeholder": "e.g., 22.0"},
+                        {"name": "bmi_difference", "label": "BMI Difference", "type": "number", "min": -4.0, "max": 15.0, "required": True, "placeholder": "e.g., 3.5"},
+                        {"name": "maternal_age", "label": "Maternal Age (years)", "type": "number", "min": 16, "max": 46, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "maternal_height", "label": "Maternal Height (cm)", "type": "number", "min": 150, "max": 190, "required": True, "placeholder": "e.g., 160"},
+                        {"name": "maternal_weight_delivery", "label": "Maternal Weight at Delivery (kg)", "type": "number", "min": 47.0, "max": 148.0, "required": True, "placeholder": "e.g., 70"},
+                        {"name": "maternal_weight_pre", "label": "Pre-pregnancy Maternal Weight (kg)", "type": "number", "min": 40.0, "max": 129.0, "required": True, "placeholder": "e.g., 60"},
+                        {"name": "gestational_diabetes", "label": "Gestational Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "occiput_posterior", "label": "Occiput Posterior Position", "type": "select", "required": True, "options": [{"value": 1, "label": "No"}, {"value": 2, "label": "Yes"}]}
+                    ]
+                }
+            ]
+        }
     },
 
     "ppd": {

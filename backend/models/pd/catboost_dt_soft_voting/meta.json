@@ -1,0 +1,24 @@
+{
+  "outcome": "pd",
+  "outcome_id": "pd",
+  "algorithm": "catboost_dt_soft_voting",
+  "target_column": "premature",
+  "positive_label": "Premature (1)",
+  "negative_label": "Full Term (0)",
+  "feature_order": [
+    "GEST",
+    "DILATE",
+    "EFFACE",
+    "CONSIS",
+    "CONTR",
+    "MEMBRAN",
+    "AGE",
+    "STRAT",
+    "GRAVID",
+    "PARIT",
+    "TRANSF",
+    "GEMEL"
+  ],
+  "categorical_features": [],
+  "threshold": 0.22
+}

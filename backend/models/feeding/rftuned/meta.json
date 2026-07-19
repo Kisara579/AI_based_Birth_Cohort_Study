@@ -1,0 +1,24 @@
+{
+  "outcome": "feeding",
+  "outcome_id": "feeding",
+  "algorithm": "rftuned",
+  "target_column": "has_feeding_problem",
+  "positive_label": "Has Problem (1)",
+  "negative_label": "No Problem (0)",
+  "feature_order": [
+    "maternal_age",
+    "maternal_education",
+    "child_birthweight_kgs",
+    "child_medical_complications",
+    "delivery_method",
+    "breastfeeding_duration_months",
+    "MH_postnatal_depression",
+    "MH_postnatal_anxiety"
+  ],
+  "categorical_features": [
+    "delivery_method",
+    "MH_postnatal_depression",
+    "MH_postnatal_anxiety"
+  ],
+  "threshold": 0.56
+}

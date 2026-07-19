@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import ApiStatusDot from "./ApiStatusDot.jsx";
+// import ApiStatusDot from "./ApiStatusDot.jsx";
 import { useEffect, useState } from "react";
 import "./Navbar.css";
 
@@ -10,6 +10,7 @@ export default function Navbar() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
   });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     document.body.setAttribute("data-theme", theme);
@@ -20,6 +21,10 @@ export default function Navbar() {
     setTheme(next);
     document.body.setAttribute("data-theme", next);
     localStorage.setItem("theme", next);
+  }
+
+  function closeMenu() {
+    setMenuOpen(false);
   }
 
   return (
@@ -45,23 +50,19 @@ export default function Navbar() {
             <line x1="10" y1="11" x2="14" y2="11" />
           </svg>
           <span className="brandText">AI Birth Cohort Study</span>
-          <ApiStatusDot />
+          {/* <ApiStatusDot /> */}
         </NavLink>
 
-        <nav className="navLinks">
-          <NavLink to="/" className={linkClass} end>
-            Overview
-          </NavLink>
-          <NavLink to="/about" className={linkClass}>
-            About
-          </NavLink>
-
+        <div className="navActions">
           <button
+            type="button"
             className="themeToggle"
             onClick={toggleTheme}
             aria-label="Toggle theme"
             title={
-              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              theme === "dark"
+                ? "Switch to light mode"
+                : "Switch to dark mode"
             }
           >
             {theme === "dark" ? (
@@ -100,6 +101,31 @@ export default function Navbar() {
               </svg>
             )}
           </button>
+
+          <button
+            type="button"
+            className="menuToggle"
+            onClick={() => setMenuOpen((value) => !value)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+            aria-controls="site-navigation"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+
+        <nav
+          id="site-navigation"
+          className={`navLinks${menuOpen ? " navLinksOpen" : ""}`}
+        >
+          <NavLink to="/" className={linkClass} onClick={closeMenu} end>
+            Overview
+          </NavLink>
+          <NavLink to="/about" className={linkClass} onClick={closeMenu}>
+            About
+          </NavLink>
         </nav>
       </div>
     </header>

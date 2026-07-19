@@ -2,26 +2,92 @@
   "outcome": "lbw",
   "outcome_id": "lbw",
   "selection_mode": "auto",
-  "selection_metric": "f1",
+  "selection_metric": "recall",
   "active_model": "xgboost",
   "models": [
     {
-      "algorithm": "logisticregression",
-      "label": "Logistic Regression",
-      "description": "Linear baseline classifier trained on CDC Natality data.",
+      "algorithm": "catboost",
+      "label": "CatBoost",
+      "description": "CatBoost classifier for low birth weight prediction with SMOTE resampling.",
       "trained": true
     },
     {
-      "algorithm": "randomforest",
+      "algorithm": "decision_tree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier for low birth weight prediction with SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "lightgbm",
+      "label": "LightGBM",
+      "description": "LightGBM classifier for low birth weight prediction with SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "linear_svm",
+      "label": "Linear SVM",
+      "description": "Calibrated Linear SVM for low birth weight prediction with SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression for low birth weight prediction with scaling and SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "lr_svm_lgbm_soft_voting",
+      "label": "Logistic Regression + Linear SVM + LightGBM Soft Voting",
+      "description": "Soft Voting ensemble (LR + SVM + LGBM) for low birth weight prediction with scaling and SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "lr_bagging",
+      "label": "Logistic Regression Bagging",
+      "description": "Bagged Logistic Regression ensemble for low birth weight prediction with scaling and SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "lr_svm_soft_voting",
+      "label": "Logis + SVM Soft Voting",
+      "description": "Soft Voting ensemble (LR + SVM) for low birth weight prediction with scaling and SMOTE resampling.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
       "label": "Random Forest",
-      "description": "Ensemble of decision trees trained on CDC Natality data.",
+      "description": "Random Forest classifier for low birth weight prediction with SMOTE resampling.",
       "trained": true
     },
     {
       "algorithm": "xgboost",
       "label": "XGBoost",
-      "description": "Gradient-boosted tree classifier trained on CDC Natality data.",
+      "description": "XGBoost classifier for low birth weight prediction with SMOTE resampling.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 10,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "xgboost",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.576014,
+      "f1": 0.578419,
+      "roc_auc": 0.89238,
+      "precision": 0.580844,
+      "accuracy": 0.936272,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

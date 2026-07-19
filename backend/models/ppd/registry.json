@@ -1,0 +1,63 @@
+{
+  "outcome": "ppd",
+  "outcome_id": "ppd",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": "weighted_soft_voting(logistic_regression+extra_trees{3,1})",
+  "models": [
+    {
+      "algorithm": "bagging_logistic_regression",
+      "label": "Bagging Logistic Regression",
+      "description": "Bagging Logistic Regression model for predicting postpartum depression using SMOTE for class imbalance.",
+      "trained": true
+    },
+    {
+      "algorithm": "equal_soft_voting(logistic_regression+extra_trees)",
+      "label": "Equal Soft Voting (LR + XRT)",
+      "description": "Equal Soft Voting model for predicting postpartum depression using SMOTE for class imbalance.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression model for predicting postpartum depression using SMOTE for class imbalance.",
+      "trained": true
+    },
+    {
+      "algorithm": "weighted_soft_voting(logistic_regression+extra_trees{3,1})",
+      "label": "Weighted Soft Voting(LR+XRT{3,1})",
+      "description": "Weighted Soft Voting model (Logistic Regression + Extra Trees{3,1}) for predicting postpartum depression using SMOTE for class imbalance.",
+      "trained": true
+    },
+    {
+      "algorithm": "extra_trees",
+      "label": "Extra Trees",
+      "description": "Extra Trees model for predicting postpartum depression using SMOTE for class imbalance.",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 5,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "weighted_soft_voting(logistic_regression+extra_trees{3,1})",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.907407,
+      "f1": 0.806584,
+      "roc_auc": 0.602386,
+      "precision": 0.725926,
+      "accuracy": 0.70625,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
+}

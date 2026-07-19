@@ -1,0 +1,104 @@
+{
+  "outcome": "nicu",
+  "outcome_id": "nicu",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": "logisticregression",
+  "models": [
+    {
+      "algorithm": "logisticregression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "decisiontree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "randomforest",
+      "label": "Random Forest",
+      "description": "Random Forest classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "gradientboosting",
+      "label": "Gradient Boosting",
+      "description": "Gradient Boosting classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "svm",
+      "label": "SVM",
+      "description": "SVM classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "knn",
+      "label": "KNN",
+      "description": "KNN classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "lightgbm",
+      "label": "LightGBM",
+      "description": "LightGBM classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "stackingxgb_lgbm_rf_gb",
+      "label": "Stacking (XGB+LGBM+RF+GB)",
+      "description": "Stacking (XGB+LGBM+RF+GB) classifier trained on NICU admission dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "softvotinglr_dt_rf_gb_svm_knn_xgb_lgbm",
+      "label": "Soft Voting (LR+DT+RF+GB+SVM+KNN+XGB+LGBM)",
+      "description": "Soft Voting (LR+DT+RF+GB+SVM+KNN+XGB+LGBM) classifier trained on NICU admission dataset.",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 8,
+    "blocked_models": [
+      {
+        "algorithm": "stackingxgb_lgbm_rf_gb",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "softvotinglr_dt_rf_gb_svm_knn_xgb_lgbm",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      }
+    ],
+    "selected": {
+      "algorithm": "logisticregression",
+      "selection_metric": "recall",
+      "selection_metric_value": 1.0,
+      "f1": 0.135198,
+      "roc_auc": 0.873687,
+      "precision": 0.0725,
+      "accuracy": 0.0725,
+      "severity": "warning",
+      "status": "Possible Underfitting/Split Instability"
+    }
+  }
+}

@@ -16,6 +16,11 @@ MODELS_DIR = BASE_DIR / "models"
 OUTCOME_FOLDER: dict[str, str] = {
     "lbw": "lbw",
     "pd": "pd",
+    "ppd": "ppd",
+    "feeding": "feeding",
+    "nicu":"nicu",
+    "iol":"iol",
+    "c_section":"c_section"
 }
 
 

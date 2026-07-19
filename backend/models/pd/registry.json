@@ -2,26 +2,133 @@
   "outcome": "pd",
   "outcome_id": "pd",
   "selection_mode": "auto",
-  "selection_metric": "f1",
-  "active_model": "xgboost",
+  "selection_metric": "recall",
+  "active_model": "logistic_regression",
   "models": [
     {
-      "algorithm": "linearsvm",
-      "label": "Linear SVM",
-      "description": "Linear SVM classifier trained on birth dataset",
+      "algorithm": "catboost_bagging",
+      "label": "CatBoost Bagging",
+      "description": "Bagged CatBoost ensemble for premature delivery prediction.",
       "trained": true
     },
     {
-      "algorithm": "randomforest",
+      "algorithm": "catboost_dt_lgbm_soft_voting",
+      "label": "CatBoost + Decision Tree + LightGBM Soft Voting",
+      "description": "Soft Voting ensemble (CatBoost + Decision Tree + LGBM) for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "catboost_dt_soft_voting",
+      "label": "CatBoost + Decision Tree Soft Voting",
+      "description": "Soft Voting ensemble (CatBoost + Decision Tree) for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "catboost",
+      "label": "CatBoost",
+      "description": "CatBoost classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "decision_tree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "lightgbm",
+      "label": "LightGBM",
+      "description": "LightGBM classifier for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "linear_svm",
+      "label": "Linear SVM",
+      "description": "Calibrated Linear SVM for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression for premature delivery prediction.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
       "label": "Random Forest",
-      "description": "Random Forest classifier trained on birth dataset",
+      "description": "Random Forest classifier for premature delivery prediction.",
       "trained": true
     },
     {
       "algorithm": "xgboost",
       "label": "XGBoost",
-      "description": "XGBoost classifier trained on birth dataset",
+      "description": "XGBoost classifier for premature delivery prediction.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 2,
+    "blocked_models": [
+      {
+        "algorithm": "catboost_bagging",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "catboost_dt_lgbm_soft_voting",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "catboost_dt_soft_voting",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "catboost",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "decision_tree",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "lightgbm",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "random_forest",
+        "severity": "danger",
+        "status": "Overfitting"
+      },
+      {
+        "algorithm": "xgboost",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      }
+    ],
+    "selected": {
+      "algorithm": "logistic_regression",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.890977,
+      "f1": 0.825784,
+      "roc_auc": 0.793415,
+      "precision": 0.769481,
+      "accuracy": 0.74359,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

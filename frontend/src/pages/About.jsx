@@ -77,61 +77,18 @@ export default function About() {
 
 
   const algorithms = [
-    {
-      name: "XGBoost",
-      isCore: true,
-      desc: "Extreme Gradient Boosting. High-performance tree boosting method optimized for clinical tabular data classifications.",
-    },
-    {
-      name: "SVM (Support Vector Machine)",
-      isCore: true,
-      desc: "Linear & kernel SVM models that compute maximum-margin decision hyperplanes for outcome boundary classification.",
-    },
-    {
-      name: "Logistic Regression",
-      isCore: true,
-      desc: "Foundational probabilistic model that determines binary risk ratios using generalized linear functions.",
-    },
-    {
-      name: "Random Forest",
-      isCore: true,
-      desc: "Ensemble of bagging decision trees that aggregates predictions to prevent overfitting and improve stability.",
-    },
-    {
-      name: "Decision Tree",
-      isCore: true,
-      desc: "Base non-parametric model mapping features to hierarchical leaf nodes for explainable clinical decisions.",
-    },
-    {
-      name: "Gradient Boosting",
-      isCore: false,
-      desc: "Sequential ensemble method that iteratively fits regression trees on residual error loss gradients.",
-    },
-    {
-      name: "Extremely Randomized Trees (XRT)",
-      isCore: false,
-      desc: "Extra Trees model that increases splits randomness to reduce variance and capture non-linear relationships.",
-    },
-    {
-      name: "K-Nearest Neighbors (KNN)",
-      isCore: false,
-      desc: "Instance-based classification algorithm that maps predictions to the majority vote of neighboring data points.",
-    },
-    {
-      name: "LightGBM",
-      isCore: false,
-      desc: "Light Gradient Boosting Machine, utilizing leaf-wise tree growth for faster computation speed.",
-    },
-    {
-      name: "Bagging Classifier",
-      isCore: false,
-      desc: "Meta-estimator fitting base classifiers (like Logistic Regression) on random bootstrapped training subsets.",
-    },
-    {
-      name: "Voting & Stacking Classifiers",
-      isCore: false,
-      desc: "Hybrid meta-estimators combining predictions of multiple heterogeneous models via soft-voting and stacking.",
-    },
+    { name: "XGBoost" },
+    { name: "SVM (Support Vector Machine)" },
+    { name: "Logistic Regression" },
+    { name: "Random Forest" },
+    { name: "Decision Tree" },
+    { name: "Gradient Boosting" },
+    { name: "Extremely Randomized Trees (XRT)" },
+    { name: "K-Nearest Neighbors (KNN)" },
+    { name: "LightGBM" },
+    { name: "CatBoost" },
+    { name: "Bagging Classifier" },
+    { name: "Voting & Stacking Classifiers" },
   ];
 
   const teamMembers = [
@@ -243,12 +200,9 @@ export default function About() {
     <div>
       {/* hero */}
       <div className="heroSection">
-        <div className="heroBadge">Research Dashboard</div>
         <h1 className="heroTitle">About This Project</h1>
         <p className="heroSubtitle">
-          An AI-powered perinatal outcome prediction platform built for birth
-          cohort research combining clinical ML models with an interactive web
-          interface for real-time risk assessment.
+          An advanced AI-driven platform designed for birth cohort research. It integrates robust clinical machine learning models with an intuitive web interface to provide real-time perinatal risk assessment and outcome prediction.
         </p>
       </div>
 
@@ -283,14 +237,8 @@ export default function About() {
 
         <div className="algorithmsGrid">
           {algorithms.map((a) => (
-            <div key={a.name} className="card algoCard">
-              <div className="algoHeader">
-                <h4 className="algoTitle">{a.name}</h4>
-                <span className={`algoBadge ${a.isCore ? "badgeCore" : "badgeOther"}`}>
-                  {a.isCore ? "Core" : "Ensemble / Other"}
-                </span>
-              </div>
-              <p className="algoText">{a.desc}</p>
+            <div key={a.name} className="card algoCard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', textAlign: 'center' }}>
+              <h4 className="algoTitle" style={{ margin: 0 }}>{a.name}</h4>
             </div>
           ))}
         </div>
@@ -374,9 +322,16 @@ export default function About() {
             {[
               "Python 3.11",
               "FastAPI",
+              "Uvicorn",
               "scikit-learn",
               "XGBoost",
+              "LightGBM",
+              "CatBoost",
               "pandas",
+              "NumPy",
+              "Optuna",
+              "SHAP",
+              "imbalanced-learn",
               "React 19",
               "Vite",
               "React Router",

@@ -20,7 +20,8 @@ OUTCOME_FOLDER: dict[str, str] = {
     "feeding": "feeding",
     "nicu":"nicu",
     "iol":"iol",
-    "c_section":"c_section"
+    "c_section":"c_section",
+    "iugr":"iugr"
 }
 
 

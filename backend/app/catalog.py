@@ -43,6 +43,55 @@ def _engineer_lbw_features(values: Dict[str, Any]) -> Dict[str, Any]:
 
     return v
 
+def _engineer_iugr_features(values: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ensure IUGR input features match the numerical encoding expected by the models.
+    Maps categorical string values (if passed) to their corresponding numeric codes:
+      - education_level: None -> 0, Primary -> 1, Secondary -> 2, Higher -> 3
+      - smoking_status: No -> 0, Yes -> 1
+      - alcohol_consumption: No -> 0, Yes -> 1
+      - has_diabetes: No -> 0, Yes -> 1
+    """
+    v = dict(values)
+
+    if "smoking_status" in v:
+        val = v["smoking_status"]
+        if isinstance(val, str):
+            v["smoking_status"] = 1 if val.strip().lower() in ("yes", "1", "true") else 0
+        elif isinstance(val, (int, float)):
+            v["smoking_status"] = int(val)
+
+    if "alcohol_consumption" in v:
+        val = v["alcohol_consumption"]
+        if isinstance(val, str):
+            v["alcohol_consumption"] = 1 if val.strip().lower() in ("yes", "1", "true") else 0
+        elif isinstance(val, (int, float)):
+            v["alcohol_consumption"] = int(val)
+
+    if "education_level" in v:
+        val = v["education_level"]
+        edu_map = {"none": 0, "primary": 1, "secondary": 2, "higher": 3}
+        if isinstance(val, str):
+            val_clean = val.strip().lower()
+            if val_clean in edu_map:
+                v["education_level"] = edu_map[val_clean]
+            else:
+                try:
+                    v["education_level"] = int(val)
+                except ValueError:
+                    pass
+        elif isinstance(val, (int, float)):
+            v["education_level"] = int(val)
+
+    if "has_diabetes" in v:
+        val = v["has_diabetes"]
+        if isinstance(val, str):
+            v["has_diabetes"] = 1 if val.strip().lower() in ("yes", "1", "true") else 0
+        elif isinstance(val, (int, float)):
+            v["has_diabetes"] = int(val)
+
+    return v
+
 
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
@@ -69,7 +118,20 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "IUGR",
         "description": "Predict risk of intrauterine growth restriction.",
         "model_key": "iugr",
-        "schema": {"title": "Intrauterine Growth Restriction Inputs", "sections": []}
+        "schema": {"title": "Intrauterine Growth Restriction Inputs", "sections": [
+            {
+                "fields": [
+                        {"name": "age", "label": "Maternal Age (years)", "type": "number", "min": 15, "max": 50, "required": True, "placeholder": "e.g., 28"},
+                        {"name": "pre_pregnancy_bmi", "label": "Pre-pregnancy BMI", "type": "number", "min": 10.0, "max": 50.0, "step": 0.1, "required": True, "placeholder": "e.g., 24.5"},
+                        {"name": "education_level", "label": "Education Level", "type": "select", "required": True, "options": [{"value": 0, "label": "None"}, {"value": 1, "label": "Primary"}, {"value": 2, "label": "Secondary"}, {"value": 3, "label": "Higher"}]},
+                        {"name": "household_income", "label": "Household Income", "type": "number", "min": 0.0, "max": 1000.0, "step": 0.01, "required": True, "placeholder": "e.g., 250.0"},
+                        {"name": "number_of_prenatal_visits", "label": "Number of Prenatal Visits", "type": "number", "min": 0, "max": 20, "step": 1, "required": True, "placeholder": "e.g., 6"},
+                        {"name": "has_diabetes", "label": "Pre-existing Diabetes", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "smoking_status", "label": "Smoking Status", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]},
+                        {"name": "alcohol_consumption", "label": "Alcohol Consumption", "type": "select", "required": True, "options": [{"value": 0, "label": "No"}, {"value": 1, "label": "Yes"}]}
+                    ]
+            }
+        ]}
     },
 
     "gdm": {

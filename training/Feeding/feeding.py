@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 """
 =============================================================================
 BREASTFEEDING FEEDING PROBLEM PREDICTION — FULL CLINICAL ML PIPELINE
@@ -216,9 +223,11 @@ print("\n" + "=" * 70)
 print("  STEP 1 — LOAD DATA")
 print("=" * 70)
 
-df_raw = pd.read_csv(
-    "Breastfeeding and mental health data - open access.csv"
-)
+DATA_PATH = PROJECT_ROOT / "data" / "Feeding" / "raw" / "Breastfeeding and mental health data - open access.csv"
+df_raw = pd.read_csv(DATA_PATH)
+# df_raw = pd.read_csv(
+#     "Breastfeeding and mental health data - open access.csv"
+# )
 print(f"  Raw shape: {df_raw.shape}")
 
 

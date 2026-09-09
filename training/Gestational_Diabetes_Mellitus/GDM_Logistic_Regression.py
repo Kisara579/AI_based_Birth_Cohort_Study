@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+    
 # # ============================================
 # # LOGISTIC REGRESSION - Complete Analysis
 # # GDM Prediction with 6 Charts
@@ -464,7 +471,7 @@ print("Loading data...")
 print("")
 
 # ==================== LOAD DATA ====================
-df = pd.read_excel("Gestational Diabetic Dat Set (3).xlsx", sheet_name="GDM-Final2022")
+df = pd.read_excel("data/GDM/raw/Gestational Diabetic Dat Set (3).xlsx", sheet_name="GDM-Final2022")
 
 # ==================== EXACT MATCHING FEATURES ====================
 feature_cols = ['Age', 'No of Pregnancy', 'BMI', 'Family History',
@@ -507,6 +514,9 @@ print()
 metrics = {
     'accuracy': [], 'precision': [], 'recall': [], 'f1': [],
     'balanced_acc': [], 'mcc': [], 'auc': [], 'avg_precision': []
+}
+train_metrics_folds = {
+    'accuracy': [], 'precision': [], 'recall': [], 'f1': [], 'roc_auc': []
 }
 
 # Store confusion matrices
@@ -558,6 +568,15 @@ for train_idx, test_idx in skf.split(X, y):
     metrics['mcc'].append(mcc)
     metrics['auc'].append(auc)
     metrics['avg_precision'].append(avg_prec)
+
+    # Train metrics for overfitting analysis
+    y_train_pred = model.predict(X_train_scaled)
+    y_train_proba = model.predict_proba(X_train_scaled)[:, 1]
+    train_metrics_folds['accuracy'].append(accuracy_score(y_train_res, y_train_pred))
+    train_metrics_folds['precision'].append(precision_score(y_train_res, y_train_pred, zero_division=0))
+    train_metrics_folds['recall'].append(recall_score(y_train_res, y_train_pred, zero_division=0))
+    train_metrics_folds['f1'].append(f1_score(y_train_res, y_train_pred, zero_division=0))
+    train_metrics_folds['roc_auc'].append(roc_auc_score(y_train_res, y_train_proba))
 
     # Confusion matrix
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
@@ -635,231 +654,281 @@ for i, row in coef_df.iterrows():
     feature_idx = available_features.index(row['Feature']) + 1
     print(f"  {feature_idx}. {row['Feature']:<30} : {row['Coefficient']:.6f} ({row['Percentage']:.1f}%)")
 
-# ==================== PLOT 1: PER-FOLD PERFORMANCE TABLE ====================
-# ==================== PLOT 1: PER-FOLD PERFORMANCE LINE CHART ====================
-fig, ax = plt.subplots(figsize=(10, 6))
+# # ==================== PLOT 1: PER-FOLD PERFORMANCE TABLE ====================
+# # ==================== PLOT 1: PER-FOLD PERFORMANCE LINE CHART ====================
+# fig, ax = plt.subplots(figsize=(10, 6))
+# 
+# folds = [1, 2, 3, 4, 5]
+# 
+# # Metrics to plot
+# metrics_to_plot = {
+#     'Accuracy': metrics['accuracy'],
+#     'Precision': metrics['precision'],
+#     'Recall': metrics['recall'],
+#     'F1-Score': metrics['f1']
+# }
+# 
+# colors = {'Accuracy': '#1E88E5', 'Precision': '#43A047',
+#           'Recall': '#FB8C00', 'F1-Score': '#E53935'}
+# markers = {'Accuracy': 'o', 'Precision': 's', 'Recall': '^', 'F1-Score': 'D'}
+# 
+# # Plot each metric
+# for metric_name, values in metrics_to_plot.items():
+#     ax.plot(folds, values, marker=markers[metric_name], linewidth=2,
+#             markersize=8, label=metric_name, color=colors[metric_name])
+# 
+# # Add value labels on each point
+# for metric_name, values in metrics_to_plot.items():
+#     for i, (fold, val) in enumerate(zip(folds, values)):
+#         ax.annotate(f'{val:.2f}', (fold, val),
+#                    textcoords="offset points", xytext=(0, 10),
+#                    ha='center', fontsize=9, fontweight='bold')
+# 
+# # Customize chart
+# ax.set_xlabel('Fold Number', fontsize=12, fontweight='bold')
+# ax.set_ylabel('Score', fontsize=12, fontweight='bold')
+# ax.set_title('Per-Fold Performance Metrics', fontsize=14, fontweight='bold')
+# ax.set_xticks(folds)
+# ax.set_xticklabels([f'Fold {i}' for i in folds])
+# ax.set_ylim([0.65, 1.0])
+# ax.set_yticks(np.arange(0.65, 1.01, 0.05))
+# ax.grid(True, alpha=0.3, linestyle='--')
+# ax.legend(loc='lower right', fontsize=10)
+# 
+# # Add horizontal line at 0.80 for reference
+# ax.axhline(y=0.80, color='gray', linestyle='--', alpha=0.5, linewidth=1)
+# 
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_1_per_fold_performance.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_1_per_fold_performance.png")
+# # ==================== PLOT 2: AVERAGE METRICS BAR CHART ====================
+# fig, ax = plt.subplots(figsize=(12, 6))
+# avg_metrics = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'mcc', 'auc']
+# avg_values = [np.mean(metrics[m]) for m in avg_metrics]
+# std_values = [np.std(metrics[m]) for m in avg_metrics]
+# 
+# bars = ax.bar(avg_metrics, avg_values, yerr=std_values, capsize=5,
+#               color='steelblue', edgecolor='black', alpha=0.8)
+# ax.set_ylabel('Score', fontsize=12)
+# ax.set_title('Average Performance Metrics (Mean ± Std over 5 folds)', fontsize=14, fontweight='bold')
+# ax.set_ylim([0, 1])
+# ax.grid(True, alpha=0.3, axis='y')
+# 
+# for bar, val in zip(bars, avg_values):
+#     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
+#             f'{val:.3f}', ha='center', va='bottom', fontweight='bold')
+# 
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_2_average_metrics.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_2_average_metrics.png")
+# 
+# # ==================== PLOT 3: CONFUSION MATRIX ====================
+# fig, ax = plt.subplots(figsize=(8, 7))
+# cm = confusion_matrix(all_y_true, all_y_pred)
+# sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
+#             xticklabels=['Non-GDM', 'GDM'], yticklabels=['Non-GDM', 'GDM'],
+#             annot_kws={'size': 16})
+# ax.set_title(f'Confusion Matrix - Overall (Accuracy: {overall_acc:.4f})', fontsize=14, fontweight='bold')
+# ax.set_ylabel('Actual', fontsize=12)
+# ax.set_xlabel('Predicted', fontsize=12)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_3_confusion_matrix.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_3_confusion_matrix.png")
+# 
+# # ==================== PLOT 4: ROC CURVE ====================
+# fig, ax = plt.subplots(figsize=(8, 7))
+# 
+# # Compute ROC for each fold and plot
+# mean_fpr = np.linspace(0, 1, 100)
+# tprs = []
+# aucs = []
+# 
+# # Reset fold counter for ROC
+# skf_roc = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+# for train_idx, test_idx in skf_roc.split(X, y):
+#     X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+#     y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+# 
+#     smote = SMOTE(random_state=42)
+#     X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
+# 
+#     scaler = StandardScaler()
+#     X_train_scaled = scaler.fit_transform(X_train_res)
+#     X_test_scaled = scaler.transform(X_test)
+# 
+#     model = LogisticRegression(random_state=42, max_iter=1000)
+#     model.fit(X_train_scaled, y_train_res)
+# 
+#     y_proba = model.predict_proba(X_test_scaled)[:, 1]
+#     fpr, tpr, _ = roc_curve(y_test, y_proba)
+#     auc_val = roc_auc_score(y_test, y_proba)
+#     aucs.append(auc_val)
+# 
+#     interp_tpr = np.interp(mean_fpr, fpr, tpr)
+#     interp_tpr[0] = 0.0
+#     tprs.append(interp_tpr)
+# 
+#     ax.plot(fpr, tpr, alpha=0.3, color='blue', linewidth=1)
+# 
+# # Plot mean ROC
+# mean_tpr = np.mean(tprs, axis=0)
+# mean_tpr[-1] = 1.0
+# mean_auc = np.mean(aucs)
+# std_auc = np.std(aucs)
+# 
+# ax.plot(mean_fpr, mean_tpr, 'b-', linewidth=2, label=f'Mean ROC (AUC = {mean_auc:.4f} ± {std_auc:.4f})')
+# ax.fill_between(mean_fpr, mean_tpr - np.std(tprs, axis=0), mean_tpr + np.std(tprs, axis=0),
+#                 alpha=0.2, color='blue', label='± 1 std. dev.')
+# ax.plot([0, 1], [0, 1], 'r--', linewidth=1, label='Random Classifier')
+# 
+# ax.set_xlabel('False Positive Rate', fontsize=12)
+# ax.set_ylabel('True Positive Rate', fontsize=12)
+# ax.set_title('ROC Curves - 5-Fold Cross-Validation', fontsize=14, fontweight='bold')
+# ax.legend(loc='lower right')
+# ax.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_4_roc_curve.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_4_roc_curve.png")
+# 
+# # ==================== PLOT 5: PRECISION-RECALL CURVE ====================
+# fig, ax = plt.subplots(figsize=(8, 7))
+# 
+# # Compute PR curve for each fold
+# precisions = []
+# recalls = []
+# avg_precisions = []
+# 
+# for train_idx, test_idx in skf_roc.split(X, y):
+#     X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+#     y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+# 
+#     smote = SMOTE(random_state=42)
+#     X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
+# 
+#     scaler = StandardScaler()
+#     X_train_scaled = scaler.fit_transform(X_train_res)
+#     X_test_scaled = scaler.transform(X_test)
+# 
+#     model = LogisticRegression(random_state=42, max_iter=1000)
+#     model.fit(X_train_scaled, y_train_res)
+# 
+#     y_proba = model.predict_proba(X_test_scaled)[:, 1]
+#     precision, recall, _ = precision_recall_curve(y_test, y_proba)
+#     avg_prec = average_precision_score(y_test, y_proba)
+# 
+#     precisions.append(precision)
+#     recalls.append(recall)
+#     avg_precisions.append(avg_prec)
+# 
+#     ax.plot(recall, precision, alpha=0.3, color='green', linewidth=1)
+# 
+# # Interpolate for mean curve
+# mean_ap = np.mean(avg_precisions)
+# std_ap = np.std(avg_precisions)
+# 
+# # Plot baseline
+# ax.axhline(y=mean_ap, color='red', linestyle='--', linewidth=1,
+#            label=f'Baseline (AP = {mean_ap:.4f})')
+# 
+# ax.set_xlabel('Recall', fontsize=12)
+# ax.set_ylabel('Precision', fontsize=12)
+# ax.set_title('Precision-Recall Curves - 5-Fold CV', fontsize=14, fontweight='bold')
+# ax.legend(loc='best')
+# ax.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_5_precision_recall_curve.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_5_precision_recall_curve.png")
+# 
+# # ==================== PLOT 6: FEATURE IMPORTANCE ====================
+# fig, ax = plt.subplots(figsize=(10, 7))
+# 
+# # Sort for horizontal bar chart
+# coef_sorted = coef_df.sort_values('Coefficient', ascending=True)
+# colors = ['red' if c < 0 else 'green' for c in coef_sorted['Coefficient']]
+# 
+# bars = ax.barh(coef_sorted['Feature'], coef_sorted['Coefficient'], color=colors)
+# ax.axvline(x=0, color='black', linestyle='-', linewidth=0.5)
+# ax.set_xlabel('Coefficient Value', fontsize=12)
+# ax.set_ylabel('Feature', fontsize=12)
+# ax.set_title('Feature Importance - Logistic Regression Coefficients\n(Red=Risk Factor, Green=Protective)',
+#              fontsize=14, fontweight='bold')
+# ax.grid(True, alpha=0.3, axis='x')
+# 
+# # Add value labels
+# for bar, val in zip(bars, coef_sorted['Coefficient']):
+#     x_pos = val + (0.02 if val > 0 else -0.08)
+#     ax.text(x_pos, bar.get_y() + bar.get_height() / 2, f'{val:.3f}', va='center', fontweight='bold')
+# 
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_6_feature_importance.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_6_feature_importance.png")
+# 
+# # ==================== BONUS: FEATURE IMPORTANCE PIE CHART ====================
+# fig, ax = plt.subplots(figsize=(10, 8))
+# wedges, texts, autotexts = ax.pie(coef_df['Percentage'], labels=coef_df['Feature'],
+#                                   autopct='%1.1f%%', startangle=90,
+#                                   colors=plt.cm.Set3(np.linspace(0, 1, len(coef_df))))
+# ax.set_title('Feature Importance Distribution (by Coefficient Magnitude)', fontsize=14, fontweight='bold')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/logreg_6b_feature_importance_pie.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print(f"✓ Saved: {output_dir}/logreg_6b_feature_importance_pie.png")
 
-folds = [1, 2, 3, 4, 5]
+# ==================== SAVE MODEL ARTIFACTS ====================
+from sklearn.pipeline import Pipeline
+from shared.model_artifacts import save_model_artifacts
 
-# Metrics to plot
-metrics_to_plot = {
-    'Accuracy': metrics['accuracy'],
-    'Precision': metrics['precision'],
-    'Recall': metrics['recall'],
-    'F1-Score': metrics['f1']
+pipeline = Pipeline([('scaler', scaler_full), ('model', model_full)])
+
+y_test_arr = np.array(all_y_true)
+y_pred_arr = np.array(all_y_pred)
+y_prob_arr = np.array(all_y_proba)
+
+metrics_payload = {
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test_arr, y_pred_arr)),
+        "precision": float(precision_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "recall": float(recall_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "f1": float(f1_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test_arr, y_prob_arr))
+    },
+    "classification_report": classification_report(y_test_arr, y_pred_arr, target_names=['Non-GDM', 'GDM'], output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test_arr, y_pred_arr).tolist()
 }
 
-colors = {'Accuracy': '#1E88E5', 'Precision': '#43A047',
-          'Recall': '#FB8C00', 'F1-Score': '#E53935'}
-markers = {'Accuracy': 'o', 'Precision': 's', 'Recall': '^', 'F1-Score': 'D'}
+train_metrics = {
+    "accuracy": float(np.mean(train_metrics_folds['accuracy'])),
+    "precision": float(np.mean(train_metrics_folds['precision'])),
+    "recall": float(np.mean(train_metrics_folds['recall'])),
+    "f1": float(np.mean(train_metrics_folds['f1'])),
+    "roc_auc": float(np.mean(train_metrics_folds['roc_auc']))
+}
 
-# Plot each metric
-for metric_name, values in metrics_to_plot.items():
-    ax.plot(folds, values, marker=markers[metric_name], linewidth=2,
-            markersize=8, label=metric_name, color=colors[metric_name])
-
-# Add value labels on each point
-for metric_name, values in metrics_to_plot.items():
-    for i, (fold, val) in enumerate(zip(folds, values)):
-        ax.annotate(f'{val:.2f}', (fold, val),
-                   textcoords="offset points", xytext=(0, 10),
-                   ha='center', fontsize=9, fontweight='bold')
-
-# Customize chart
-ax.set_xlabel('Fold Number', fontsize=12, fontweight='bold')
-ax.set_ylabel('Score', fontsize=12, fontweight='bold')
-ax.set_title('Per-Fold Performance Metrics', fontsize=14, fontweight='bold')
-ax.set_xticks(folds)
-ax.set_xticklabels([f'Fold {i}' for i in folds])
-ax.set_ylim([0.65, 1.0])
-ax.set_yticks(np.arange(0.65, 1.01, 0.05))
-ax.grid(True, alpha=0.3, linestyle='--')
-ax.legend(loc='lower right', fontsize=10)
-
-# Add horizontal line at 0.80 for reference
-ax.axhline(y=0.80, color='gray', linestyle='--', alpha=0.5, linewidth=1)
-
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_1_per_fold_performance.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_1_per_fold_performance.png")
-# ==================== PLOT 2: AVERAGE METRICS BAR CHART ====================
-fig, ax = plt.subplots(figsize=(12, 6))
-avg_metrics = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'mcc', 'auc']
-avg_values = [np.mean(metrics[m]) for m in avg_metrics]
-std_values = [np.std(metrics[m]) for m in avg_metrics]
-
-bars = ax.bar(avg_metrics, avg_values, yerr=std_values, capsize=5,
-              color='steelblue', edgecolor='black', alpha=0.8)
-ax.set_ylabel('Score', fontsize=12)
-ax.set_title('Average Performance Metrics (Mean ± Std over 5 folds)', fontsize=14, fontweight='bold')
-ax.set_ylim([0, 1])
-ax.grid(True, alpha=0.3, axis='y')
-
-for bar, val in zip(bars, avg_values):
-    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
-            f'{val:.3f}', ha='center', va='bottom', fontweight='bold')
-
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_2_average_metrics.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_2_average_metrics.png")
-
-# ==================== PLOT 3: CONFUSION MATRIX ====================
-fig, ax = plt.subplots(figsize=(8, 7))
-cm = confusion_matrix(all_y_true, all_y_pred)
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
-            xticklabels=['Non-GDM', 'GDM'], yticklabels=['Non-GDM', 'GDM'],
-            annot_kws={'size': 16})
-ax.set_title(f'Confusion Matrix - Overall (Accuracy: {overall_acc:.4f})', fontsize=14, fontweight='bold')
-ax.set_ylabel('Actual', fontsize=12)
-ax.set_xlabel('Predicted', fontsize=12)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_3_confusion_matrix.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_3_confusion_matrix.png")
-
-# ==================== PLOT 4: ROC CURVE ====================
-fig, ax = plt.subplots(figsize=(8, 7))
-
-# Compute ROC for each fold and plot
-mean_fpr = np.linspace(0, 1, 100)
-tprs = []
-aucs = []
-
-# Reset fold counter for ROC
-skf_roc = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-for train_idx, test_idx in skf_roc.split(X, y):
-    X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
-    y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
-
-    smote = SMOTE(random_state=42)
-    X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
-
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train_res)
-    X_test_scaled = scaler.transform(X_test)
-
-    model = LogisticRegression(random_state=42, max_iter=1000)
-    model.fit(X_train_scaled, y_train_res)
-
-    y_proba = model.predict_proba(X_test_scaled)[:, 1]
-    fpr, tpr, _ = roc_curve(y_test, y_proba)
-    auc_val = roc_auc_score(y_test, y_proba)
-    aucs.append(auc_val)
-
-    interp_tpr = np.interp(mean_fpr, fpr, tpr)
-    interp_tpr[0] = 0.0
-    tprs.append(interp_tpr)
-
-    ax.plot(fpr, tpr, alpha=0.3, color='blue', linewidth=1)
-
-# Plot mean ROC
-mean_tpr = np.mean(tprs, axis=0)
-mean_tpr[-1] = 1.0
-mean_auc = np.mean(aucs)
-std_auc = np.std(aucs)
-
-ax.plot(mean_fpr, mean_tpr, 'b-', linewidth=2, label=f'Mean ROC (AUC = {mean_auc:.4f} ± {std_auc:.4f})')
-ax.fill_between(mean_fpr, mean_tpr - np.std(tprs, axis=0), mean_tpr + np.std(tprs, axis=0),
-                alpha=0.2, color='blue', label='± 1 std. dev.')
-ax.plot([0, 1], [0, 1], 'r--', linewidth=1, label='Random Classifier')
-
-ax.set_xlabel('False Positive Rate', fontsize=12)
-ax.set_ylabel('True Positive Rate', fontsize=12)
-ax.set_title('ROC Curves - 5-Fold Cross-Validation', fontsize=14, fontweight='bold')
-ax.legend(loc='lower right')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_4_roc_curve.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_4_roc_curve.png")
-
-# ==================== PLOT 5: PRECISION-RECALL CURVE ====================
-fig, ax = plt.subplots(figsize=(8, 7))
-
-# Compute PR curve for each fold
-precisions = []
-recalls = []
-avg_precisions = []
-
-for train_idx, test_idx in skf_roc.split(X, y):
-    X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
-    y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
-
-    smote = SMOTE(random_state=42)
-    X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
-
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train_res)
-    X_test_scaled = scaler.transform(X_test)
-
-    model = LogisticRegression(random_state=42, max_iter=1000)
-    model.fit(X_train_scaled, y_train_res)
-
-    y_proba = model.predict_proba(X_test_scaled)[:, 1]
-    precision, recall, _ = precision_recall_curve(y_test, y_proba)
-    avg_prec = average_precision_score(y_test, y_proba)
-
-    precisions.append(precision)
-    recalls.append(recall)
-    avg_precisions.append(avg_prec)
-
-    ax.plot(recall, precision, alpha=0.3, color='green', linewidth=1)
-
-# Interpolate for mean curve
-mean_ap = np.mean(avg_precisions)
-std_ap = np.std(avg_precisions)
-
-# Plot baseline
-ax.axhline(y=mean_ap, color='red', linestyle='--', linewidth=1,
-           label=f'Baseline (AP = {mean_ap:.4f})')
-
-ax.set_xlabel('Recall', fontsize=12)
-ax.set_ylabel('Precision', fontsize=12)
-ax.set_title('Precision-Recall Curves - 5-Fold CV', fontsize=14, fontweight='bold')
-ax.legend(loc='best')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_5_precision_recall_curve.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_5_precision_recall_curve.png")
-
-# ==================== PLOT 6: FEATURE IMPORTANCE ====================
-fig, ax = plt.subplots(figsize=(10, 7))
-
-# Sort for horizontal bar chart
-coef_sorted = coef_df.sort_values('Coefficient', ascending=True)
-colors = ['red' if c < 0 else 'green' for c in coef_sorted['Coefficient']]
-
-bars = ax.barh(coef_sorted['Feature'], coef_sorted['Coefficient'], color=colors)
-ax.axvline(x=0, color='black', linestyle='-', linewidth=0.5)
-ax.set_xlabel('Coefficient Value', fontsize=12)
-ax.set_ylabel('Feature', fontsize=12)
-ax.set_title('Feature Importance - Logistic Regression Coefficients\n(Red=Risk Factor, Green=Protective)',
-             fontsize=14, fontweight='bold')
-ax.grid(True, alpha=0.3, axis='x')
-
-# Add value labels
-for bar, val in zip(bars, coef_sorted['Coefficient']):
-    x_pos = val + (0.02 if val > 0 else -0.08)
-    ax.text(x_pos, bar.get_y() + bar.get_height() / 2, f'{val:.3f}', va='center', fontweight='bold')
-
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_6_feature_importance.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_6_feature_importance.png")
-
-# ==================== BONUS: FEATURE IMPORTANCE PIE CHART ====================
-fig, ax = plt.subplots(figsize=(10, 8))
-wedges, texts, autotexts = ax.pie(coef_df['Percentage'], labels=coef_df['Feature'],
-                                  autopct='%1.1f%%', startangle=90,
-                                  colors=plt.cm.Set3(np.linspace(0, 1, len(coef_df))))
-ax.set_title('Feature Importance Distribution (by Coefficient Magnitude)', fontsize=14, fontweight='bold')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/logreg_6b_feature_importance_pie.png', dpi=300, bbox_inches='tight')
-plt.close()
-print(f"✓ Saved: {output_dir}/logreg_6b_feature_importance_pie.png")
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="gdm",
+    outcome_id="gdm",
+    algorithm="logistic_regression",
+    label="Logistic Regression",
+    description="Logistic Regression classifier with SMOTE and StandardScaler for predicting Gestational Diabetes Mellitus.",
+    target_column="Class Label(GDM /Non GDM)",
+    feature_order=available_features,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="GDM (1)",
+    negative_label="Non-GDM (0)",
+    threshold=0.5,
+    y_test=y_test_arr,
+    y_prob=y_prob_arr,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
 
 # ==================== FINAL SUMMARY ====================
 print()
@@ -881,14 +950,7 @@ for i, row in coef_df.head(5).iterrows():
     feature_idx = available_features.index(row['Feature']) + 1
     print(f"   {feature_idx}. {row['Feature']:<30} : {row['Coefficient']:.4f} ({row['Percentage']:.1f}% contribution)")
 print()
-print("✅ All 6 charts have been saved:")
-print("   1. logreg_1_per_fold_performance.png - Per-fold metrics line chart")
-print("   2. logreg_2_average_metrics.png - Average metrics bar chart")
-print("   3. logreg_3_confusion_matrix.png - Confusion matrix heatmap")
-print("   4. logreg_4_roc_curve.png - ROC curves with AUC")
-print("   5. logreg_5_precision_recall_curve.png - Precision-Recall curves")
-print("   6. logreg_6_feature_importance.png - Feature importance (horizontal bar chart)")
-print("   Bonus: logreg_6b_feature_importance_pie.png - Feature importance pie chart")
+# print("✅ All 6 charts have been saved:")
 print()
 print("=" * 70)
 print("LOGISTIC REGRESSION WITH SMOTE COMPLETED SUCCESSFULLY!")

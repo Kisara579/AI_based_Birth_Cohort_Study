@@ -1,4 +1,9 @@
+import sys
+from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 """
 Support Vector Machine (SVM) for GDM Prediction (WITH SMOTE Class Balancing)
@@ -25,7 +30,7 @@ warnings.filterwarnings('ignore')
 
 # Load the dataset
 print("Loading data...")
-df = pd.read_excel("Gestational Diabetic Dat Set (3).xlsx", sheet_name="GDM-Final2022")
+df = pd.read_excel("data/GDM/raw/Gestational Diabetic Dat Set (3).xlsx", sheet_name="GDM-Final2022")
 
 print("\n" + "=" * 70)
 print("DATA SUMMARY")
@@ -73,6 +78,9 @@ all_y_proba = []
 # Store training and validation scores for overfitting detection
 train_scores = []
 val_scores = []
+train_metrics_folds = {
+    'accuracy': [], 'precision': [], 'recall': [], 'f1': [], 'roc_auc': []
+}
 
 print("\n" + "=" * 70)
 print("SVM WITH SMOTE - 5-FOLD STRATIFIED CROSS-VALIDATION")
@@ -116,7 +124,14 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
     X_train_original_scaled = scaler.transform(X_train)
 
     y_train_pred = svm_model.predict(X_train_original_scaled)
+    y_train_proba = svm_model.predict_proba(X_train_original_scaled)[:, 1]
     train_acc = accuracy_score(y_train, y_train_pred)
+
+    train_metrics_folds['accuracy'].append(train_acc)
+    train_metrics_folds['precision'].append(precision_score(y_train, y_train_pred, zero_division=0))
+    train_metrics_folds['recall'].append(recall_score(y_train, y_train_pred, zero_division=0))
+    train_metrics_folds['f1'].append(f1_score(y_train, y_train_pred, zero_division=0))
+    train_metrics_folds['roc_auc'].append(roc_auc_score(y_train, y_train_proba))
 
     # Predict on validation set
     y_pred = svm_model.predict(X_val_scaled)
@@ -263,148 +278,222 @@ print(f"   Validation Accuracy : {avg_val_acc:.4f}")
 print(f"   Gap                 : {overfitting_gap:.4f}")
 print(f"   Status              : {overfitting_status}")
 
-# ============== SAVE SEPARATE CHARTS ==============
+# # ============== SAVE SEPARATE CHARTS ==============
+# 
+# # Chart 1: Per-fold performance line chart
+# plt.figure(figsize=(10, 6))
+# folds = range(1, 6)
+# for metric in ['accuracy', 'precision', 'recall', 'f1', 'auc']:
+#     plt.plot(folds, metrics[metric], marker='o', linewidth=2, markersize=8, label=metric.capitalize())
+# plt.xlabel('Fold', fontsize=12)
+# plt.ylabel('Score', fontsize=12)
+# plt.title('SVM with SMOTE - Per-Fold Performance Metrics', fontsize=14, fontweight='bold')
+# plt.legend(loc='best', fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.xticks(folds)
+# plt.ylim([0.5, 1.0])
+# plt.tight_layout()
+# plt.savefig('svm_smote_1_per_fold_performance.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("\n✅ Saved: svm_smote_1_per_fold_performance.png")
+# 
+# # Chart 2: Average metrics bar chart with error bars
+# plt.figure(figsize=(12, 6))
+# avg_metrics = {k: np.mean(v) for k, v in metrics.items()}
+# std_metrics = {k: np.std(v) for k, v in metrics.items()}
+# metric_names = list(avg_metrics.keys())
+# avg_values = list(avg_metrics.values())
+# std_values = list(std_metrics.values())
+# 
+# bars = plt.bar(metric_names, avg_values, yerr=std_values, capsize=8,
+#                color='steelblue', edgecolor='black', alpha=0.8)
+# plt.ylabel('Score', fontsize=12)
+# plt.title('SVM with SMOTE - Average Metrics with Standard Deviation (5-fold CV)', fontsize=14, fontweight='bold')
+# plt.ylim([0, 1])
+# plt.xticks(rotation=45, ha='right')
+# for bar, val in zip(bars, avg_values):
+#     plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+#              f'{val:.3f}', ha='center', va='bottom', fontsize=9)
+# plt.grid(True, alpha=0.3, axis='y')
+# plt.tight_layout()
+# plt.savefig('svm_smote_2_average_metrics.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_2_average_metrics.png")
+# 
+# # Chart 3: Confusion matrix heatmap
+# plt.figure(figsize=(8, 7))
+# cm_display = confusion_matrix(all_y_true, all_y_pred)
+# im = plt.imshow(cm_display, interpolation='nearest', cmap='Blues')
+# plt.colorbar(im)
+# plt.title(f'SVM with SMOTE - Confusion Matrix\nAccuracy: {total_acc:.3f}', fontsize=14, fontweight='bold')
+# plt.xlabel('Predicted Label', fontsize=12)
+# plt.ylabel('True Label', fontsize=12)
+# plt.xticks([0, 1], ['Non-GDM', 'GDM'])
+# plt.yticks([0, 1], ['Non-GDM', 'GDM'])
+# for i in range(2):
+#     for j in range(2):
+#         plt.text(j, i, str(cm_display[i, j]), ha='center', va='center', fontsize=16, fontweight='bold')
+# plt.tight_layout()
+# plt.savefig('svm_smote_3_confusion_matrix.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_3_confusion_matrix.png")
+# 
+# # Chart 4: ROC curve with AUC
+# plt.figure(figsize=(8, 7))
+# fpr, tpr, _ = roc_curve(all_y_true, all_y_proba)
+# roc_auc = auc(fpr, tpr)
+# plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'SVM with SMOTE (AUC = {roc_auc:.3f})')
+# plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', label='Random Classifier (AUC = 0.500)')
+# plt.xlim([0.0, 1.0])
+# plt.ylim([0.0, 1.05])
+# plt.xlabel('False Positive Rate (1 - Specificity)', fontsize=12)
+# plt.ylabel('True Positive Rate (Sensitivity)', fontsize=12)
+# plt.title('SVM with SMOTE - ROC Curve', fontsize=14, fontweight='bold')
+# plt.legend(loc="lower right", fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig('svm_smote_4_roc_curve.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_4_roc_curve.png")
+# 
+# # Chart 5: Precision-Recall curve
+# plt.figure(figsize=(8, 7))
+# precision_curve, recall_curve, _ = precision_recall_curve(all_y_true, all_y_proba)
+# avg_precision = average_precision_score(all_y_true, all_y_proba)
+# plt.plot(recall_curve, precision_curve, color='green', lw=2,
+#          label=f'SVM with SMOTE (AP = {avg_precision:.3f})')
+# plt.xlabel('Recall', fontsize=12)
+# plt.ylabel('Precision', fontsize=12)
+# plt.title('SVM with SMOTE - Precision-Recall Curve', fontsize=14, fontweight='bold')
+# plt.legend(loc="lower left", fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.xlim([0.0, 1.0])
+# plt.ylim([0.0, 1.05])
+# plt.tight_layout()
+# plt.savefig('svm_smote_5_precision_recall_curve.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_5_precision_recall_curve.png")
+# 
+# # Chart 6: Feature importance horizontal bar chart
+# plt.figure(figsize=(10, 6))
+# top_features = feature_importance.head(5)
+# colors = plt.cm.RdYlGn_r(np.linspace(0.2, 0.8, len(top_features)))
+# bars = plt.barh(range(len(top_features)), top_features['importance'].values,
+#                 color=colors, edgecolor='black')
+# plt.yticks(range(len(top_features)), top_features['feature'].values)
+# plt.xlabel('|Coefficient| (Importance)', fontsize=12)
+# plt.title('SVM with SMOTE - Top 5 Feature Importance', fontsize=14, fontweight='bold')
+# plt.gca().invert_yaxis()
+# for i, (bar, val, pct) in enumerate(zip(bars, top_features['importance'].values, top_features['percentage'].values)):
+#     plt.text(bar.get_width() + 0.002, bar.get_y() + bar.get_height() / 2,
+#              f'{val:.4f} ({pct:.1f}%)', ha='left', va='center', fontsize=10)
+# plt.grid(True, alpha=0.3, axis='x')
+# plt.tight_layout()
+# plt.savefig('svm_smote_6_feature_importance.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_6_feature_importance.png")
+# 
+# # Chart 6b (Bonus): Feature importance pie chart
+# plt.figure(figsize=(8, 8))
+# colors = plt.cm.Set3(np.linspace(0, 1, len(top_features)))
+# plt.pie(top_features['importance'], labels=top_features['feature'], autopct='%1.1f%%',
+#         startangle=90, colors=colors, explode=[0.05] * len(top_features))
+# plt.title('SVM with SMOTE - Feature Importance Distribution', fontsize=14, fontweight='bold')
+# plt.tight_layout()
+# plt.savefig('svm_smote_6b_feature_importance_pie.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_6b_feature_importance_pie.png")
+# 
+# # Chart 7: Training vs Validation Accuracy (Overfitting plot)
+# plt.figure(figsize=(8, 6))
+# plt.plot(folds, train_scores, marker='o', linewidth=2, markersize=8, label='Training Accuracy', color='blue')
+# plt.plot(folds, val_scores, marker='s', linewidth=2, markersize=8, label='Validation Accuracy', color='red')
+# plt.xlabel('Fold', fontsize=12)
+# plt.ylabel('Accuracy', fontsize=12)
+# plt.title(f'SVM with SMOTE - Training vs Validation\nOverfitting Gap: {overfitting_gap:.4f}', fontsize=14,
+#           fontweight='bold')
+# plt.legend(loc='best', fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.xticks(folds)
+# plt.ylim([0.5, 1.0])
+# plt.tight_layout()
+# plt.savefig('svm_smote_7_overfitting_analysis.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: svm_smote_7_overfitting_analysis.png")
 
-# Chart 1: Per-fold performance line chart
-plt.figure(figsize=(10, 6))
-folds = range(1, 6)
-for metric in ['accuracy', 'precision', 'recall', 'f1', 'auc']:
-    plt.plot(folds, metrics[metric], marker='o', linewidth=2, markersize=8, label=metric.capitalize())
-plt.xlabel('Fold', fontsize=12)
-plt.ylabel('Score', fontsize=12)
-plt.title('SVM with SMOTE - Per-Fold Performance Metrics', fontsize=14, fontweight='bold')
-plt.legend(loc='best', fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.xticks(folds)
-plt.ylim([0.5, 1.0])
-plt.tight_layout()
-plt.savefig('svm_smote_1_per_fold_performance.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("\n✅ Saved: svm_smote_1_per_fold_performance.png")
+# ==================== SAVE MODEL ARTIFACTS ====================
+from sklearn.pipeline import Pipeline
+from shared.model_artifacts import save_model_artifacts
 
-# Chart 2: Average metrics bar chart with error bars
-plt.figure(figsize=(12, 6))
-avg_metrics = {k: np.mean(v) for k, v in metrics.items()}
-std_metrics = {k: np.std(v) for k, v in metrics.items()}
-metric_names = list(avg_metrics.keys())
-avg_values = list(avg_metrics.values())
-std_values = list(std_metrics.values())
+svm_final = SVC(
+    kernel='rbf',
+    C=1.0,
+    gamma='scale',
+    class_weight=None,
+    probability=True,
+    random_state=42,
+    cache_size=1000
+)
+svm_final.fit(X_resampled_scaled, y_resampled_full)
+pipeline = Pipeline([('scaler', scaler_full), ('model', svm_final)])
 
-bars = plt.bar(metric_names, avg_values, yerr=std_values, capsize=8,
-               color='steelblue', edgecolor='black', alpha=0.8)
-plt.ylabel('Score', fontsize=12)
-plt.title('SVM with SMOTE - Average Metrics with Standard Deviation (5-fold CV)', fontsize=14, fontweight='bold')
-plt.ylim([0, 1])
-plt.xticks(rotation=45, ha='right')
-for bar, val in zip(bars, avg_values):
-    plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
-             f'{val:.3f}', ha='center', va='bottom', fontsize=9)
-plt.grid(True, alpha=0.3, axis='y')
-plt.tight_layout()
-plt.savefig('svm_smote_2_average_metrics.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_2_average_metrics.png")
+y_test_arr = np.array(all_y_true)
+y_pred_arr = np.array(all_y_pred)
+y_prob_arr = np.array(all_y_proba)
 
-# Chart 3: Confusion matrix heatmap
-plt.figure(figsize=(8, 7))
-cm_display = confusion_matrix(all_y_true, all_y_pred)
-im = plt.imshow(cm_display, interpolation='nearest', cmap='Blues')
-plt.colorbar(im)
-plt.title(f'SVM with SMOTE - Confusion Matrix\nAccuracy: {total_acc:.3f}', fontsize=14, fontweight='bold')
-plt.xlabel('Predicted Label', fontsize=12)
-plt.ylabel('True Label', fontsize=12)
-plt.xticks([0, 1], ['Non-GDM', 'GDM'])
-plt.yticks([0, 1], ['Non-GDM', 'GDM'])
-for i in range(2):
-    for j in range(2):
-        plt.text(j, i, str(cm_display[i, j]), ha='center', va='center', fontsize=16, fontweight='bold')
-plt.tight_layout()
-plt.savefig('svm_smote_3_confusion_matrix.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_3_confusion_matrix.png")
+fi_items = []
+max_imp = feature_importance['importance'].max() if not feature_importance.empty and feature_importance['importance'].max() > 0 else 1.0
+for _, row in feature_importance.iterrows():
+    fi_items.append({
+        "feature": row['feature'],
+        "importance": round(float(row['importance'] / max_imp), 4)
+    })
 
-# Chart 4: ROC curve with AUC
-plt.figure(figsize=(8, 7))
-fpr, tpr, _ = roc_curve(all_y_true, all_y_proba)
-roc_auc = auc(fpr, tpr)
-plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'SVM with SMOTE (AUC = {roc_auc:.3f})')
-plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', label='Random Classifier (AUC = 0.500)')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate (1 - Specificity)', fontsize=12)
-plt.ylabel('True Positive Rate (Sensitivity)', fontsize=12)
-plt.title('SVM with SMOTE - ROC Curve', fontsize=14, fontweight='bold')
-plt.legend(loc="lower right", fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig('svm_smote_4_roc_curve.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_4_roc_curve.png")
+metrics_payload = {
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test_arr, y_pred_arr)),
+        "precision": float(precision_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "recall": float(recall_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "f1": float(f1_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test_arr, y_prob_arr))
+    },
+    "classification_report": classification_report(y_test_arr, y_pred_arr, target_names=['Non-GDM', 'GDM'], output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test_arr, y_pred_arr).tolist(),
+    "feature_importance": fi_items,
+    "feature_importance_v2": {
+        "items": fi_items,
+        "total_features": len(fi_items),
+        "features_shown": len(fi_items)
+    }
+}
 
-# Chart 5: Precision-Recall curve
-plt.figure(figsize=(8, 7))
-precision_curve, recall_curve, _ = precision_recall_curve(all_y_true, all_y_proba)
-avg_precision = average_precision_score(all_y_true, all_y_proba)
-plt.plot(recall_curve, precision_curve, color='green', lw=2,
-         label=f'SVM with SMOTE (AP = {avg_precision:.3f})')
-plt.xlabel('Recall', fontsize=12)
-plt.ylabel('Precision', fontsize=12)
-plt.title('SVM with SMOTE - Precision-Recall Curve', fontsize=14, fontweight='bold')
-plt.legend(loc="lower left", fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.tight_layout()
-plt.savefig('svm_smote_5_precision_recall_curve.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_5_precision_recall_curve.png")
+train_metrics = {
+    "accuracy": float(np.mean(train_metrics_folds['accuracy'])),
+    "precision": float(np.mean(train_metrics_folds['precision'])),
+    "recall": float(np.mean(train_metrics_folds['recall'])),
+    "f1": float(np.mean(train_metrics_folds['f1'])),
+    "roc_auc": float(np.mean(train_metrics_folds['roc_auc']))
+}
 
-# Chart 6: Feature importance horizontal bar chart
-plt.figure(figsize=(10, 6))
-top_features = feature_importance.head(5)
-colors = plt.cm.RdYlGn_r(np.linspace(0.2, 0.8, len(top_features)))
-bars = plt.barh(range(len(top_features)), top_features['importance'].values,
-                color=colors, edgecolor='black')
-plt.yticks(range(len(top_features)), top_features['feature'].values)
-plt.xlabel('|Coefficient| (Importance)', fontsize=12)
-plt.title('SVM with SMOTE - Top 5 Feature Importance', fontsize=14, fontweight='bold')
-plt.gca().invert_yaxis()
-for i, (bar, val, pct) in enumerate(zip(bars, top_features['importance'].values, top_features['percentage'].values)):
-    plt.text(bar.get_width() + 0.002, bar.get_y() + bar.get_height() / 2,
-             f'{val:.4f} ({pct:.1f}%)', ha='left', va='center', fontsize=10)
-plt.grid(True, alpha=0.3, axis='x')
-plt.tight_layout()
-plt.savefig('svm_smote_6_feature_importance.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_6_feature_importance.png")
-
-# Chart 6b (Bonus): Feature importance pie chart
-plt.figure(figsize=(8, 8))
-colors = plt.cm.Set3(np.linspace(0, 1, len(top_features)))
-plt.pie(top_features['importance'], labels=top_features['feature'], autopct='%1.1f%%',
-        startangle=90, colors=colors, explode=[0.05] * len(top_features))
-plt.title('SVM with SMOTE - Feature Importance Distribution', fontsize=14, fontweight='bold')
-plt.tight_layout()
-plt.savefig('svm_smote_6b_feature_importance_pie.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_6b_feature_importance_pie.png")
-
-# Chart 7: Training vs Validation Accuracy (Overfitting plot)
-plt.figure(figsize=(8, 6))
-plt.plot(folds, train_scores, marker='o', linewidth=2, markersize=8, label='Training Accuracy', color='blue')
-plt.plot(folds, val_scores, marker='s', linewidth=2, markersize=8, label='Validation Accuracy', color='red')
-plt.xlabel('Fold', fontsize=12)
-plt.ylabel('Accuracy', fontsize=12)
-plt.title(f'SVM with SMOTE - Training vs Validation\nOverfitting Gap: {overfitting_gap:.4f}', fontsize=14,
-          fontweight='bold')
-plt.legend(loc='best', fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.xticks(folds)
-plt.ylim([0.5, 1.0])
-plt.tight_layout()
-plt.savefig('svm_smote_7_overfitting_analysis.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: svm_smote_7_overfitting_analysis.png")
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="gdm",
+    outcome_id="gdm",
+    algorithm="svm",
+    label="Support Vector Machine",
+    description="Support Vector Machine (SVM) classifier with SMOTE and StandardScaler for predicting Gestational Diabetes Mellitus.",
+    target_column="Class Label(GDM /Non GDM)",
+    feature_order=feature_names,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="GDM (1)",
+    negative_label="Non-GDM (0)",
+    threshold=0.5,
+    y_test=y_test_arr,
+    y_prob=y_prob_arr,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
 
 print("\n" + "=" * 70)
 print("✅ ALL CHARTS SAVED SUCCESSFULLY!")

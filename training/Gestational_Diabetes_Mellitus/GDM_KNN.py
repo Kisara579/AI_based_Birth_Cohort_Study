@@ -1,4 +1,9 @@
+import sys
+from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 """
 K-Nearest Neighbors (KNN) for GDM Prediction (WITH SMOTE Class Balancing)
 Using 5-Fold Stratified Cross-Validation with Standard Scaling
@@ -21,7 +26,7 @@ warnings.filterwarnings('ignore')
 
 # Load the dataset
 print("Loading data...")
-df = pd.read_excel("Gestational Diabetic Dat Set (3).xlsx", sheet_name="GDM-Final2022")
+df = pd.read_excel("data/GDM/raw/Gestational Diabetic Dat Set (3).xlsx", sheet_name="GDM-Final2022")
 
 print("\n" + "="*70)
 print("DATA SUMMARY")
@@ -69,6 +74,9 @@ all_y_proba = []
 # Store training and validation scores for overfitting detection
 train_scores = []
 val_scores = []
+train_metrics_folds = {
+    'accuracy': [], 'precision': [], 'recall': [], 'f1': [], 'roc_auc': []
+}
 
 print("\n" + "="*70)
 print("KNN WITH SMOTE - 5-FOLD STRATIFIED CROSS-VALIDATION")
@@ -110,14 +118,21 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
 
     # Predict on training set (for overfitting detection)
     y_train_pred = knn_model.predict(X_train_scaled)
+    y_train_proba = knn_model.predict_proba(X_train_scaled)[:, 1]
     train_acc = accuracy_score(y_train_resampled, y_train_pred)
+
+    train_scores.append(train_acc)
+    train_metrics_folds['accuracy'].append(train_acc)
+    train_metrics_folds['precision'].append(precision_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['recall'].append(recall_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['f1'].append(f1_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['roc_auc'].append(roc_auc_score(y_train_resampled, y_train_proba))
 
     # Predict on validation set
     y_pred = knn_model.predict(X_val_scaled)
     y_proba = knn_model.predict_proba(X_val_scaled)[:, 1]
     val_acc = accuracy_score(y_val, y_pred)
 
-    train_scores.append(train_acc)
     val_scores.append(val_acc)
 
     # Calculate metrics
@@ -232,137 +247,177 @@ print(f"   Validation Accuracy : {avg_val_acc:.4f}")
 print(f"   Gap                 : {overfitting_gap:.4f}")
 print(f"   Status              : {overfitting_status}")
 
-# ============== SAVE SEPARATE CHARTS ==============
+# ============== SAVE SEPARATE CHARTS (COMMENTED OUT) ==============
+# # Chart 1: Per-fold performance line chart
+# plt.figure(figsize=(10, 6))
+# folds = range(1, 6)
+# for metric in ['accuracy', 'precision', 'recall', 'f1', 'auc']:
+#     plt.plot(folds, metrics[metric], marker='o', linewidth=2, markersize=8, label=metric.capitalize())
+# plt.xlabel('Fold', fontsize=12)
+# plt.ylabel('Score', fontsize=12)
+# plt.title('KNN with SMOTE - Per-Fold Performance Metrics', fontsize=14, fontweight='bold')
+# plt.legend(loc='best', fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.xticks(folds)
+# plt.ylim([0.5, 1.0])
+# plt.tight_layout()
+# plt.savefig('knn_smote_1_per_fold_performance.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("\n✅ Saved: knn_smote_1_per_fold_performance.png")
 
-# Chart 1: Per-fold performance line chart
-plt.figure(figsize=(10, 6))
-folds = range(1, 6)
-for metric in ['accuracy', 'precision', 'recall', 'f1', 'auc']:
-    plt.plot(folds, metrics[metric], marker='o', linewidth=2, markersize=8, label=metric.capitalize())
-plt.xlabel('Fold', fontsize=12)
-plt.ylabel('Score', fontsize=12)
-plt.title('KNN with SMOTE - Per-Fold Performance Metrics', fontsize=14, fontweight='bold')
-plt.legend(loc='best', fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.xticks(folds)
-plt.ylim([0.5, 1.0])
-plt.tight_layout()
-plt.savefig('knn_smote_1_per_fold_performance.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("\n✅ Saved: knn_smote_1_per_fold_performance.png")
+# # Chart 2: Average metrics bar chart with error bars
+# plt.figure(figsize=(12, 6))
+# avg_metrics = {k: np.mean(v) for k, v in metrics.items()}
+# std_metrics = {k: np.std(v) for k, v in metrics.items()}
+# metric_names = list(avg_metrics.keys())
+# avg_values = list(avg_metrics.values())
+# std_values = list(std_metrics.values())
+# bars = plt.bar(metric_names, avg_values, yerr=std_values, capsize=8,
+#                color='steelblue', edgecolor='black', alpha=0.8)
+# plt.ylabel('Score', fontsize=12)
+# plt.title('KNN with SMOTE - Average Metrics with Standard Deviation (5-fold CV)', fontsize=14, fontweight='bold')
+# plt.ylim([0, 1])
+# plt.xticks(rotation=45, ha='right')
+# for bar, val in zip(bars, avg_values):
+#     plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+#              f'{val:.3f}', ha='center', va='bottom', fontsize=9)
+# plt.grid(True, alpha=0.3, axis='y')
+# plt.tight_layout()
+# plt.savefig('knn_smote_2_average_metrics.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: knn_smote_2_average_metrics.png")
 
-# Chart 2: Average metrics bar chart with error bars
-plt.figure(figsize=(12, 6))
-avg_metrics = {k: np.mean(v) for k, v in metrics.items()}
-std_metrics = {k: np.std(v) for k, v in metrics.items()}
-metric_names = list(avg_metrics.keys())
-avg_values = list(avg_metrics.values())
-std_values = list(std_metrics.values())
+# # Chart 3: Confusion matrix heatmap
+# plt.figure(figsize=(8, 7))
+# cm_display = confusion_matrix(all_y_true, all_y_pred)
+# im = plt.imshow(cm_display, interpolation='nearest', cmap='Blues')
+# plt.colorbar(im)
+# plt.title(f'KNN with SMOTE - Confusion Matrix\nAccuracy: {total_acc:.3f}', fontsize=14, fontweight='bold')
+# plt.xlabel('Predicted Label', fontsize=12)
+# plt.ylabel('True Label', fontsize=12)
+# plt.xticks([0, 1], ['Non-GDM', 'GDM'])
+# plt.yticks([0, 1], ['Non-GDM', 'GDM'])
+# for i in range(2):
+#     for j in range(2):
+#         plt.text(j, i, str(cm_display[i, j]), ha='center', va='center', fontsize=16, fontweight='bold')
+# plt.tight_layout()
+# plt.savefig('knn_smote_3_confusion_matrix.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: knn_smote_3_confusion_matrix.png")
 
-bars = plt.bar(metric_names, avg_values, yerr=std_values, capsize=8,
-               color='steelblue', edgecolor='black', alpha=0.8)
-plt.ylabel('Score', fontsize=12)
-plt.title('KNN with SMOTE - Average Metrics with Standard Deviation (5-fold CV)', fontsize=14, fontweight='bold')
-plt.ylim([0, 1])
-plt.xticks(rotation=45, ha='right')
-for bar, val in zip(bars, avg_values):
-    plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
-             f'{val:.3f}', ha='center', va='bottom', fontsize=9)
-plt.grid(True, alpha=0.3, axis='y')
-plt.tight_layout()
-plt.savefig('knn_smote_2_average_metrics.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: knn_smote_2_average_metrics.png")
+# # Chart 4: ROC curve with AUC
+# plt.figure(figsize=(8, 7))
+# fpr, tpr, _ = roc_curve(all_y_true, all_y_proba)
+# roc_auc = auc(fpr, tpr)
+# plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'KNN with SMOTE (AUC = {roc_auc:.3f})')
+# plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', label='Random Classifier (AUC = 0.500)')
+# plt.xlim([0.0, 1.0])
+# plt.ylim([0.0, 1.05])
+# plt.xlabel('False Positive Rate (1 - Specificity)', fontsize=12)
+# plt.ylabel('True Positive Rate (Sensitivity)', fontsize=12)
+# plt.title('KNN with SMOTE - ROC Curve', fontsize=14, fontweight='bold')
+# plt.legend(loc="lower right", fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig('knn_smote_4_roc_curve.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: knn_smote_4_roc_curve.png")
 
-# Chart 3: Confusion matrix heatmap
-plt.figure(figsize=(8, 7))
-cm_display = confusion_matrix(all_y_true, all_y_pred)
-im = plt.imshow(cm_display, interpolation='nearest', cmap='Blues')
-plt.colorbar(im)
-plt.title(f'KNN with SMOTE - Confusion Matrix\nAccuracy: {total_acc:.3f}', fontsize=14, fontweight='bold')
-plt.xlabel('Predicted Label', fontsize=12)
-plt.ylabel('True Label', fontsize=12)
-plt.xticks([0, 1], ['Non-GDM', 'GDM'])
-plt.yticks([0, 1], ['Non-GDM', 'GDM'])
-for i in range(2):
-    for j in range(2):
-        plt.text(j, i, str(cm_display[i, j]), ha='center', va='center', fontsize=16, fontweight='bold')
-plt.tight_layout()
-plt.savefig('knn_smote_3_confusion_matrix.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: knn_smote_3_confusion_matrix.png")
+# # Chart 5: Precision-Recall curve
+# plt.figure(figsize=(8, 7))
+# precision_curve, recall_curve, _ = precision_recall_curve(all_y_true, all_y_proba)
+# avg_precision = average_precision_score(all_y_true, all_y_proba)
+# plt.plot(recall_curve, precision_curve, color='green', lw=2,
+#          label=f'KNN with SMOTE (AP = {avg_precision:.3f})')
+# plt.xlabel('Recall', fontsize=12)
+# plt.ylabel('Precision', fontsize=12)
+# plt.title('KNN with SMOTE - Precision-Recall Curve', fontsize=14, fontweight='bold')
+# plt.legend(loc="lower left", fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.xlim([0.0, 1.0])
+# plt.ylim([0.0, 1.05])
+# plt.tight_layout()
+# plt.savefig('knn_smote_5_precision_recall_curve.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: knn_smote_5_precision_recall_curve.png")
 
-# Chart 4: ROC curve with AUC
-plt.figure(figsize=(8, 7))
-fpr, tpr, _ = roc_curve(all_y_true, all_y_proba)
-roc_auc = auc(fpr, tpr)
-plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'KNN with SMOTE (AUC = {roc_auc:.3f})')
-plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', label='Random Classifier (AUC = 0.500)')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate (1 - Specificity)', fontsize=12)
-plt.ylabel('True Positive Rate (Sensitivity)', fontsize=12)
-plt.title('KNN with SMOTE - ROC Curve', fontsize=14, fontweight='bold')
-plt.legend(loc="lower right", fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig('knn_smote_4_roc_curve.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: knn_smote_4_roc_curve.png")
+# # Chart 6: Training vs Validation Accuracy (Overfitting plot)
+# plt.figure(figsize=(8, 6))
+# plt.plot(folds, train_scores, marker='o', linewidth=2, markersize=8, label='Training Accuracy', color='blue')
+# plt.plot(folds, val_scores, marker='s', linewidth=2, markersize=8, label='Validation Accuracy', color='red')
+# plt.xlabel('Fold', fontsize=12)
+# plt.ylabel('Accuracy', fontsize=12)
+# plt.title(f'KNN with SMOTE - Training vs Validation\nOverfitting Gap: {overfitting_gap:.4f}', fontsize=14, fontweight='bold')
+# plt.legend(loc='best', fontsize=10)
+# plt.grid(True, alpha=0.3)
+# plt.xticks(folds)
+# plt.ylim([0.5, 1.0])
+# plt.tight_layout()
+# plt.savefig('knn_smote_6_overfitting_analysis.png', dpi=300, bbox_inches='tight')
+# plt.close()
+# print("✅ Saved: knn_smote_6_overfitting_analysis.png")
 
-# Chart 5: Precision-Recall curve
-plt.figure(figsize=(8, 7))
-precision_curve, recall_curve, _ = precision_recall_curve(all_y_true, all_y_proba)
-avg_precision = average_precision_score(all_y_true, all_y_proba)
-plt.plot(recall_curve, precision_curve, color='green', lw=2,
-         label=f'KNN with SMOTE (AP = {avg_precision:.3f})')
-plt.xlabel('Recall', fontsize=12)
-plt.ylabel('Precision', fontsize=12)
-plt.title('KNN with SMOTE - Precision-Recall Curve', fontsize=14, fontweight='bold')
-plt.legend(loc="lower left", fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.tight_layout()
-plt.savefig('knn_smote_5_precision_recall_curve.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: knn_smote_5_precision_recall_curve.png")
+from sklearn.pipeline import Pipeline
+from shared.model_artifacts import save_model_artifacts
 
-# Chart 6: Training vs Validation Accuracy (Overfitting plot)
-plt.figure(figsize=(8, 6))
-plt.plot(folds, train_scores, marker='o', linewidth=2, markersize=8, label='Training Accuracy', color='blue')
-plt.plot(folds, val_scores, marker='s', linewidth=2, markersize=8, label='Validation Accuracy', color='red')
-plt.xlabel('Fold', fontsize=12)
-plt.ylabel('Accuracy', fontsize=12)
-plt.title(f'KNN with SMOTE - Training vs Validation\nOverfitting Gap: {overfitting_gap:.4f}', fontsize=14, fontweight='bold')
-plt.legend(loc='best', fontsize=10)
-plt.grid(True, alpha=0.3)
-plt.xticks(folds)
-plt.ylim([0.5, 1.0])
-plt.tight_layout()
-plt.savefig('knn_smote_6_overfitting_analysis.png', dpi=300, bbox_inches='tight')
-plt.close()
-print("✅ Saved: knn_smote_6_overfitting_analysis.png")
+# Fit final model on full data with SMOTE and StandardScaler
+smote_full = SMOTE(random_state=42)
+X_resampled_full, y_resampled_full = smote_full.fit_resample(X, y)
+scaler_full = StandardScaler()
+X_scaled_full = scaler_full.fit_transform(X_resampled_full)
 
-print("\n" + "="*70)
-print("✅ ALL CHARTS SAVED SUCCESSFULLY!")
-print("="*70)
-print("\n📁 Generated files:")
-print("   1. knn_smote_1_per_fold_performance.png - Per-fold metrics line chart")
-print("   2. knn_smote_2_average_metrics.png - Average metrics bar chart with error bars")
-print("   3. knn_smote_3_confusion_matrix.png - Confusion matrix heatmap")
-print("   4. knn_smote_4_roc_curve.png - ROC curve with AUC score")
-print("   5. knn_smote_5_precision_recall_curve.png - Precision-Recall curve")
-print("   6. knn_smote_6_overfitting_analysis.png - Training vs Validation accuracy plot")
+final_knn = KNeighborsClassifier(
+    n_neighbors=5,
+    weights='uniform',
+    algorithm='auto',
+    leaf_size=30,
+    p=2,
+    metric='minkowski',
+    n_jobs=-1
+)
+final_knn.fit(X_scaled_full, y_resampled_full)
+pipeline = Pipeline([('scaler', scaler_full), ('model', final_knn)])
 
-print("\n" + "="*70)
-print("MODEL CONFIGURATION")
-print("="*70)
-print("• Algorithm: K-Nearest Neighbors (KNN)")
-print("• Class Balancing: SMOTE (Synthetic Minority Over-sampling Technique)")
-print("• n_neighbors: 5")
-print("• weights: uniform")
-print("• metric: Euclidean (p=2)")
-print("• algorithm: auto")
-print("• Scaling: StandardScaler (REQUIRED for KNN)")
-print("• Cross-Validation: 5-Fold Stratified")
+y_test_arr = np.array(all_y_true)
+y_pred_arr = np.array(all_y_pred)
+y_prob_arr = np.array(all_y_proba)
+
+metrics_payload = {
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test_arr, y_pred_arr)),
+        "precision": float(precision_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "recall": float(recall_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "f1": float(f1_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test_arr, y_prob_arr))
+    },
+    "classification_report": classification_report(y_test_arr, y_pred_arr, target_names=['Non-GDM', 'GDM'], output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test_arr, y_pred_arr).tolist()
+}
+
+train_metrics = {
+    "accuracy": float(np.mean(train_metrics_folds['accuracy'])),
+    "precision": float(np.mean(train_metrics_folds['precision'])),
+    "recall": float(np.mean(train_metrics_folds['recall'])),
+    "f1": float(np.mean(train_metrics_folds['f1'])),
+    "roc_auc": float(np.mean(train_metrics_folds['roc_auc']))
+}
+
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="gdm",
+    outcome_id="gdm",
+    algorithm="knn",
+    label="K-Nearest Neighbors",
+    description="K-Nearest Neighbors (KNN) classifier with SMOTE and StandardScaler for predicting Gestational Diabetes Mellitus.",
+    target_column="Class Label(GDM /Non GDM)",
+    feature_order=feature_names,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="GDM (1)",
+    negative_label="Non-GDM (0)",
+    threshold=0.5,
+    y_test=y_test_arr,
+    y_prob=y_prob_arr,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)

@@ -1,13 +1,12 @@
-
-"""
-KNN for IUGR Prediction - WITH SMOTE
-"""
 import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+"""
+KNN for IUGR Prediction - WITH SMOTE
+"""
 
     
 import pandas as pd
@@ -132,6 +131,9 @@ fold_metrics = {
     'accuracy': [], 'precision': [], 'recall': [], 'f1': [],
     'balanced_acc': [], 'mcc': [], 'auc': []
 }
+train_metrics_folds = {
+    'accuracy': [], 'precision': [], 'recall': [], 'f1': [], 'roc_auc': []
+}
 
 all_y_true = []
 all_y_pred = []
@@ -168,10 +170,16 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
     y_pred = knn_model.predict(X_val_scaled)
     y_pred_proba = knn_model.predict_proba(X_val_scaled)[:, 1]
 
-    # Training score
-    y_train_pred = knn_model.predict(X_train_resampled)
-    train_acc = accuracy_score(y_train_resampled, y_train_pred)
+    # Training score (on original training data)
+    y_train_pred = knn_model.predict(X_train_scaled)
+    y_train_proba = knn_model.predict_proba(X_train_scaled)[:, 1]
+    train_acc = accuracy_score(y_train, y_train_pred)
     train_scores.append(train_acc)
+    train_metrics_folds['accuracy'].append(train_acc)
+    train_metrics_folds['precision'].append(precision_score(y_train, y_train_pred, zero_division=0))
+    train_metrics_folds['recall'].append(recall_score(y_train, y_train_pred, zero_division=0))
+    train_metrics_folds['f1'].append(f1_score(y_train, y_train_pred, zero_division=0))
+    train_metrics_folds['roc_auc'].append(roc_auc_score(y_train, y_train_proba))
 
     # Validation metrics
     val_acc = accuracy_score(y_val, y_pred)
@@ -283,146 +291,208 @@ print("\n" + "=" * 70)
 print("STEP 7: GENERATING VISUALIZATIONS")
 print("=" * 70)
 
-# Chart 1: Per-fold performance
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-metrics_to_plot = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'auc']
-colors = plt.cm.Set3(np.linspace(0, 1, len(metrics_to_plot)))
+# # Chart 1: Per-fold performance
+# fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+# metrics_to_plot = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'auc']
+# colors = plt.cm.Set3(np.linspace(0, 1, len(metrics_to_plot)))
+# 
+# for i, metric in enumerate(metrics_to_plot):
+#     row = i // 3
+#     col = i % 3
+#     ax = axes[row, col]
+#     values = fold_metrics[metric]
+#     ax.plot(range(1, 6), values, 'o-', color=colors[i], linewidth=2, markersize=8)
+#     ax.axhline(y=np.mean(values), color='red', linestyle='--', label=f'Mean: {np.mean(values):.3f}')
+#     ax.set_xlabel('Fold')
+#     ax.set_ylabel(metric.capitalize())
+#     ax.set_title(f'{metric.capitalize()} per Fold')
+#     ax.set_xticks(range(1, 6))
+#     ax.legend()
+#     ax.grid(True, alpha=0.3)
+# plt.suptitle('KNN with SMOTE - Per-Fold Performance', fontsize=14)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/knn_smote_1_per_fold_performance.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 2: Average metrics bar chart
+# avg_metrics = {
+#     'Accuracy': np.mean(fold_metrics['accuracy']),
+#     'Precision': np.mean(fold_metrics['precision']),
+#     'Recall': np.mean(fold_metrics['recall']),
+#     'F1-Score': np.mean(fold_metrics['f1']),
+#     'Balanced Acc': np.mean(fold_metrics['balanced_acc']),
+#     'AUC': np.mean(fold_metrics['auc'])
+# }
+# std_metrics = {
+#     'Accuracy': np.std(fold_metrics['accuracy']),
+#     'Precision': np.std(fold_metrics['precision']),
+#     'Recall': np.std(fold_metrics['recall']),
+#     'F1-Score': np.std(fold_metrics['f1']),
+#     'Balanced Acc': np.std(fold_metrics['balanced_acc']),
+#     'AUC': np.std(fold_metrics['auc'])
+# }
+# 
+# fig, ax = plt.subplots(figsize=(12, 6))
+# bars = ax.bar(avg_metrics.keys(), avg_metrics.values(), yerr=std_metrics.values(),
+#               capsize=5, color='steelblue', edgecolor='black')
+# ax.set_ylabel('Score')
+# ax.set_title('KNN with SMOTE - Average Performance Metrics')
+# ax.set_ylim(0, 1.1)
+# ax.grid(True, alpha=0.3, axis='y')
+# for bar, val in zip(bars, avg_metrics.values()):
+#     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02, f'{val:.3f}', ha='center', va='bottom',
+#             fontsize=9)
+# plt.xticks(rotation=45, ha='right')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/knn_smote_2_average_metrics.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 3: Confusion matrix heatmap
+# fig, ax = plt.subplots(figsize=(8, 6))
+# sns.heatmap(overall_cm, annot=True, fmt='d', cmap='Blues',
+#             xticklabels=['Normal', 'Low/IUGR'],
+#             yticklabels=['Normal', 'Low/IUGR'], ax=ax)
+# ax.set_xlabel('Predicted')
+# ax.set_ylabel('Actual')
+# ax.set_title('KNN with SMOTE - Confusion Matrix')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/knn_smote_3_confusion_matrix.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 4: ROC Curve
+# fig, ax = plt.subplots(figsize=(8, 6))
+# for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
+#     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+#     y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+# 
+#     scaler_fold = StandardScaler()
+#     X_train_scaled = scaler_fold.fit_transform(X_train)
+#     X_val_scaled = scaler_fold.transform(X_val)
+# 
+#     smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
+#     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
+# 
+#     knn_model = KNeighborsClassifier(n_neighbors=5, weights='distance', metric='euclidean')
+#     knn_model.fit(X_train_resampled, y_train_resampled)
+# 
+#     y_pred_proba = knn_model.predict_proba(X_val_scaled)[:, 1]
+#     fpr, tpr, _ = roc_curve(y_val, y_pred_proba)
+#     auc_val = roc_auc_score(y_val, y_pred_proba)
+#     ax.plot(fpr, tpr, lw=1, alpha=0.7, label=f'Fold {fold} (AUC={auc_val:.3f})')
+# 
+# ax.plot([0, 1], [0, 1], 'k--', lw=2, label='Random')
+# ax.set_xlabel('False Positive Rate')
+# ax.set_ylabel('True Positive Rate')
+# ax.set_title('KNN with SMOTE - ROC Curves')
+# ax.legend(loc='lower right')
+# ax.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/knn_smote_4_roc_curve.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 5: Precision-Recall Curve
+# fig, ax = plt.subplots(figsize=(8, 6))
+# for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
+#     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+#     y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+# 
+#     scaler_fold = StandardScaler()
+#     X_train_scaled = scaler_fold.fit_transform(X_train)
+#     X_val_scaled = scaler_fold.transform(X_val)
+# 
+#     smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
+#     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
+# 
+#     knn_model = KNeighborsClassifier(n_neighbors=5, weights='distance', metric='euclidean')
+#     knn_model.fit(X_train_resampled, y_train_resampled)
+# 
+#     y_pred_proba = knn_model.predict_proba(X_val_scaled)[:, 1]
+#     precision_vals, recall_vals, _ = precision_recall_curve(y_val, y_pred_proba)
+#     ax.plot(recall_vals, precision_vals, lw=1, alpha=0.7, label=f'Fold {fold}')
+# 
+# ax.set_xlabel('Recall')
+# ax.set_ylabel('Precision')
+# ax.set_title('KNN with SMOTE - Precision-Recall Curve')
+# ax.legend(loc='best')
+# ax.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/knn_smote_5_precision_recall_curve.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 6: Placeholder for KNN feature importance (since KNN doesn't have built-in importance)
+# fig, ax = plt.subplots(figsize=(10, 6))
+# ax.text(0.5, 0.5,
+#         'KNN does not provide built-in feature importance\n\nUse Permutation Importance or\nFeature Selection methods instead',
+#         ha='center', va='center', fontsize=14, transform=ax.transAxes)
+# ax.set_title('KNN with SMOTE - Feature Importance (Not Available)')
+# ax.axis('off')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/knn_smote_6_feature_importance.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # print(f"\n✓ All 6 charts saved to '{output_dir}/'")
 
-for i, metric in enumerate(metrics_to_plot):
-    row = i // 3
-    col = i % 3
-    ax = axes[row, col]
-    values = fold_metrics[metric]
-    ax.plot(range(1, 6), values, 'o-', color=colors[i], linewidth=2, markersize=8)
-    ax.axhline(y=np.mean(values), color='red', linestyle='--', label=f'Mean: {np.mean(values):.3f}')
-    ax.set_xlabel('Fold')
-    ax.set_ylabel(metric.capitalize())
-    ax.set_title(f'{metric.capitalize()} per Fold')
-    ax.set_xticks(range(1, 6))
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-plt.suptitle('KNN with SMOTE - Per-Fold Performance', fontsize=14)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/knn_smote_1_per_fold_performance.png', dpi=150, bbox_inches='tight')
-plt.close()
+# ==================== SAVE MODEL ARTIFACTS ====================
+from sklearn.pipeline import Pipeline
+from shared.model_artifacts import save_model_artifacts
 
-# Chart 2: Average metrics bar chart
-avg_metrics = {
-    'Accuracy': np.mean(fold_metrics['accuracy']),
-    'Precision': np.mean(fold_metrics['precision']),
-    'Recall': np.mean(fold_metrics['recall']),
-    'F1-Score': np.mean(fold_metrics['f1']),
-    'Balanced Acc': np.mean(fold_metrics['balanced_acc']),
-    'AUC': np.mean(fold_metrics['auc'])
+scaler_full = StandardScaler()
+X_scaled = scaler_full.fit_transform(X)
+smote_final = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
+X_resampled_final, y_resampled_final = smote_final.fit_resample(X_scaled, y)
+
+final_knn = KNeighborsClassifier(
+    n_neighbors=5,
+    weights='distance',
+    metric='euclidean',
+    n_jobs=-1
+)
+final_knn.fit(X_resampled_final, y_resampled_final)
+pipeline = Pipeline([('scaler', scaler_full), ('model', final_knn)])
+
+y_test_arr = np.array(all_y_true)
+y_pred_arr = np.array(all_y_pred)
+y_prob_arr = np.array(all_y_pred_proba)
+
+metrics_payload = {
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test_arr, y_pred_arr)),
+        "precision": float(precision_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "recall": float(recall_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "f1": float(f1_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test_arr, y_prob_arr))
+    },
+    "classification_report": classification_report(y_test_arr, y_pred_arr, target_names=['Normal', 'Low/IUGR'], output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test_arr, y_pred_arr).tolist()
 }
-std_metrics = {
-    'Accuracy': np.std(fold_metrics['accuracy']),
-    'Precision': np.std(fold_metrics['precision']),
-    'Recall': np.std(fold_metrics['recall']),
-    'F1-Score': np.std(fold_metrics['f1']),
-    'Balanced Acc': np.std(fold_metrics['balanced_acc']),
-    'AUC': np.std(fold_metrics['auc'])
+
+train_metrics = {
+    "accuracy": float(np.mean(train_metrics_folds['accuracy'])),
+    "precision": float(np.mean(train_metrics_folds['precision'])),
+    "recall": float(np.mean(train_metrics_folds['recall'])),
+    "f1": float(np.mean(train_metrics_folds['f1'])),
+    "roc_auc": float(np.mean(train_metrics_folds['roc_auc']))
 }
 
-fig, ax = plt.subplots(figsize=(12, 6))
-bars = ax.bar(avg_metrics.keys(), avg_metrics.values(), yerr=std_metrics.values(),
-              capsize=5, color='steelblue', edgecolor='black')
-ax.set_ylabel('Score')
-ax.set_title('KNN with SMOTE - Average Performance Metrics')
-ax.set_ylim(0, 1.1)
-ax.grid(True, alpha=0.3, axis='y')
-for bar, val in zip(bars, avg_metrics.values()):
-    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02, f'{val:.3f}', ha='center', va='bottom',
-            fontsize=9)
-plt.xticks(rotation=45, ha='right')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/knn_smote_2_average_metrics.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 3: Confusion matrix heatmap
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(overall_cm, annot=True, fmt='d', cmap='Blues',
-            xticklabels=['Normal', 'Low/IUGR'],
-            yticklabels=['Normal', 'Low/IUGR'], ax=ax)
-ax.set_xlabel('Predicted')
-ax.set_ylabel('Actual')
-ax.set_title('KNN with SMOTE - Confusion Matrix')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/knn_smote_3_confusion_matrix.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 4: ROC Curve
-fig, ax = plt.subplots(figsize=(8, 6))
-for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-
-    scaler_fold = StandardScaler()
-    X_train_scaled = scaler_fold.fit_transform(X_train)
-    X_val_scaled = scaler_fold.transform(X_val)
-
-    smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
-
-    knn_model = KNeighborsClassifier(n_neighbors=5, weights='distance', metric='euclidean')
-    knn_model.fit(X_train_resampled, y_train_resampled)
-
-    y_pred_proba = knn_model.predict_proba(X_val_scaled)[:, 1]
-    fpr, tpr, _ = roc_curve(y_val, y_pred_proba)
-    auc_val = roc_auc_score(y_val, y_pred_proba)
-    ax.plot(fpr, tpr, lw=1, alpha=0.7, label=f'Fold {fold} (AUC={auc_val:.3f})')
-
-ax.plot([0, 1], [0, 1], 'k--', lw=2, label='Random')
-ax.set_xlabel('False Positive Rate')
-ax.set_ylabel('True Positive Rate')
-ax.set_title('KNN with SMOTE - ROC Curves')
-ax.legend(loc='lower right')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/knn_smote_4_roc_curve.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 5: Precision-Recall Curve
-fig, ax = plt.subplots(figsize=(8, 6))
-for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-
-    scaler_fold = StandardScaler()
-    X_train_scaled = scaler_fold.fit_transform(X_train)
-    X_val_scaled = scaler_fold.transform(X_val)
-
-    smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
-
-    knn_model = KNeighborsClassifier(n_neighbors=5, weights='distance', metric='euclidean')
-    knn_model.fit(X_train_resampled, y_train_resampled)
-
-    y_pred_proba = knn_model.predict_proba(X_val_scaled)[:, 1]
-    precision_vals, recall_vals, _ = precision_recall_curve(y_val, y_pred_proba)
-    ax.plot(recall_vals, precision_vals, lw=1, alpha=0.7, label=f'Fold {fold}')
-
-ax.set_xlabel('Recall')
-ax.set_ylabel('Precision')
-ax.set_title('KNN with SMOTE - Precision-Recall Curve')
-ax.legend(loc='best')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/knn_smote_5_precision_recall_curve.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 6: Placeholder for KNN feature importance (since KNN doesn't have built-in importance)
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.text(0.5, 0.5,
-        'KNN does not provide built-in feature importance\n\nUse Permutation Importance or\nFeature Selection methods instead',
-        ha='center', va='center', fontsize=14, transform=ax.transAxes)
-ax.set_title('KNN with SMOTE - Feature Importance (Not Available)')
-ax.axis('off')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/knn_smote_6_feature_importance.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-print(f"\n✓ All 6 charts saved to '{output_dir}/'")
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="iugr",
+    outcome_id="iugr",
+    algorithm="knn",
+    label="K-Nearest Neighbors",
+    description="K-Nearest Neighbors (KNN) classifier with SMOTE and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+    target_column="birth_weight_category",
+    feature_order=feature_names,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="Low/IUGR (1)",
+    negative_label="Normal (0)",
+    threshold=0.5,
+    y_test=y_test_arr,
+    y_prob=y_prob_arr,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
 
 # ============================================================================
 # FINAL SUMMARY

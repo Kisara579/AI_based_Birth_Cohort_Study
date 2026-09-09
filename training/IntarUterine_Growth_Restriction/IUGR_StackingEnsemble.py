@@ -1,14 +1,16 @@
-"""
-STACKING ENSEMBLE FOR IUGR PREDICTION (2 MODELS)
-Combines: Logistic Regression + SMOTE and Random Forest + SMOTE
-Meta-Learner: Logistic Regression
-"""
 import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+    
+"""
+STACKING ENSEMBLE FOR IUGR PREDICTION (2 MODELS)
+Combines: Logistic Regression + SMOTE and Random Forest + SMOTE
+Meta-Learner: Logistic Regression
+"""
+
 
     
 import pandas as pd
@@ -193,6 +195,9 @@ fold_metrics = {
     'accuracy': [], 'precision': [], 'recall': [], 'f1': [],
     'balanced_acc': [], 'mcc': [], 'auc': []
 }
+train_metrics_folds = {
+    'accuracy': [], 'precision': [], 'recall': [], 'f1': [], 'roc_auc': []
+}
 
 # Store all predictions for final aggregation
 all_y_true = []
@@ -242,8 +247,14 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
 
     # Training score (for overfitting detection)
     y_train_pred = fold_stacking.predict(X_train_resampled)
+    y_train_proba = fold_stacking.predict_proba(X_train_resampled)[:, 1]
     train_acc = accuracy_score(y_train_resampled, y_train_pred)
     train_scores.append(train_acc)
+    train_metrics_folds['accuracy'].append(train_acc)
+    train_metrics_folds['precision'].append(precision_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['recall'].append(recall_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['f1'].append(f1_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['roc_auc'].append(roc_auc_score(y_train_resampled, y_train_proba))
 
     # Validation accuracy
     val_acc = accuracy_score(y_val, y_pred)
@@ -372,6 +383,8 @@ final_rf.fit(X_resampled_final, y_resampled_final)
 
 importance = final_rf.feature_importances_
 sorted_idx = np.argsort(importance)[::-1]
+sorted_importance = importance[sorted_idx]
+sorted_features = [feature_names[i] for i in sorted_idx]
 
 print("\nFeature importance (by gain from Random Forest component):")
 for i, idx in enumerate(sorted_idx):
@@ -379,223 +392,221 @@ for i, idx in enumerate(sorted_idx):
         f"  {i + 1}. {feature_names[idx]:30s} : {importance[idx]:.4f} ({importance[idx] / sum(importance) * 100:.1f}%)")
 
 # ============================================================================
-# STEP 8: GENERATING 6 CHARTS
+# STEP 8: GENERATING 6 CHARTS (COMMENTED OUT)
 # ============================================================================
 
-print("\n" + "=" * 70)
-print("STEP 8: GENERATING VISUALIZATIONS")
-print("=" * 70)
-
-# Set style for better-looking plots
-plt.style.use('seaborn-v0_8-darkgrid')
-
-# Chart 1: Per-fold performance (2 rows, 3 columns)
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-metrics_to_plot = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'auc']
-colors = plt.cm.Set3(np.linspace(0, 1, len(metrics_to_plot)))
-
-for i, metric in enumerate(metrics_to_plot):
-    row = i // 3
-    col = i % 3
-    ax = axes[row, col]
-    values = fold_metrics[metric]
-    ax.plot(range(1, 6), values, 'o-', color=colors[i], linewidth=2, markersize=8)
-    ax.axhline(y=np.mean(values), color='red', linestyle='--', label=f'Mean: {np.mean(values):.3f}')
-    ax.set_xlabel('Fold')
-    ax.set_ylabel(metric.capitalize())
-    ax.set_title(f'{metric.capitalize()} per Fold')
-    ax.set_xticks(range(1, 6))
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-plt.suptitle('Stacking Ensemble (LR+RF) - Per-Fold Performance', fontsize=14, fontweight='bold')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/stacking_2models_1_per_fold_performance.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 2: Average metrics bar chart
-avg_metrics = {
-    'Accuracy': np.mean(fold_metrics['accuracy']),
-    'Precision': np.mean(fold_metrics['precision']),
-    'Recall': np.mean(fold_metrics['recall']),
-    'F1-Score': np.mean(fold_metrics['f1']),
-    'Balanced Acc': np.mean(fold_metrics['balanced_acc']),
-    'AUC': np.mean(fold_metrics['auc'])
-}
-std_metrics = {
-    'Accuracy': np.std(fold_metrics['accuracy']),
-    'Precision': np.std(fold_metrics['precision']),
-    'Recall': np.std(fold_metrics['recall']),
-    'F1-Score': np.std(fold_metrics['f1']),
-    'Balanced Acc': np.std(fold_metrics['balanced_acc']),
-    'AUC': np.std(fold_metrics['auc'])
-}
-
-fig, ax = plt.subplots(figsize=(12, 6))
-bars = ax.bar(avg_metrics.keys(), avg_metrics.values(), yerr=std_metrics.values(),
-              capsize=5, color='steelblue', edgecolor='black')
-ax.set_ylabel('Score')
-ax.set_title('Stacking Ensemble (LR+RF) - Average Performance Metrics', fontweight='bold')
-ax.set_ylim(0, 1.1)
-ax.grid(True, alpha=0.3, axis='y')
-for bar, val in zip(bars, avg_metrics.values()):
-    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
-            f'{val:.3f}', ha='center', va='bottom', fontsize=9)
-plt.xticks(rotation=45, ha='right')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/stacking_2models_2_average_metrics.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 3: Confusion matrix heatmap
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(overall_cm, annot=True, fmt='d', cmap='Blues',
-            xticklabels=['Normal', 'Low/IUGR'],
-            yticklabels=['Normal', 'Low/IUGR'], ax=ax)
-ax.set_xlabel('Predicted')
-ax.set_ylabel('Actual')
-ax.set_title('Stacking Ensemble (LR+RF) - Confusion Matrix', fontweight='bold')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/stacking_2models_3_confusion_matrix.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 4: ROC Curve with all folds
-fig, ax = plt.subplots(figsize=(8, 6))
-
-# Plot individual fold ROC curves
-for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-
-    scaler_fold = StandardScaler()
-    X_train_scaled = scaler_fold.fit_transform(X_train)
-    X_val_scaled = scaler_fold.transform(X_val)
-
-    smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
-
-    fold_logreg = LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)
-    fold_rf = RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
-                                     min_samples_leaf=3, random_state=RANDOM_STATE)
-
-    fold_stacking = StackingClassifier(
-        estimators=[('lr', fold_logreg), ('rf', fold_rf)],
-        final_estimator=LogisticRegression(solver='liblinear', random_state=RANDOM_STATE),
-        cv=5,
-        stack_method='predict_proba'
-    )
-    fold_stacking.fit(X_train_resampled, y_train_resampled)
-
-    y_pred_proba = fold_stacking.predict_proba(X_val_scaled)[:, 1]
-    fpr, tpr, _ = roc_curve(y_val, y_pred_proba)
-    auc_val = roc_auc_score(y_val, y_pred_proba)
-    ax.plot(fpr, tpr, lw=1, alpha=0.5, label=f'Fold {fold} (AUC={auc_val:.3f})')
-
-# Calculate and plot mean ROC curve
-mean_fpr = np.linspace(0, 1, 100)
-mean_tpr = 0
-
-for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-
-    scaler_fold = StandardScaler()
-    X_train_scaled = scaler_fold.fit_transform(X_train)
-    X_val_scaled = scaler_fold.transform(X_val)
-
-    smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
-
-    fold_logreg = LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)
-    fold_rf = RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
-                                     min_samples_leaf=3, random_state=RANDOM_STATE)
-
-    fold_stacking = StackingClassifier(
-        estimators=[('lr', fold_logreg), ('rf', fold_rf)],
-        final_estimator=LogisticRegression(solver='liblinear', random_state=RANDOM_STATE),
-        cv=5,
-        stack_method='predict_proba'
-    )
-    fold_stacking.fit(X_train_resampled, y_train_resampled)
-
-    y_pred_proba = fold_stacking.predict_proba(X_val_scaled)[:, 1]
-    fpr, tpr, _ = roc_curve(y_val, y_pred_proba)
-    mean_tpr += np.interp(mean_fpr, fpr, tpr)
-
-mean_tpr /= 5
-mean_auc = np.mean(fold_metrics['auc'])
-ax.plot(mean_fpr, mean_tpr, 'b-', lw=2, label=f'Mean ROC (AUC={mean_auc:.3f})', color='darkred')
-
-ax.plot([0, 1], [0, 1], 'k--', lw=2, label='Random Classifier')
-ax.set_xlabel('False Positive Rate (1 - Specificity)')
-ax.set_ylabel('True Positive Rate (Sensitivity)')
-ax.set_title('Stacking Ensemble (LR+RF) - ROC Curves', fontweight='bold')
-ax.legend(loc='lower right')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/stacking_2models_4_roc_curve.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 5: Precision-Recall Curve
-fig, ax = plt.subplots(figsize=(8, 6))
-for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-
-    scaler_fold = StandardScaler()
-    X_train_scaled = scaler_fold.fit_transform(X_train)
-    X_val_scaled = scaler_fold.transform(X_val)
-
-    smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
-
-    fold_logreg = LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)
-    fold_rf = RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
-                                     min_samples_leaf=3, random_state=RANDOM_STATE)
-
-    fold_stacking = StackingClassifier(
-        estimators=[('lr', fold_logreg), ('rf', fold_rf)],
-        final_estimator=LogisticRegression(solver='liblinear', random_state=RANDOM_STATE),
-        cv=5,
-        stack_method='predict_proba'
-    )
-    fold_stacking.fit(X_train_resampled, y_train_resampled)
-
-    y_pred_proba = fold_stacking.predict_proba(X_val_scaled)[:, 1]
-    precision_vals, recall_vals, _ = precision_recall_curve(y_val, y_pred_proba)
-    ax.plot(recall_vals, precision_vals, lw=1, alpha=0.5, label=f'Fold {fold}')
-
-ax.set_xlabel('Recall (Sensitivity)')
-ax.set_ylabel('Precision (Positive Predictive Value)')
-ax.set_title('Stacking Ensemble (LR+RF) - Precision-Recall Curve', fontweight='bold')
-ax.legend(loc='best')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/stacking_2models_5_precision_recall_curve.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# Chart 6: Feature importance bar chart
-fig, ax = plt.subplots(figsize=(10, 6))
-sorted_importance = importance[sorted_idx]
-sorted_features = [feature_names[i] for i in sorted_idx]
-colors_bar = plt.cm.coolwarm(np.linspace(0.3, 0.9, len(sorted_features)))
-bars = ax.barh(range(len(sorted_features)), sorted_importance, color=colors_bar, edgecolor='black')
-ax.set_yticks(range(len(sorted_features)))
-ax.set_yticklabels(sorted_features)
-ax.set_xlabel('Importance Score')
-ax.set_title('Stacking Ensemble (LR+RF) - Feature Importance (Random Forest)', fontweight='bold')
-ax.invert_yaxis()
-for bar, val in zip(bars, sorted_importance):
-    ax.text(val + 0.01, bar.get_y() + bar.get_height() / 2, f'{val:.3f}', va='center')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/stacking_2models_6_feature_importance.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-print(f"\n✓ All 6 charts saved to '{output_dir}/'")
-print("  1. stacking_2models_1_per_fold_performance.png")
-print("  2. stacking_2models_2_average_metrics.png")
-print("  3. stacking_2models_3_confusion_matrix.png")
-print("  4. stacking_2models_4_roc_curve.png")
-print("  5. stacking_2models_5_precision_recall_curve.png")
-print("  6. stacking_2models_6_feature_importance.png")
+# print("\n" + "=" * 70)
+# print("STEP 8: GENERATING VISUALIZATIONS")
+# print("=" * 70)
+# 
+# # Set style for better-looking plots
+# plt.style.use('seaborn-v0_8-darkgrid')
+# 
+# # Chart 1: Per-fold performance (2 rows, 3 columns)
+# fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+# metrics_to_plot = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'auc']
+# colors = plt.cm.Set3(np.linspace(0, 1, len(metrics_to_plot)))
+# 
+# for i, metric in enumerate(metrics_to_plot):
+#     row = i // 3
+#     col = i % 3
+#     ax = axes[row, col]
+#     values = fold_metrics[metric]
+#     ax.plot(range(1, 6), values, 'o-', color=colors[i], linewidth=2, markersize=8)
+#     ax.axhline(y=np.mean(values), color='red', linestyle='--', label=f'Mean: {np.mean(values):.3f}')
+#     ax.set_xlabel('Fold')
+#     ax.set_ylabel(metric.capitalize())
+#     ax.set_title(f'{metric.capitalize()} per Fold')
+#     ax.set_xticks(range(1, 6))
+#     ax.legend()
+#     ax.grid(True, alpha=0.3)
+# plt.suptitle('Stacking Ensemble (LR+RF) - Per-Fold Performance', fontsize=14, fontweight='bold')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/stacking_2models_1_per_fold_performance.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 2: Average metrics bar chart
+# avg_metrics = {
+#     'Accuracy': np.mean(fold_metrics['accuracy']),
+#     'Precision': np.mean(fold_metrics['precision']),
+#     'Recall': np.mean(fold_metrics['recall']),
+#     'F1-Score': np.mean(fold_metrics['f1']),
+#     'Balanced Acc': np.mean(fold_metrics['balanced_acc']),
+#     'AUC': np.mean(fold_metrics['auc'])
+# }
+# std_metrics = {
+#     'Accuracy': np.std(fold_metrics['accuracy']),
+#     'Precision': np.std(fold_metrics['precision']),
+#     'Recall': np.std(fold_metrics['recall']),
+#     'F1-Score': np.std(fold_metrics['f1']),
+#     'Balanced Acc': np.std(fold_metrics['balanced_acc']),
+#     'AUC': np.std(fold_metrics['auc'])
+# }
+# 
+# fig, ax = plt.subplots(figsize=(12, 6))
+# bars = ax.bar(avg_metrics.keys(), avg_metrics.values(), yerr=std_metrics.values(),
+#               capsize=5, color='steelblue', edgecolor='black')
+# ax.set_ylabel('Score')
+# ax.set_title('Stacking Ensemble (LR+RF) - Average Performance Metrics', fontweight='bold')
+# ax.set_ylim(0, 1.1)
+# ax.grid(True, alpha=0.3, axis='y')
+# for bar, val in zip(bars, avg_metrics.values()):
+#     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
+#             f'{val:.3f}', ha='center', va='bottom', fontsize=9)
+# plt.xticks(rotation=45, ha='right')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/stacking_2models_2_average_metrics.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 3: Confusion matrix heatmap
+# fig, ax = plt.subplots(figsize=(8, 6))
+# sns.heatmap(overall_cm, annot=True, fmt='d', cmap='Blues',
+#             xticklabels=['Normal', 'Low/IUGR'],
+#             yticklabels=['Normal', 'Low/IUGR'], ax=ax)
+# ax.set_xlabel('Predicted')
+# ax.set_ylabel('Actual')
+# ax.set_title('Stacking Ensemble (LR+RF) - Confusion Matrix', fontweight='bold')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/stacking_2models_3_confusion_matrix.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 4: ROC Curve with all folds
+# fig, ax = plt.subplots(figsize=(8, 6))
+# 
+# # Plot individual fold ROC curves
+# for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
+#     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+#     y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+# 
+#     scaler_fold = StandardScaler()
+#     X_train_scaled = scaler_fold.fit_transform(X_train)
+#     X_val_scaled = scaler_fold.transform(X_val)
+# 
+#     smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
+#     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
+# 
+#     fold_logreg = LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)
+#     fold_rf = RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
+#                                      min_samples_leaf=3, random_state=RANDOM_STATE)
+# 
+#     fold_stacking = StackingClassifier(
+#         estimators=[('lr', fold_logreg), ('rf', fold_rf)],
+#         final_estimator=LogisticRegression(solver='liblinear', random_state=RANDOM_STATE),
+#         cv=5,
+#         stack_method='predict_proba'
+#     )
+#     fold_stacking.fit(X_train_resampled, y_train_resampled)
+# 
+#     y_pred_proba = fold_stacking.predict_proba(X_val_scaled)[:, 1]
+#     fpr, tpr, _ = roc_curve(y_val, y_pred_proba)
+#     auc_val = roc_auc_score(y_val, y_pred_proba)
+#     ax.plot(fpr, tpr, lw=1, alpha=0.5, label=f'Fold {fold} (AUC={auc_val:.3f})')
+# 
+# # Calculate and plot mean ROC curve
+# mean_fpr = np.linspace(0, 1, 100)
+# mean_tpr = 0
+# 
+# for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
+#     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+#     y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+# 
+#     scaler_fold = StandardScaler()
+#     X_train_scaled = scaler_fold.fit_transform(X_train)
+#     X_val_scaled = scaler_fold.transform(X_val)
+# 
+#     smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
+#     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
+# 
+#     fold_logreg = LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)
+#     fold_rf = RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
+#                                      min_samples_leaf=3, random_state=RANDOM_STATE)
+# 
+#     fold_stacking = StackingClassifier(
+#         estimators=[('lr', fold_logreg), ('rf', fold_rf)],
+#         final_estimator=LogisticRegression(solver='liblinear', random_state=RANDOM_STATE),
+#         cv=5,
+#         stack_method='predict_proba'
+#     )
+#     fold_stacking.fit(X_train_resampled, y_train_resampled)
+# 
+#     y_pred_proba = fold_stacking.predict_proba(X_val_scaled)[:, 1]
+#     fpr, tpr, _ = roc_curve(y_val, y_pred_proba)
+#     mean_tpr += np.interp(mean_fpr, fpr, tpr)
+# 
+# mean_tpr /= 5
+# mean_auc = np.mean(fold_metrics['auc'])
+# ax.plot(mean_fpr, mean_tpr, 'b-', lw=2, label=f'Mean ROC (AUC={mean_auc:.3f})', color='darkred')
+# 
+# ax.plot([0, 1], [0, 1], 'k--', lw=2, label='Random Classifier')
+# ax.set_xlabel('False Positive Rate (1 - Specificity)')
+# ax.set_ylabel('True Positive Rate (Sensitivity)')
+# ax.set_title('Stacking Ensemble (LR+RF) - ROC Curves', fontweight='bold')
+# ax.legend(loc='lower right')
+# ax.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/stacking_2models_4_roc_curve.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 5: Precision-Recall Curve
+# fig, ax = plt.subplots(figsize=(8, 6))
+# for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
+#     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+#     y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+# 
+#     scaler_fold = StandardScaler()
+#     X_train_scaled = scaler_fold.fit_transform(X_train)
+#     X_val_scaled = scaler_fold.transform(X_val)
+# 
+#     smote = SMOTE(random_state=RANDOM_STATE, k_neighbors=3)
+#     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
+# 
+#     fold_logreg = LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)
+#     fold_rf = RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
+#                                      min_samples_leaf=3, random_state=RANDOM_STATE)
+# 
+#     fold_stacking = StackingClassifier(
+#         estimators=[('lr', fold_logreg), ('rf', fold_rf)],
+#         final_estimator=LogisticRegression(solver='liblinear', random_state=RANDOM_STATE),
+#         cv=5,
+#         stack_method='predict_proba'
+#     )
+#     fold_stacking.fit(X_train_resampled, y_train_resampled)
+# 
+#     y_pred_proba = fold_stacking.predict_proba(X_val_scaled)[:, 1]
+#     precision_vals, recall_vals, _ = precision_recall_curve(y_val, y_pred_proba)
+#     ax.plot(recall_vals, precision_vals, lw=1, alpha=0.5, label=f'Fold {fold}')
+# 
+# ax.set_xlabel('Recall (Sensitivity)')
+# ax.set_ylabel('Precision (Positive Predictive Value)')
+# ax.set_title('Stacking Ensemble (LR+RF) - Precision-Recall Curve', fontweight='bold')
+# ax.legend(loc='best')
+# ax.grid(True, alpha=0.3)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/stacking_2models_5_precision_recall_curve.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # Chart 6: Feature importance bar chart
+# # fig, ax = plt.subplots(figsize=(10, 6))
+# # colors_bar = plt.cm.coolwarm(np.linspace(0.3, 0.9, len(sorted_features)))
+# # bars = ax.barh(range(len(sorted_features)), sorted_importance, color=colors_bar, edgecolor='black')
+# # ax.set_yticks(range(len(sorted_features)))
+# # ax.set_yticklabels(sorted_features)
+# # ax.set_xlabel('Importance Score')
+# # ax.set_title('Stacking Ensemble (LR+RF) - Feature Importance (Random Forest)', fontweight='bold')
+# # ax.invert_yaxis()
+# # for bar, val in zip(bars, sorted_importance):
+# #     ax.text(val + 0.01, bar.get_y() + bar.get_height() / 2, f'{val:.3f}', va='center')
+# # plt.tight_layout()
+# # plt.savefig(f'{output_dir}/stacking_2models_6_feature_importance.png', dpi=150, bbox_inches='tight')
+# # plt.close()
+# 
+# # print(f"\n✓ All 6 charts saved to '{output_dir}/'")
+# # print("  1. stacking_2models_1_per_fold_performance.png")
+# # print("  2. stacking_2models_2_average_metrics.png")
+# # print("  3. stacking_2models_3_confusion_matrix.png")
+# # print("  4. stacking_2models_4_roc_curve.png")
+# # print("  5. stacking_2models_5_precision_recall_curve.png")
+# # print("  6. stacking_2models_6_feature_importance.png")
 
 # ============================================================================
 # STEP 9: THRESHOLD TUNING FOR CLINICAL USE
@@ -672,6 +683,82 @@ print(f"\n✓ Optimal threshold for maximum recall: {best_recall_thresh:.2f}")
 print(f"  Recall at threshold 0.5: {default_recall:.4f}")
 print(f"  Recall at threshold {best_recall_thresh:.2f}: {best_recall_value:.4f}")
 print(f"  Improvement: {(best_recall_value - default_recall) * 100:.1f}% more IUGR cases detected")
+
+# ==================== SAVE MODEL ARTIFACTS ====================
+from sklearn.pipeline import Pipeline
+from shared.model_artifacts import save_model_artifacts
+
+final_deploy_model = StackingClassifier(
+    estimators=[
+        ('lr', LogisticRegression(solver='liblinear', max_iter=1000, C=1.0, random_state=RANDOM_STATE)),
+        ('rf', RandomForestClassifier(n_estimators=100, max_depth=5, min_samples_split=5,
+                                      min_samples_leaf=3, random_state=RANDOM_STATE))
+    ],
+    final_estimator=LogisticRegression(solver='liblinear', max_iter=1000, random_state=RANDOM_STATE),
+    cv=5,
+    stack_method='predict_proba'
+)
+final_deploy_model.fit(X_resampled_full, y_resampled_full)
+
+pipeline = Pipeline([('scaler', scaler_full), ('model', final_deploy_model)])
+
+y_test_arr = np.array(all_y_true)
+y_pred_arr = np.array(all_y_pred)
+y_prob_arr = np.array(all_y_pred_proba)
+
+fi_items = []
+max_imp = float(np.max(importance)) if np.max(importance) > 0 else 1.0
+for i in sorted_idx:
+    fi_items.append({
+        "feature": feature_names[i],
+        "importance": round(float(importance[i] / max_imp), 4)
+    })
+
+metrics_payload = {
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test_arr, y_pred_arr)),
+        "precision": float(precision_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "recall": float(recall_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "f1": float(f1_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test_arr, y_prob_arr))
+    },
+    "classification_report": classification_report(y_test_arr, y_pred_arr, target_names=['Normal', 'Low/IUGR'], output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test_arr, y_pred_arr).tolist(),
+    "feature_importance": fi_items,
+    "feature_importance_v2": {
+        "items": fi_items,
+        "total_features": len(fi_items),
+        "features_shown": len(fi_items)
+    }
+}
+
+train_metrics = {
+    "accuracy": float(np.mean(train_metrics_folds['accuracy'])),
+    "precision": float(np.mean(train_metrics_folds['precision'])),
+    "recall": float(np.mean(train_metrics_folds['recall'])),
+    "f1": float(np.mean(train_metrics_folds['f1'])),
+    "roc_auc": float(np.mean(train_metrics_folds['roc_auc']))
+}
+
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="iugr",
+    outcome_id="iugr",
+    algorithm="stacking_ensemble(LR+RF)",
+    label="Stacking Ensemble(LR+RF)",
+    description="Stacking Ensemble combining Logistic Regression and Random Forest with Logistic Regression meta-learner, SMOTE and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+    target_column="birth_weight_category",
+    feature_order=feature_names,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="Low/IUGR (1)",
+    negative_label="Normal (0)",
+    threshold=0.5,
+    y_test=y_test_arr,
+    y_prob=y_prob_arr,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
 
 # ============================================================================
 # FINAL SUMMARY

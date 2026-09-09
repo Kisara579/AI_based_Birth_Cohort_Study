@@ -1,0 +1,20 @@
+{
+  "outcome": "iugr",
+  "outcome_id": "iugr",
+  "algorithm": "gradient_boosting",
+  "target_column": "birth_weight_category",
+  "positive_label": "Low/IUGR (1)",
+  "negative_label": "Normal (0)",
+  "feature_order": [
+    "age",
+    "has_diabetes",
+    "household_income",
+    "education_level",
+    "number_of_prenatal_visits",
+    "pre_pregnancy_bmi",
+    "smoking_status",
+    "alcohol_consumption"
+  ],
+  "categorical_features": [],
+  "threshold": 0.5
+}

@@ -1,4 +1,9 @@
+import sys
+from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 """
 XGBoost for IUGR Prediction - WITH SMOTE (External Class Balancing)
@@ -141,6 +146,9 @@ fold_metrics = {
     'accuracy': [], 'precision': [], 'recall': [], 'f1': [],
     'balanced_acc': [], 'mcc': [], 'auc': []
 }
+train_metrics_folds = {
+    'accuracy': [], 'precision': [], 'recall': [], 'f1': [], 'roc_auc': []
+}
 
 fold_confusion_matrices = []
 all_y_true = []
@@ -183,6 +191,15 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
     # Predict
     y_pred = xgb_model.predict(X_val_scaled)
     y_pred_proba = xgb_model.predict_proba(X_val_scaled)[:, 1]
+
+    # Train metrics for overfitting analysis
+    y_train_pred = xgb_model.predict(X_train_resampled)
+    y_train_proba = xgb_model.predict_proba(X_train_resampled)[:, 1]
+    train_metrics_folds['accuracy'].append(accuracy_score(y_train_resampled, y_train_pred))
+    train_metrics_folds['precision'].append(precision_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['recall'].append(recall_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['f1'].append(f1_score(y_train_resampled, y_train_pred, zero_division=0))
+    train_metrics_folds['roc_auc'].append(roc_auc_score(y_train_resampled, y_train_proba))
 
     # Store for aggregation
     all_y_true.extend(y_val)
@@ -280,114 +297,164 @@ final_model.fit(X_resampled_final, y_resampled_final)
 
 importance = final_model.feature_importances_
 sorted_idx = np.argsort(importance)[::-1]
+sorted_importance = importance[sorted_idx]
+sorted_features = [feature_names[i] for i in sorted_idx]
 
 print("\nFeature importance (by gain):")
 for i, idx in enumerate(sorted_idx):
     print(f"  {i+1}. {feature_names[idx]:30s} : {importance[idx]:.4f} ({importance[idx]/sum(importance)*100:.1f}%)")
 
 # ============================================================================
-# STEP 6: VISUALIZATIONS (Fixed 2x3 grid)
+# STEP 6: VISUALIZATIONS (COMMENTED OUT)
 # ============================================================================
 
-print("\n" + "="*70)
-print("STEP 6: GENERATING VISUALIZATIONS")
-print("="*70)
+# print("\n" + "="*70)
+# print("STEP 6: GENERATING VISUALIZATIONS")
+# print("="*70)
+# 
+# # 1. Per-fold performance (2 rows, 3 columns for 6 metrics)
+# fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+# metrics_to_plot = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'auc']
+# colors = plt.cm.Set3(np.linspace(0, 1, len(metrics_to_plot)))
+# 
+# for i, metric in enumerate(metrics_to_plot):
+#     row = i // 3
+#     col = i % 3
+#     ax = axes[row, col]
+#     values = fold_metrics[metric]
+#     ax.plot(range(1, 6), values, 'o-', color=colors[i], linewidth=2, markersize=8)
+#     ax.axhline(y=np.mean(values), color='red', linestyle='--', label=f'Mean: {np.mean(values):.3f}')
+#     ax.set_xlabel('Fold')
+#     ax.set_ylabel(metric.capitalize())
+#     ax.set_title(f'{metric.capitalize()} per Fold')
+#     ax.set_xticks(range(1, 6))
+#     ax.legend()
+#     ax.grid(True, alpha=0.3)
+# plt.suptitle('XGBoost with SMOTE - Per-Fold Performance', fontsize=14)
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/xgboost_smote_1_per_fold_performance.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # 2. Average metrics bar chart
+# avg_metrics = {
+#     'Accuracy': np.mean(fold_metrics['accuracy']),
+#     'Precision': np.mean(fold_metrics['precision']),
+#     'Recall': np.mean(fold_metrics['recall']),
+#     'F1-Score': np.mean(fold_metrics['f1']),
+#     'Balanced Acc': np.mean(fold_metrics['balanced_acc']),
+#     'AUC': np.mean(fold_metrics['auc'])
+# }
+# std_metrics = {
+#     'Accuracy': np.std(fold_metrics['accuracy']),
+#     'Precision': np.std(fold_metrics['precision']),
+#     'Recall': np.std(fold_metrics['recall']),
+#     'F1-Score': np.std(fold_metrics['f1']),
+#     'Balanced Acc': np.std(fold_metrics['balanced_acc']),
+#     'AUC': np.std(fold_metrics['auc'])
+# }
+# 
+# fig, ax = plt.subplots(figsize=(12, 6))
+# bars = ax.bar(avg_metrics.keys(), avg_metrics.values(), yerr=std_metrics.values(),
+#               capsize=5, color='steelblue', edgecolor='black')
+# ax.set_ylabel('Score')
+# ax.set_title('XGBoost with SMOTE - Average Performance Metrics')
+# ax.set_ylim(0, 1.1)
+# ax.grid(True, alpha=0.3, axis='y')
+# for bar, val in zip(bars, avg_metrics.values()):
+#     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02,
+#             f'{val:.3f}', ha='center', va='bottom', fontsize=9)
+# plt.xticks(rotation=45, ha='right')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/xgboost_smote_2_average_metrics.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # 3. Confusion matrix heatmap
+# fig, ax = plt.subplots(figsize=(8, 6))
+# sns.heatmap(overall_cm, annot=True, fmt='d', cmap='Blues',
+#             xticklabels=['Normal', 'Low/IUGR'],
+#             yticklabels=['Normal', 'Low/IUGR'], ax=ax)
+# ax.set_xlabel('Predicted')
+# ax.set_ylabel('Actual')
+# ax.set_title('XGBoost with SMOTE - Overall Confusion Matrix')
+# plt.tight_layout()
+# plt.savefig(f'{output_dir}/xgboost_smote_3_confusion_matrix.png', dpi=150, bbox_inches='tight')
+# plt.close()
+# 
+# # 4. Feature importance bar chart
+# # fig, ax = plt.subplots(figsize=(10, 6))
+# # bars = ax.barh(range(len(sorted_features)), sorted_importance, color='coral', edgecolor='black')
+# # ax.set_yticks(range(len(sorted_features)))
+# # ax.set_yticklabels(sorted_features)
+# # ax.set_xlabel('Importance Score')
+# # ax.set_title('XGBoost with SMOTE - Feature Importance')
+# # ax.invert_yaxis()
+# # for bar, val in zip(bars, sorted_importance):
+# #     ax.text(val + 0.01, bar.get_y() + bar.get_height()/2, f'{val:.3f}', va='center')
+# # plt.tight_layout()
+# # plt.savefig(f'{output_dir}/xgboost_smote_4_feature_importance.png', dpi=150, bbox_inches='tight')
+# # plt.close()
+# 
+# # 5. Feature importance pie chart
+# # fig, ax = plt.subplots(figsize=(10, 8))
+# # colors_pie = plt.cm.Set3(np.linspace(0, 1, len(sorted_features)))
+# # wedges, texts, autotexts = ax.pie(sorted_importance, labels=sorted_features, autopct='%1.1f%%',
+# #                                     colors=colors_pie, startangle=90)
+# # ax.set_title('XGBoost with SMOTE - Feature Importance Distribution')
+# # plt.tight_layout()
+# # plt.savefig(f'{output_dir}/xgboost_smote_5_feature_importance_pie.png', dpi=150, bbox_inches='tight')
+# # plt.close()
+# 
+# # print(f"\n✓ All charts saved to '{output_dir}/'")
 
-# 1. Per-fold performance (2 rows, 3 columns for 6 metrics)
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-metrics_to_plot = ['accuracy', 'precision', 'recall', 'f1', 'balanced_acc', 'auc']
-colors = plt.cm.Set3(np.linspace(0, 1, len(metrics_to_plot)))
+# ==================== SAVE MODEL ARTIFACTS ====================
+from sklearn.pipeline import Pipeline
+from shared.model_artifacts import save_model_artifacts
 
-for i, metric in enumerate(metrics_to_plot):
-    row = i // 3
-    col = i % 3
-    ax = axes[row, col]
-    values = fold_metrics[metric]
-    ax.plot(range(1, 6), values, 'o-', color=colors[i], linewidth=2, markersize=8)
-    ax.axhline(y=np.mean(values), color='red', linestyle='--', label=f'Mean: {np.mean(values):.3f}')
-    ax.set_xlabel('Fold')
-    ax.set_ylabel(metric.capitalize())
-    ax.set_title(f'{metric.capitalize()} per Fold')
-    ax.set_xticks(range(1, 6))
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-plt.suptitle('XGBoost with SMOTE - Per-Fold Performance', fontsize=14)
-plt.tight_layout()
-plt.savefig(f'{output_dir}/xgboost_smote_1_per_fold_performance.png', dpi=150, bbox_inches='tight')
-plt.close()
+pipeline = Pipeline([('scaler', scaler_final), ('model', final_model)])
 
-# 2. Average metrics bar chart
-avg_metrics = {
-    'Accuracy': np.mean(fold_metrics['accuracy']),
-    'Precision': np.mean(fold_metrics['precision']),
-    'Recall': np.mean(fold_metrics['recall']),
-    'F1-Score': np.mean(fold_metrics['f1']),
-    'Balanced Acc': np.mean(fold_metrics['balanced_acc']),
-    'AUC': np.mean(fold_metrics['auc'])
+y_test_arr = np.array(all_y_true)
+y_pred_arr = np.array(all_y_pred)
+y_prob_arr = np.array(all_y_pred_proba)
+
+metrics_payload = {
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test_arr, y_pred_arr)),
+        "precision": float(precision_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "recall": float(recall_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "f1": float(f1_score(y_test_arr, y_pred_arr, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test_arr, y_prob_arr))
+    },
+    "classification_report": classification_report(y_test_arr, y_pred_arr, target_names=['Normal', 'Low/IUGR'], output_dict=True, zero_division=0),
+    "confusion_matrix": confusion_matrix(y_test_arr, y_pred_arr).tolist()
 }
-std_metrics = {
-    'Accuracy': np.std(fold_metrics['accuracy']),
-    'Precision': np.std(fold_metrics['precision']),
-    'Recall': np.std(fold_metrics['recall']),
-    'F1-Score': np.std(fold_metrics['f1']),
-    'Balanced Acc': np.std(fold_metrics['balanced_acc']),
-    'AUC': np.std(fold_metrics['auc'])
+
+train_metrics = {
+    "accuracy": float(np.mean(train_metrics_folds['accuracy'])),
+    "precision": float(np.mean(train_metrics_folds['precision'])),
+    "recall": float(np.mean(train_metrics_folds['recall'])),
+    "f1": float(np.mean(train_metrics_folds['f1'])),
+    "roc_auc": float(np.mean(train_metrics_folds['roc_auc']))
 }
 
-fig, ax = plt.subplots(figsize=(12, 6))
-bars = ax.bar(avg_metrics.keys(), avg_metrics.values(), yerr=std_metrics.values(),
-              capsize=5, color='steelblue', edgecolor='black')
-ax.set_ylabel('Score')
-ax.set_title('XGBoost with SMOTE - Average Performance Metrics')
-ax.set_ylim(0, 1.1)
-ax.grid(True, alpha=0.3, axis='y')
-for bar, val in zip(bars, avg_metrics.values()):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02,
-            f'{val:.3f}', ha='center', va='bottom', fontsize=9)
-plt.xticks(rotation=45, ha='right')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/xgboost_smote_2_average_metrics.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# 3. Confusion matrix heatmap
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(overall_cm, annot=True, fmt='d', cmap='Blues',
-            xticklabels=['Normal', 'Low/IUGR'],
-            yticklabels=['Normal', 'Low/IUGR'], ax=ax)
-ax.set_xlabel('Predicted')
-ax.set_ylabel('Actual')
-ax.set_title('XGBoost with SMOTE - Overall Confusion Matrix')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/xgboost_smote_3_confusion_matrix.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# 4. Feature importance bar chart
-fig, ax = plt.subplots(figsize=(10, 6))
-sorted_importance = importance[sorted_idx]
-sorted_features = [feature_names[i] for i in sorted_idx]
-bars = ax.barh(range(len(sorted_features)), sorted_importance, color='coral', edgecolor='black')
-ax.set_yticks(range(len(sorted_features)))
-ax.set_yticklabels(sorted_features)
-ax.set_xlabel('Importance Score')
-ax.set_title('XGBoost with SMOTE - Feature Importance')
-ax.invert_yaxis()
-for bar, val in zip(bars, sorted_importance):
-    ax.text(val + 0.01, bar.get_y() + bar.get_height()/2, f'{val:.3f}', va='center')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/xgboost_smote_4_feature_importance.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-# 5. Feature importance pie chart
-fig, ax = plt.subplots(figsize=(10, 8))
-colors_pie = plt.cm.Set3(np.linspace(0, 1, len(sorted_features)))
-wedges, texts, autotexts = ax.pie(sorted_importance, labels=sorted_features, autopct='%1.1f%%',
-                                    colors=colors_pie, startangle=90)
-ax.set_title('XGBoost with SMOTE - Feature Importance Distribution')
-plt.tight_layout()
-plt.savefig(f'{output_dir}/xgboost_smote_5_feature_importance_pie.png', dpi=150, bbox_inches='tight')
-plt.close()
-
-print(f"\n✓ All charts saved to '{output_dir}/'")
+save_model_artifacts(
+    pipeline=pipeline,
+    outcome="iugr",
+    outcome_id="iugr",
+    algorithm="xgboost",
+    label="XGBoost",
+    description="XGBoost classifier with SMOTE oversampling and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+    target_column="birth_weight_category",
+    feature_order=feature_names,
+    categorical_features=[],
+    metrics_payload=metrics_payload,
+    positive_label="Low/IUGR (1)",
+    negative_label="Normal (0)",
+    threshold=0.5,
+    y_test=y_test_arr,
+    y_prob=y_prob_arr,
+    train_metrics=train_metrics,
+    project_root=PROJECT_ROOT
+)
 
 # ============================================================================
 # SUMMARY

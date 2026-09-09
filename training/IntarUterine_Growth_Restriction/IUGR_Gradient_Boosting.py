@@ -40,7 +40,7 @@ print("STEP 1: LOADING AND PREPARING DATA")
 print("="*70)
 
 # Load data
-df = pd.read_csv('birth_weight_dataset.csv')
+df = pd.read_csv('data/IUGR/raw/birth_weight_dataset.csv')
 print(f"\n✓ Loaded {len(df)} samples")
 
 # Define features

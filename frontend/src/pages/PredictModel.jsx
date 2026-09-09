@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Card from "../components/common/Card.jsx";
 import Button from "../components/common/Button.jsx";
 import ErrorBanner from "../components/common/ErrorBanner.jsx";
@@ -11,6 +11,9 @@ import "./PredictModel.css";
 export default function PredictModel() {
   const { outcomeId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const initialValues = location.state?.formValues || null;
 
   const [outcomes, setOutcomes] = useState([]);
   const [schema, setSchema] = useState(null);
@@ -101,7 +104,7 @@ export default function PredictModel() {
               Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
-          <Button variant="ghost" onClick={() => navigate(-1)}>
+          <Button variant="ghost" onClick={() => navigate("/")}>
             ← Back
           </Button>
         </div>
@@ -127,7 +130,7 @@ export default function PredictModel() {
               Outcome: <b>{outcomeDisplayName}</b>
             </p>
           </div>
-          <Button variant="ghost" onClick={() => navigate(-1)}>
+          <Button variant="ghost" onClick={() => navigate("/")}>
             ← Back
           </Button>
         </div>
@@ -159,7 +162,7 @@ export default function PredictModel() {
             Outcome: <b>{outcomeDisplayName}</b>
           </p>
         </div>
-        <Button variant="ghost" onClick={() => navigate(-1)}>
+        <Button variant="ghost" onClick={() => navigate("/")}>
           ← Back
         </Button>
       </div>
@@ -184,7 +187,11 @@ export default function PredictModel() {
       </Card>
 
       <Card title={schema?.title || "Inputs"} className="predictFormCard">
-        <DynamicForm schema={schema} onSubmit={handleSubmit} />
+        <DynamicForm
+          schema={schema}
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+        />
       </Card>
     </div>
   );

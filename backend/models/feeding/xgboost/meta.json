@@ -1,0 +1,22 @@
+{
+  "outcome": "feeding",
+  "outcome_id": "feeding",
+  "algorithm": "xgboost",
+  "target_column": "neonatal_feeding_problem",
+  "positive_label": "Has Problem (1)",
+  "negative_label": "No Problem (0)",
+  "feature_order": [
+    "maternal_age",
+    "maternal_education",
+    "child_birthweight_kgs",
+    "child_gest_age_weeks",
+    "delivery_method",
+    "child_medical_complications",
+    "breastfeeding_intention",
+    "breastfeeding_knowledge",
+    "breastfeeding_support",
+    "breastfeeding_initiation_time"
+  ],
+  "categorical_features": [],
+  "threshold": 0.26
+}

@@ -2,7 +2,14 @@
 """
 KNN for IUGR Prediction - WITH SMOTE
 """
+import sys
+from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+    
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,7 +47,7 @@ print("STEP 1: LOADING AND PREPARING DATA")
 print("=" * 70)
 
 # Load data
-df = pd.read_csv('birth_weight_dataset.csv')
+df = pd.read_csv('data/IUGR/raw/birth_weight_dataset.csv')
 print(f"\n✓ Loaded {len(df)} samples")
 
 # Define features

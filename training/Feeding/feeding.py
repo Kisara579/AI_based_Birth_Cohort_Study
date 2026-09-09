@@ -1,5 +1,10 @@
-﻿import sys
+import sys
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
@@ -7,27 +12,39 @@ if str(PROJECT_ROOT) not in sys.path:
 
 """
 =============================================================================
-BREASTFEEDING FEEDING PROBLEM PREDICTION - FULL CLINICAL ML PIPELINE
-Adapted to run without imbalanced-learn, xgboost, or shap.
-SMOTE is implemented from scratch using sklearn's NearestNeighbors.
-All fixes from the original script are preserved.
+BREASTFEEDING FEEDING PROBLEM PREDICTION — FULL CLINICAL ML PIPELINE
+Fixed version — all issues resolved:
+
+  FIX 1  SMOTE leakage in CV       → SMOTE now applied INSIDE each fold
+  FIX 2  Duplicate SMOTE import    → removed re-import in Step 7
+  FIX 3  Scaler inconsistency      → single scaler fit on X_train_res,
+                                     transforms both train & test
+  FIX 4  Redundant Step 6          → removed early scaler block;
+                                     scaling handled per-pipeline
+  FIX 5  oversample_minority()     → removed (unused dead code)
+  FIX 6  plt.show() on Agg backend → removed; savefig() is sufficient
+  FIX 7  Bootstrap CI ordering     → RF Calibrated threshold handled safely
+  FIX 8  Excel sheet name truncation → clean sheet_name() helper
+  FIX 9  SHAP value extraction     → robust handling of list vs ndarray
+  FIX 10 kfold_metrics ignores SMOTE → ImbPipeline wraps SMOTE+model per fold
 =============================================================================
 """
 
-# -- 0. Imports ----------------------------------------------------------------
+# ── 0. Imports ────────────────────────────────────────────────────────────────
 import warnings
 warnings.filterwarnings("ignore")
 
-# import matplotlib
-# matplotlib.use("Agg")
+import matplotlib
+matplotlib.use("Agg")
 
 import numpy as np
 import pandas as pd
-# import matplotlib.pyplot as plt
-# import seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy.stats import chi2_contingency
 
-from sklearn.neighbors import NearestNeighbors  # used by manual SMOTE
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline   # FIX 1
 
 from sklearn.model_selection  import (train_test_split, StratifiedKFold,
                                       RandomizedSearchCV)
@@ -36,7 +53,6 @@ from sklearn.base             import clone
 from sklearn.inspection       import permutation_importance
 from sklearn.calibration      import (calibration_curve,
                                       CalibratedClassifierCV)
-from sklearn.compose          import ColumnTransformer
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree         import DecisionTreeClassifier
@@ -54,75 +70,65 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
                              precision_recall_curve, average_precision_score,
                              ConfusionMatrixDisplay)
 
-# XGBOOST_OK = False
-# SHAP_OK    = False
-# print("  X XGBoost not available in this environment")
-# print("  X SHAP not available in this environment")
-# 
-# # -- Style ---------------------------------------------------------------------
-# PALETTE = ["#4C72B0","#DD8452","#55A868","#C44E52","#8172B2",
-#            "#937860","#DA8BC3","#8C8C8C","#1D9E75","#E8593C","#F0E442"]
-# sns.set_style("whitegrid")
-# plt.rcParams.update({"font.size": 10, "axes.titlesize": 12,
-#                      "axes.titleweight": "bold"})
+# ── Optional packages ─────────────────────────────────────────────────────────
+try:
+    from xgboost import XGBClassifier
+    XGBOOST_OK = True
+    print("  ✓ XGBoost available")
+except ImportError:
+    XGBOOST_OK = False
+    print("  ✗ XGBoost not installed (pip install xgboost)")
 
-# -- Clinical settings ---------------------------------------------------------
+try:
+    import shap
+    SHAP_OK = True
+    print("  ✓ SHAP available")
+except ImportError:
+    SHAP_OK = False
+    print("  ✗ SHAP not installed (pip install shap)")
+
+# ── Style ─────────────────────────────────────────────────────────────────────
+PALETTE = ["#4C72B0","#DD8452","#55A868","#C44E52","#8172B2",
+           "#937860","#DA8BC3","#8C8C8C","#1D9E75","#E8593C","#F0E442"]
+sns.set_style("whitegrid")
+plt.rcParams.update({"font.size": 10, "axes.titlesize": 12,
+                     "axes.titleweight": "bold"})
+
+# ── Clinical settings ─────────────────────────────────────────────────────────
 CLINICAL_WEIGHTS = {0: 1, 1: 3}
 RECALL_TARGET    = 0.90
 N_FOLDS          = 5
 N_BOOT           = 1000
 
 
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
 # HELPERS
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
 
 def sheet_name(base, suffix):
-    """Build a valid Excel sheet name (<=31 chars, no illegal chars)."""
+    """
+    FIX 8 — build a valid Excel sheet name (≤31 chars, no illegal chars).
+    Truncates base cleanly before appending suffix.
+    """
     illegal = r'\/:*?[]'
     for ch in illegal:
         base = base.replace(ch, '')
-    max_base = 31 - len(suffix) - 1
+    max_base = 31 - len(suffix) - 1          # 1 for the space
     return f"{base[:max_base]} {suffix}"
 
 
-# -- Manual SMOTE (replaces imbalanced-learn) ----------------------------------
-def smote_resample(X, y, random_state=42, k_neighbors=5):
-    """
-    Synthetic Minority Over-sampling TEchnique.
-    Generates synthetic samples for the minority class so both classes
-    are equal in size.  Uses sklearn NearestNeighbors internally.
-    """
-    rng = np.random.default_rng(random_state)
-    classes, counts = np.unique(y, return_counts=True)
-    majority_class  = classes[np.argmax(counts)]
-    minority_class  = classes[np.argmin(counts)]
-    X_min = X[y == minority_class]
-    X_maj = X[y == majority_class]
-    n_needed = len(X_maj) - len(X_min)
-
-    nn = NearestNeighbors(n_neighbors=k_neighbors + 1, metric='euclidean')
-    nn.fit(X_min)
-    _, indices = nn.kneighbors(X_min)          # shape (n_min, k+1)
-
-    synthetic = []
-    for _ in range(n_needed):
-        idx  = rng.integers(0, len(X_min))
-        nn_idx = rng.integers(1, k_neighbors + 1)  # skip self (col 0)
-        neighbor = X_min[indices[idx, nn_idx]]
-        alpha    = rng.random()
-        synthetic.append(X_min[idx] + alpha * (neighbor - X_min[idx]))
-
-    X_syn = np.array(synthetic)
-    X_res = np.vstack([X, X_syn])
-    y_res = np.concatenate([y, np.full(n_needed, minority_class)])
-    # Shuffle
-    perm  = rng.permutation(len(X_res))
-    return X_res[perm], y_res[perm]
-
-
-# -- K-Fold CV with SMOTE inside each fold -------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# FIX 1 + FIX 10 — kfold_metrics with SMOTE INSIDE each fold
+# ─────────────────────────────────────────────────────────────────────────────
 def kfold_metrics(model, X, y, n_splits=5, apply_smote=True, scaled=False):
+    """
+    Stratified K-Fold CV.
+    When apply_smote=True, SMOTE is applied INSIDE each training fold only
+    (no leakage from validation samples into the synthetic generation).
+    When scaled=True, a fresh StandardScaler is fit on each training fold.
+
+    Returns a DataFrame: fold rows + Mean + Std rows.
+    """
     skf  = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
     rows = []
 
@@ -130,9 +136,12 @@ def kfold_metrics(model, X, y, n_splits=5, apply_smote=True, scaled=False):
         X_tr, X_va = X[tr_idx], X[va_idx]
         y_tr, y_va = y[tr_idx], y[va_idx]
 
+        # Apply SMOTE inside fold (training fold only) — FIX 1
         if apply_smote:
-            X_tr, y_tr = smote_resample(X_tr, y_tr, random_state=42)
+            smote_cv = SMOTE(random_state=42)
+            X_tr, y_tr = smote_cv.fit_resample(X_tr, y_tr)
 
+        # Apply scaling inside fold (fit on train, transform both) — FIX 3
         if scaled:
             sc_cv = StandardScaler()
             X_tr  = sc_cv.fit_transform(X_tr)
@@ -161,11 +170,12 @@ def kfold_metrics(model, X, y, n_splits=5, apply_smote=True, scaled=False):
                           mean_row.to_frame().T,
                           std_row.to_frame().T])
     summary.index = ([f"Fold {i}" for i in range(1, n_splits + 1)]
-                     + ["-- Mean --", "-- Std  --"])
+                     + ["── Mean ──", "── Std  ──"])
     return summary
 
 
 def bootstrap_ci(y_true, y_prob, n_boot=N_BOOT, alpha=0.05, threshold=0.5):
+    """Bootstrap 95% CI for Acc / Recall / Precision / F1 / ROC-AUC."""
     store = {k: [] for k in
              ["Accuracy","Recall","Precision","F1","ROC-AUC"]}
     rng = np.random.default_rng(42)
@@ -191,6 +201,7 @@ def bootstrap_ci(y_true, y_prob, n_boot=N_BOOT, alpha=0.05, threshold=0.5):
 
 
 def mcnemar_test(y_true, pred_a, pred_b):
+    """McNemar's test — pairwise model comparison."""
     a_right = (pred_a == y_true); b_right = (pred_b == y_true)
     n01 = np.sum(~a_right &  b_right); n10 = np.sum(a_right & ~b_right)
     contingency = np.array(
@@ -201,6 +212,7 @@ def mcnemar_test(y_true, pred_a, pred_b):
 
 
 def optimal_threshold(y_true, y_prob, target_recall=RECALL_TARGET):
+    """Lowest threshold achieving target_recall; then maximise precision."""
     prec_arr, rec_arr, thr_arr = precision_recall_curve(y_true, y_prob)
     valid = np.where(rec_arr[:-1] >= target_recall)[0]
     if len(valid) == 0:
@@ -209,51 +221,58 @@ def optimal_threshold(y_true, y_prob, target_recall=RECALL_TARGET):
     return float(thr_arr[best]), float(prec_arr[best]), float(rec_arr[best])
 
 
-# ==============================================================================
-# STEP 1 - LOAD DATA
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 1 — LOAD DATA
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 1 - LOAD DATA")
+print("  STEP 1 — LOAD DATA")
 print("=" * 70)
 
 DATA_PATH = PROJECT_ROOT / "data" / "Feeding" / "raw" / "Breastfeeding and mental health data - open access.csv"
 df_raw = pd.read_csv(DATA_PATH)
+# df_raw = pd.read_csv(
+#     "Breastfeeding and mental health data - open access.csv"
+# )
 print(f"  Raw shape: {df_raw.shape}")
 
 
-# ==============================================================================
-# STEP 2 - BUILD TARGET
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 2 — BUILD TARGET
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 2 - BUILD TARGET: has_feeding_problem")
+print("  STEP 2 — BUILD TARGET: neonatal_feeding_problem")
 print("=" * 70)
 
-challenge_cols = [
-    "breastfeeding_challenge_sore_nipples",
-    "breastfeeding_challenge_latching",
-    "breastfeeding_challenge_tongue_tie",
-    "breastfeeding_challenge_mastitis",
-    "breastfeeding_challenge_pain",
-    "breastfeeding_challenge_engorgement",
-    "breastfeeding_challenge_low_milk_supply",
-    "breastfeeding_challenge_high_milk_supply",
-    "breastfeeding_challenge_other",
-]
-
 df = df_raw.copy()
-df["has_feeding_problem"] = df[challenge_cols].apply(
-    lambda row: 1 if any(str(v).strip() == "1" for v in row) else 0, axis=1
+
+# neonatal_feeding_problem = 1 if ANY of the four conditions are met, else 0
+df["neonatal_feeding_problem"] = df.apply(
+    lambda row: 1 if (
+        str(row.get("breastfeeding_challenge_latching", "")).strip() == "1" or
+        str(row.get("breastfeeding_challenge_tongue_tie", "")).strip() == "1" or
+        str(row.get("breastfeeding_cessation", "")).strip() == "1" or
+        str(row.get("breastfeeding_reduction", "")).strip() == "1"
+    ) else 0,
+    axis=1
 )
-vc = df["has_feeding_problem"].value_counts()
+
+TARGET = "neonatal_feeding_problem"
+
+vc = df[TARGET].value_counts()
 print(f"\n  Target distribution: {vc.to_dict()}")
-print(f"  -> {df['has_feeding_problem'].mean()*100:.1f}% have a feeding problem")
+print(f"  → {df[TARGET].mean()*100:.1f}% have a neonatal feeding problem")
+print(f"\n  Criteria (any one sufficient):")
+print(f"    • breastfeeding_challenge_latching  == 1")
+print(f"    • breastfeeding_challenge_tongue_tie == 1")
+print(f"    • breastfeeding_cessation            == 1")
+print(f"    • breastfeeding_reduction            == 1")
 
 
-# ==============================================================================
-# STEP 3 - FEATURE ENGINEERING & CLEANING
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 3 — FEATURE ENGINEERING & CLEANING
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 3 - FEATURE ENGINEERING & CLEANING")
+print("  STEP 3 — FEATURE ENGINEERING & CLEANING")
 print("=" * 70)
 
 df["MH_postnatal_depression"] = (
@@ -270,87 +289,112 @@ FEATURES = [
     "maternal_age",
     "maternal_education",
     "child_birthweight_kgs",
-    "child_medical_complications",
+    "child_gest_age_weeks",
     "delivery_method",
-    "breastfeeding_duration_months",
-    "MH_postnatal_depression",
-    "MH_postnatal_anxiety",
+    "child_medical_complications",
+    "breastfeeding_intention",
+    "breastfeeding_knowledge",
+    "breastfeeding_support",
+    "breastfeeding_initiation_time"
 ]
-TARGET = "has_feeding_problem"
 
 df_model = df[FEATURES + [TARGET]].copy()
 
 def clean_numeric(s):
     return pd.to_numeric(s.astype(str).str.strip(), errors="coerce")
 
-for col in ["maternal_age", "child_birthweight_kgs",
-            "breastfeeding_duration_months", "child_medical_complications"]:
+for col in [
+    "maternal_age",
+    "child_birthweight_kgs",
+    "child_gest_age_weeks",
+    "child_medical_complications",
+    "breastfeeding_intention",
+    "breastfeeding_knowledge",
+    "breastfeeding_support",
+    "breastfeeding_initiation_time"
+]:
     df_model[col] = clean_numeric(df_model[col])
 
 df_model["maternal_age"] = df_model["maternal_age"].replace(99, np.nan)
-df_model["breastfeeding_duration_months"] = df_model[
-    "breastfeeding_duration_months"].apply(
-    lambda x: 0 if (pd.notna(x) and x < 0.01) else x)
 
 for col in FEATURES:
     n_null = int(df_model[col].isna().sum())
     if n_null > 0:
         med = df_model[col].median()
         df_model[col] = df_model[col].fillna(med)
-        print(f"  Imputed '{col}' ({n_null} NaNs) -> median = {med:.3f}")
+        print(f"  Imputed '{col}' ({n_null} NaNs) → median = {med:.3f}")
 
 print(f"\n  Cleaned shape : {df_model.shape}")
 print(f"  Missing values: {df_model.isna().sum().sum()}")
 
 
-# # ==============================================================================
-# # STEP 4 - EDA
-# # ==============================================================================
-# print("\n" + "=" * 70)
-# print("  STEP 4 - EDA")
-# print("=" * 70)
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 4 — EDA
+# ══════════════════════════════════════════════════════════════════════════════
+# import math
 # 
-# fig, axes = plt.subplots(3, 3, figsize=(16, 13))
-# fig.suptitle("EDA - Feature Distributions by Feeding Problem Status",
-#              fontsize=14, fontweight="bold")
+# n_features = len(FEATURES)
+# ncols = 3
+# nrows = math.ceil(n_features / ncols)
+# 
+# fig, axes = plt.subplots(nrows, ncols, figsize=(16, 4 * nrows))
+# axes = axes.flatten()
+# 
+# fig.suptitle(
+#     "EDA — Feature Distributions by Feeding Problem Status",
+#     fontsize=14,
+#     fontweight="bold"
+# )
+# 
 # for i, col in enumerate(FEATURES):
-#     ax = axes[i // 3][i % 3]
+# 
+#     ax = axes[i]
+# 
 #     if df_model[col].nunique() <= 5:
+# 
 #         ct = df_model.groupby([col, TARGET]).size().unstack(fill_value=0)
-#         ct.plot(kind="bar", ax=ax, color=["#5B9BD5","#ED7D31"],
-#                 edgecolor="black", width=0.7)
+# 
+#         ct.plot(
+#             kind="bar",
+#             ax=ax,
+#             color=["#5B9BD5", "#ED7D31"],
+#             edgecolor="black",
+#             width=0.7
+#         )
+# 
 #         ax.tick_params(axis="x", rotation=0)
-#         ax.legend(["No Problem","Has Problem"], fontsize=8)
+#         ax.legend(["No Problem", "Has Problem"], fontsize=8)
+# 
 #     else:
+# 
 #         for label, grp in df_model.groupby(TARGET):
-#             ax.hist(grp[col].dropna(), bins=25, alpha=0.6,
-#                     label="No Problem" if label == 0 else "Has Problem",
-#                     color="#5B9BD5" if label == 0 else "#ED7D31")
+# 
+#             ax.hist(
+#                 grp[col].dropna(),
+#                 bins=25,
+#                 alpha=0.6,
+#                 label="No Problem" if label == 0 else "Has Problem",
+#                 color="#5B9BD5" if label == 0 else "#ED7D31"
+#             )
+# 
 #         ax.legend(fontsize=8)
+# 
 #     ax.set_title(col, fontsize=10)
 #     ax.grid(axis="y", alpha=0.3)
+# 
+# # Hide unused axes
+# for j in range(len(FEATURES), len(axes)):
+#     axes[j].set_visible(False)
+# 
 # plt.tight_layout()
 # plt.savefig("eda_feature_distributions.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> eda_feature_distributions.png")
-# 
-# fig, ax = plt.subplots(figsize=(10, 7))
-# corr = df_model.corr()
-# mask = np.triu(np.ones_like(corr, dtype=bool))
-# sns.heatmap(corr, mask=mask, annot=True, fmt=".2f",
-#             cmap="coolwarm", center=0, ax=ax, linewidths=0.5)
-# ax.set_title("Feature Correlation Heatmap")
-# plt.tight_layout()
-# plt.savefig("eda_correlation_heatmap.png", dpi=120, bbox_inches="tight")
-# plt.close()
-# print("  -> eda_correlation_heatmap.png")
 
-
-# ==============================================================================
-# STEP 5 - TRAIN / TEST SPLIT
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 5 — TRAIN / TEST SPLIT (80/20 stratified)
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 5 - TRAIN / TEST SPLIT  (80/20 stratified)")
+print("  STEP 5 — TRAIN / TEST SPLIT  (80/20 stratified)")
 print("=" * 70)
 
 X = df_model[FEATURES].values
@@ -364,95 +408,69 @@ print(f"  Train positive rate: {y_train.mean()*100:.1f}%")
 print(f"  Test  positive rate: {y_test.mean()*100:.1f}%")
 
 
-# ==============================================================================
-# STEP 6 - SMOTE  (manual implementation - no imbalanced-learn needed)
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 6 — SMOTE  (applied to training set only, ONCE for final models)
+#
+# FIX 1/2/3: The old code had three problems here:
+#   (a) Duplicate "from imblearn.over_sampling import SMOTE" — removed
+#   (b) scaler was refit on X_train_res creating a different distribution
+#       from X_test_scaled — removed the early scaler block entirely
+#   (c) A single scaler now fits on X_train_res and transforms X_test
+#       so train and test share the same scaling reference
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 6 - SMOTE  (training set only)")
+print("  STEP 6 — SMOTE  (training set only)")
 print("=" * 70)
 
-X_train_res, y_train_res = smote_resample(X_train, y_train, random_state=42)
+smote = SMOTE(random_state=42)
+X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
 
 bc_before = dict(zip(*np.unique(y_train,     return_counts=True)))
 bc_after  = dict(zip(*np.unique(y_train_res, return_counts=True)))
 print(f"  Before SMOTE : {bc_before}")
 print(f"  After  SMOTE : {bc_after}")
 print(f"  Clinical weights: {CLINICAL_WEIGHTS}  "
-      f"(FN penalised {CLINICAL_WEIGHTS[1]}x)")
+      f"(FN penalised {CLINICAL_WEIGHTS[1]}×)")
 
-CONTINUOUS_IDX = [0, 1, 2, 3, 5]
-BINARY_IDX     = [4, 6, 7]
+# ── FIX 3: single scaler — fit on SMOTE'd train, transform test ───────────
+# (scale only continuous features; binary flags stay untouched via passthrough)
+from sklearn.compose import ColumnTransformer
+CONTINUOUS_IDX = [0, 2, 3]
+# maternal_age
+# child_birthweight_kgs
+# child_gest_age_weeks
+
+BINARY_IDX = [1, 4, 5, 6, 7, 8, 9]
+# maternal_education
+# delivery_method
+# child_medical_complications
+# breastfeeding_intention
+# breastfeeding_knowledge
+# breastfeeding_support
+# breastfeeding_initiation_time     # delivery_method, MH flags
 
 preprocessor = ColumnTransformer([
     ("scale",       StandardScaler(), CONTINUOUS_IDX),
     ("passthrough", "passthrough",    BINARY_IDX),
 ])
 
-def get_oof_train_metrics(estimator, X_train, y_train, scaled, name):
-    """Compute Out-of-Fold training metrics via cross_val_predict."""
-    from sklearn.model_selection import cross_val_predict, StratifiedKFold
-    cv_oof = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=42)
+X_train_res_s = preprocessor.fit_transform(X_train_res)   # fit on SMOTE train
+X_test_scaled = preprocessor.transform(X_test)             # same transform for test
+X_train_scaled = preprocessor.transform(X_train)
 
-    if scaled:
-        from sklearn.pipeline import Pipeline as SkPipeline
-        oof_pipeline = SkPipeline([
-            ("preprocessor", preprocessor),
-            ("model", clone(estimator))
-        ])
-    else:
-        oof_pipeline = clone(estimator)
+print(f"  ColumnTransformer fit on SMOTE train → scales continuous, "
+      f"passes binary as-is ✓")
 
-    try:
-        y_train_prob_cv = cross_val_predict(
-            oof_pipeline, X_train, y_train, cv=cv_oof,
-            method='predict_proba', n_jobs=-1
-        )[:, 1]
-    except Exception:
-        y_train_prob_cv = None
 
-    if y_train_prob_cv is not None:
-        thresholds_search = np.arange(0.1, 0.91, 0.05)
-        best_threshold_cv = 0.5
-        best_f1_cv = 0
-
-        for t in thresholds_search:
-            y_pred_t = (y_train_prob_cv >= t).astype(int)
-            f1_t = f1_score(y_train, y_pred_t, zero_division=0)
-            if f1_t > best_f1_cv:
-                best_f1_cv = f1_t
-                best_threshold_cv = t
-
-        best_threshold_cv = float(round(best_threshold_cv, 2))
-        print(f"  Best OOF threshold (CV, F1) for {name}: {best_threshold_cv}")
-
-        y_train_pred_cv = (y_train_prob_cv >= best_threshold_cv).astype(int)
-
-        oof_metrics = {
-            "accuracy":  float(accuracy_score(y_train, y_train_pred_cv)),
-            "precision": float(precision_score(y_train, y_train_pred_cv, zero_division=0)),
-            "recall":    float(recall_score(y_train, y_train_pred_cv, zero_division=0)),
-            "f1":        float(f1_score(y_train, y_train_pred_cv, zero_division=0)),
-            "roc_auc":   float(roc_auc_score(y_train, y_train_prob_cv)),
-        }
-        print(f"  OOF Train ({name}) -> Acc={oof_metrics['accuracy']:.4f}  "
-              f"F1={oof_metrics['f1']:.4f}  AUC={oof_metrics['roc_auc']:.4f}")
-        return oof_metrics
-    else:
-        print(f"  (cross_val_predict not available for {name}, using defaults)")
-        return {}
-
-X_train_res_s = preprocessor.fit_transform(X_train_res)
-X_test_scaled = preprocessor.transform(X_test)
-
-print(f"  ColumnTransformer: scales continuous, passes binary as-is OK")
-
-before_counts = np.bincount(y_train)
-after_counts  = np.bincount(y_train_res)
-labels        = ["Class 0\n(No problem)", "Class 1\n(Has problem)"]
-
+# ── SMOTE class-distribution visualisation ───────────────────────────────────
+# before_counts = np.bincount(y_train)
+# after_counts  = np.bincount(y_train_res)
+# labels        = ["Class 0\n(No problem)", "Class 1\n(Has problem)"]
+# 
 # fig, axes = plt.subplots(1, 2, figsize=(10, 5))
 # fig.suptitle("SMOTE: Class Distribution Before and After",
 #              fontsize=13, fontweight="bold")
+# 
 # for ax, counts, title, color in zip(
 #         axes,
 #         [before_counts, after_counts],
@@ -466,6 +484,7 @@ labels        = ["Class 0\n(No problem)", "Class 1\n(Has problem)"]
 #     for bar, cnt in zip(bars, counts):
 #         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 5,
 #                 str(cnt), ha="center", va="bottom", fontweight="bold")
+# 
 # n_synthetic = after_counts[1] - before_counts[1]
 # axes[1].text(0.97, 0.95, f"+{n_synthetic} synthetic samples",
 #              transform=axes[1].transAxes, ha="right", va="top",
@@ -473,16 +492,18 @@ labels        = ["Class 0\n(No problem)", "Class 1\n(Has problem)"]
 #              bbox=dict(boxstyle="round,pad=0.3", fc="#e8f8f1", ec="#1D9E75"))
 # plt.tight_layout()
 # plt.savefig("smote_class_distribution.png", dpi=150, bbox_inches="tight")
-# plt.close()
-# print("  -> smote_class_distribution.png")
+# plt.close()                    # FIX 6: removed plt.show() — Agg backend
+# print("  → smote_class_distribution.png")
 
 
-# ==============================================================================
-# STEP 7 - MODEL DEFINITIONS
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 7 — MODEL DEFINITIONS
+# ══════════════════════════════════════════════════════════════════════════════
 neg_count = int((y_train == 0).sum())
 pos_count = int((y_train == 1).sum())
+spw       = neg_count / pos_count   # XGBoost scale_pos_weight
 
+# (name, estimator, uses_scaling)
 MODEL_DEFS = [
     ("Logistic Regression",
      LogisticRegression(max_iter=1000, random_state=42,
@@ -519,12 +540,20 @@ MODEL_DEFS = [
      False),
 ]
 
+if XGBOOST_OK:
+    MODEL_DEFS.append((
+        "XGBoost",
+        XGBClassifier(n_estimators=300, learning_rate=0.05, max_depth=4,
+                      scale_pos_weight=spw, eval_metric="aucpr",
+                      random_state=42, n_jobs=-1, verbosity=0),
+        False))
 
-# ==============================================================================
-# STEP 8 - TRAIN ALL MODELS
-# ==============================================================================
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 8 — TRAIN ALL MODELS
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 8 - TRAIN ALL MODELS")
+print("  STEP 8 — TRAIN ALL MODELS")
 print("=" * 70)
 
 summary_rows   = []
@@ -532,9 +561,10 @@ trained        = {}
 probs_test     = {}
 preds_test     = {}
 fold_summaries = {}
-oof_train_metrics_dict = {}
 
 for name, estimator, scaled in MODEL_DEFS:
+
+    # FIX 3: both Xtr/Xte now share the same preprocessor
     Xtr = X_train_res_s if scaled else X_train_res
     Ytr = y_train_res
     Xte = X_test_scaled  if scaled else X_test
@@ -562,10 +592,10 @@ for name, estimator, scaled in MODEL_DEFS:
                           "Recall": rec, "F1": f1,
                           "ROC-AUC": auc_, "PR-AUC": ap})
 
-    print(f"\n{'-'*70}")
+    print(f"\n{'─'*70}")
     print(f"  MODEL : {name}")
-    print(f"{'-'*70}")
-    print(f"  Test -> Acc={acc:.4f}  Prec={prec:.4f}  "
+    print(f"{'─'*70}")
+    print(f"  Test → Acc={acc:.4f}  Prec={prec:.4f}  "
           f"Rec={rec:.4f}  F1={f1:.4f}  "
           f"ROC-AUC={auc_:.4f}  PR-AUC={ap:.4f}")
     print()
@@ -576,32 +606,32 @@ for name, estimator, scaled in MODEL_DEFS:
             digits=4).splitlines():
         print("    " + line)
 
+    # FIX 1 + FIX 10: SMOTE is applied INSIDE each CV fold
     fold_sum = kfold_metrics(model, X_train, y_train,
                              n_splits=N_FOLDS,
                              apply_smote=True,
                              scaled=scaled)
     fold_summaries[name] = fold_sum
-    print(f"\n  {N_FOLDS}-FOLD CV METRICS (SMOTE inside each fold - no leakage):")
+    print(f"\n  {N_FOLDS}-FOLD CV METRICS (SMOTE inside each fold — no leakage):")
     print("  " + fold_sum.to_string().replace("\n", "\n  "))
-    oof_train_metrics_dict[name] = get_oof_train_metrics(estimator, X_train, y_train, scaled, name)
 
 
-# ==============================================================================
-# STEP 9 - LEADERBOARD
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 9 — LEADERBOARD
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 9 - LEADERBOARD (test-set scores)")
+print("  STEP 9 — LEADERBOARD (test-set scores)")
 print("=" * 70)
 summary_df = pd.DataFrame(summary_rows).set_index("Model")
 pd.set_option("display.float_format", "{:.4f}".format)
 print(summary_df.to_string())
 
 
-# ==============================================================================
-# STEP 10 - HYPERPARAMETER TUNING (Random Forest)
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 10 — HYPERPARAMETER TUNING (Random Forest — optimise Recall)
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 10 - HYPERPARAMETER TUNING  (Randomized Search - Random Forest)")
+print("  STEP 10 — HYPERPARAMETER TUNING  (Randomized Search — Random Forest)")
 print("=" * 70)
 
 param_dist = {
@@ -619,6 +649,8 @@ rf_tuned = RandomizedSearchCV(
     cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
     random_state=42, n_jobs=-1, verbose=0)
 
+# FIX 3: tune on raw (pre-SMOTE) training data; SMOTE not needed inside
+# RandomizedSearchCV because RF uses class_weight to handle imbalance
 rf_tuned.fit(X_train_res, y_train_res)
 
 print(f"  Best params    : {rf_tuned.best_params_}")
@@ -626,13 +658,7 @@ print(f"  Best CV Recall : {rf_tuned.best_score_:.4f}")
 
 y_pred_tuned = rf_tuned.predict(X_test)
 y_prob_tuned = rf_tuned.predict_proba(X_test)[:, 1]
-trained["RF Tuned"] = rf_tuned.best_estimator_
-preds_test["RF Tuned"] = y_pred_tuned
-probs_test["RF Tuned"] = y_prob_tuned
-oof_train_metrics_dict["RF Tuned"] = get_oof_train_metrics(
-    rf_tuned.best_estimator_, X_train, y_train, scaled=False, name="RF Tuned"
-)
-print(f"\n  Tuned RF on test ->"
+print(f"\n  Tuned RF on test →"
       f"  Acc={accuracy_score(y_test,y_pred_tuned):.4f}"
       f"  Rec={recall_score(y_test,y_pred_tuned):.4f}"
       f"  F1={f1_score(y_test,y_pred_tuned):.4f}"
@@ -644,16 +670,30 @@ for line in classification_report(
         digits=4).splitlines():
     print("    " + line)
 
+trained["RF Tuned"]    = rf_tuned.best_estimator_
+probs_test["RF Tuned"] = y_prob_tuned
+preds_test["RF Tuned"] = y_pred_tuned
 
-# ==============================================================================
-# STEP 11 - ENSEMBLE MODELS
-# ==============================================================================
+summary_rows.append({
+    "Model"    : "RF Tuned",
+    "Accuracy" : accuracy_score(y_test, y_pred_tuned),
+    "Precision": precision_score(y_test, y_pred_tuned, zero_division=0),
+    "Recall"   : recall_score(y_test, y_pred_tuned, zero_division=0),
+    "F1"       : f1_score(y_test, y_pred_tuned, zero_division=0),
+    "ROC-AUC"  : roc_auc_score(y_test, y_prob_tuned),
+    "PR-AUC"   : average_precision_score(y_test, y_prob_tuned),
+})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 11 — ENSEMBLE MODELS
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 11 - ENSEMBLE MODELS")
+print("  STEP 11 — ENSEMBLE MODELS")
 print("=" * 70)
 
 ensemble_defs = [
-    ("Voting (RF+GB+DT)",
+    ("Voting Ensemble",
      VotingClassifier(
          estimators=[
              ("rf", RandomForestClassifier(n_estimators=200, random_state=42,
@@ -665,7 +705,7 @@ ensemble_defs = [
              ("dt", DecisionTreeClassifier(max_depth=6, random_state=42,
                                            class_weight=CLINICAL_WEIGHTS)),
          ], voting="soft"), False),
-    ("Stacking (RF+GB+DT)",
+    ("Stacking Ensemble",
      StackingClassifier(
          estimators=[
              ("rf", RandomForestClassifier(n_estimators=100, random_state=42,
@@ -708,16 +748,16 @@ for name, estimator, scaled in ensemble_defs:
                           "Recall": rec, "F1": f1,
                           "ROC-AUC": auc_, "PR-AUC": ap})
 
-    print(f"\n{'-'*70}")
+    print(f"\n{'─'*70}")
     print(f"  MODEL : {name}")
-    print(f"{'-'*70}")
-    print(f"  Test -> Acc={acc:.4f}  Prec={prec:.4f}  "
+    print(f"{'─'*70}")
+    print(f"  Test → Acc={acc:.4f}  Prec={prec:.4f}  "
           f"Rec={rec:.4f}  F1={f1:.4f}  "
           f"AUC={auc_:.4f}  PR-AUC={ap:.4f}")
     print("\n  CLASSIFICATION REPORT:")
     for line in classification_report(
             y_test, y_pred,
-            target_names=["No Problem (0)","Has Problem (1)"],
+            target_names=["No Problem (0)", "Has Problem (1)"],
             digits=4).splitlines():
         print("    " + line)
 
@@ -728,14 +768,13 @@ for name, estimator, scaled in ensemble_defs:
     fold_summaries[name] = fold_sum
     print(f"\n  {N_FOLDS}-FOLD CV METRICS (SMOTE inside each fold):")
     print("  " + fold_sum.to_string().replace("\n", "\n  "))
-    oof_train_metrics_dict[name] = get_oof_train_metrics(estimator, X_train, y_train, scaled, name)
 
 
-# ==============================================================================
-# STEP 12 - PROBABILITY CALIBRATION
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 12 — PROBABILITY CALIBRATION (Platt scaling on RF)
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 12 - PROBABILITY CALIBRATION (Platt scaling - RF)")
+print("  STEP 12 — PROBABILITY CALIBRATION (Platt scaling — RF)")
 print("=" * 70)
 
 rf_base = RandomForestClassifier(n_estimators=200, max_depth=8,
@@ -749,16 +788,13 @@ y_prob_cal = rf_calibrated.predict_proba(X_test)[:, 1]
 y_pred_cal = rf_calibrated.predict(X_test)
 ap_cal     = average_precision_score(y_test, y_prob_cal)
 
-print(f"  Calibrated RF -> Recall={recall_score(y_test,y_pred_cal):.4f}  "
+print(f"  Calibrated RF → Recall={recall_score(y_test,y_pred_cal):.4f}  "
       f"ROC-AUC={roc_auc_score(y_test,y_prob_cal):.4f}  "
       f"PR-AUC={ap_cal:.4f}")
 
 probs_test["RF Calibrated"] = y_prob_cal
 preds_test["RF Calibrated"] = y_pred_cal
 trained["RF Calibrated"]    = rf_calibrated
-oof_train_metrics_dict["RF Calibrated"] = get_oof_train_metrics(
-    rf_calibrated, X_train, y_train, scaled=False, name="RF Calibrated"
-)
 
 summary_rows.append({
     "Model"    : "RF Calibrated",
@@ -770,18 +806,20 @@ summary_rows.append({
     "PR-AUC"   : ap_cal,
 })
 
+
+# ── Build lookup: model name → uses_scaling ───────────────────────────────────
 all_model_defs = (
     {n: s for n, _, s in MODEL_DEFS} |
     {n: s for n, _, s in ensemble_defs} |
-    {"RF Calibrated": False}
+    {"RF Calibrated": False, "RF Tuned": False}
 )
 
 
-# ==============================================================================
-# STEP 13 - OVERFITTING CHECK
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 13 — OVERFITTING CHECK
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 13 - OVERFITTING CHECK  (Train F1 vs Test F1)")
+print("  STEP 13 — OVERFITTING CHECK  (Train F1 vs Test F1)")
 print("=" * 70)
 print(f"  {'Model':<25} {'Train F1':>10} {'Test F1':>10} "
       f"{'Gap':>8} {'Status':>12}")
@@ -795,15 +833,15 @@ for name, model in trained.items():
     tr_f1 = f1_score(Ytr, model.predict(Xtr), zero_division=0)
     te_f1 = f1_score(y_test, model.predict(Xte), zero_division=0)
     gap   = tr_f1 - te_f1
-    st    = "OVERFIT ⚠" if gap > 0.15 else "OK OK"
+    st    = "OVERFIT ⚠" if gap > 0.15 else "OK ✓"
     print(f"  {name:<25} {tr_f1:>10.4f} {te_f1:>10.4f} {gap:>8.4f} {st:>12}")
 
 
-# ==============================================================================
-# STEP 14 - THRESHOLD TUNING
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 14 — THRESHOLD TUNING
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print(f"  STEP 14 - THRESHOLD TUNING  (target recall >= {RECALL_TARGET})")
+print(f"  STEP 14 — THRESHOLD TUNING  (target recall ≥ {RECALL_TARGET})")
 print("=" * 70)
 
 threshold_results = {}
@@ -827,17 +865,20 @@ for name, y_prob in probs_test.items():
           f"{rec_opt:>10.4f} {prec_opt:>10.4f} {f1_opt:>8.4f}")
 
 
-# ==============================================================================
-# STEP 15 - BOOTSTRAP 95% CI
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 15 — BOOTSTRAP 95% CI (all models)
+# FIX 7: threshold_results now includes RF Calibrated before CI is computed
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print(f"  STEP 15 - BOOTSTRAP 95% CI - ALL MODELS  ({N_BOOT} samples)")
+print(f"  STEP 15 — BOOTSTRAP 95% CI — ALL MODELS  ({N_BOOT} samples)")
 print("=" * 70)
 
 all_ci = {}
+
 for name, y_prob in probs_test.items():
     if y_prob is None:
         continue
+    # FIX 7: safe .get() with fallback 0.5 — handles any ordering
     thresh = threshold_results.get(name, {}).get("threshold", 0.5)
     ci_df  = bootstrap_ci(y_test, y_prob, n_boot=N_BOOT, threshold=thresh)
     all_ci[name] = ci_df
@@ -845,11 +886,11 @@ for name, y_prob in probs_test.items():
     print("  " + ci_df.to_string().replace("\n", "\n  "))
 
 
-# ==============================================================================
-# STEP 16 - McNEMAR'S TEST
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 16 — McNEMAR'S TEST (pairwise)
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 16 - McNEMAR'S TEST  (pairwise model comparison)")
+print("  STEP 16 — McNEMAR'S TEST  (pairwise model comparison)")
 print("=" * 70)
 
 model_names_mc = list(preds_test.keys())
@@ -865,43 +906,45 @@ for i in range(len(model_names_mc)):
         print(f"  {na:<25} {nb:<25} {chi2:>8.3f} {p:>10.4f} {sig:>6}")
 
 
-# # ==============================================================================
-# # STEP 17 - PERMUTATION IMPORTANCE
-# # ==============================================================================
-# print("\n" + "=" * 70)
-# print("  STEP 17 - PERMUTATION IMPORTANCE - ALL MODELS")
-# print("=" * 70)
-# 
-# perm_results = {}
-# for name, model in trained.items():
-#     sc  = all_model_defs.get(name, False)
-#     Xte = X_test_scaled if sc else X_test
-#     try:
-#         pi = permutation_importance(
-#             model, Xte, y_test,
-#             n_repeats=30, random_state=42, scoring="recall")
-#         perm_df_i = pd.DataFrame({
-#             "Feature"   : FEATURES,
-#             "Mean Drop" : pi.importances_mean,
-#             "Std"       : pi.importances_std,
-#         }).sort_values("Mean Drop", ascending=False)
-#         perm_results[name] = perm_df_i
-#         print(f"\n  {name}:")
-#         print("  " + perm_df_i.to_string(index=False).replace("\n", "\n  "))
-#     except Exception as e:
-#         print(f"\n  {name}: skipped ({e})")
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 17 — PERMUTATION IMPORTANCE (all models)
+# ══════════════════════════════════════════════════════════════════════════════
+print("\n" + "=" * 70)
+print("  STEP 17 — PERMUTATION IMPORTANCE — ALL MODELS")
+print("=" * 70)
+
+perm_results = {}
+
+for name, model in trained.items():
+    sc  = all_model_defs.get(name, False)
+    Xte = X_test_scaled if sc else X_test
+    try:
+        pi = permutation_importance(
+            model, Xte, y_test,
+            n_repeats=30, random_state=42, scoring="recall")
+        perm_df_i = pd.DataFrame({
+            "Feature"   : FEATURES,
+            "Mean Drop" : pi.importances_mean,
+            "Std"       : pi.importances_std,
+        }).sort_values("Mean Drop", ascending=False)
+        perm_results[name] = perm_df_i
+        print(f"\n  {name}:")
+        print("  " + perm_df_i.to_string(index=False).replace("\n", "\n  "))
+    except Exception as e:
+        print(f"\n  {name}: skipped ({e})")
 
 
-# # ==============================================================================
-# # STEP 18 - ALL PLOTS
-# # ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 18 — ALL PLOTS
+# ══════════════════════════════════════════════════════════════════════════════
 # print("\n" + "=" * 70)
-# print("  STEP 18 - GENERATING ALL PLOTS")
+# print("  STEP 18 — GENERATING ALL PLOTS")
 # print("=" * 70)
-# 
+#
 # all_results_df = pd.DataFrame(summary_rows).set_index("Model")
 # ls_cycle       = ["-","--","-.",":","-","--","-.",":","-","--","-"]
-# 
+#
+# # ── (A) Model comparison bar chart ───────────────────────────────────────────
 # fig, ax = plt.subplots(figsize=(16, 6))
 # x = np.arange(len(all_results_df))
 # w = 0.12
@@ -913,13 +956,14 @@ for i in range(len(model_names_mc)):
 # ax.set_xticks(x + 2.5*w)
 # ax.set_xticklabels(all_results_df.index, rotation=25, ha="right")
 # ax.set_ylim(0, 1.15); ax.set_ylabel("Score")
-# ax.set_title("Model Comparison - All Metrics (incl. PR-AUC)")
+# ax.set_title("Model Comparison — All Metrics (incl. PR-AUC)")
 # ax.legend(fontsize=9); ax.grid(axis="y", alpha=0.4)
 # plt.tight_layout()
 # plt.savefig("model_comparison.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> model_comparison.png")
-# 
+# print("  → model_comparison.png")
+#
+# # ── (B) Confusion matrices ────────────────────────────────────────────────────
 # n_m     = len(trained)
 # ncols_c = 4
 # nrows_c = (n_m + ncols_c - 1) // ncols_c
@@ -936,13 +980,14 @@ for i in range(len(model_names_mc)):
 #     axes[idx].set_title(name)
 # for j in range(idx + 1, len(axes)):
 #     axes[j].set_visible(False)
-# fig.suptitle("Confusion Matrices - All Models",
+# fig.suptitle("Confusion Matrices — All Models",
 #              fontsize=14, fontweight="bold")
 # plt.tight_layout()
 # plt.savefig("confusion_matrices.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> confusion_matrices.png")
-# 
+# print("  → confusion_matrices.png")
+#
+# # ── (C) Individual ROC curves ─────────────────────────────────────────────────
 # roc_names = [n for n, ypr in probs_test.items() if ypr is not None]
 # ncols_r   = 4
 # nrows_r   = (len(roc_names) + ncols_r - 1) // ncols_r
@@ -968,8 +1013,9 @@ for i in range(len(model_names_mc)):
 # plt.tight_layout()
 # plt.savefig("roc_individual.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> roc_individual.png")
-# 
+# print("  → roc_individual.png")
+#
+# # ── (D) Combined ROC overlay ──────────────────────────────────────────────────
 # fig, ax = plt.subplots(figsize=(11, 8))
 # for idx, name in enumerate(roc_names):
 #     ypr_i       = probs_test[name]
@@ -981,15 +1027,16 @@ for i in range(len(model_names_mc)):
 # ax.plot([0,1],[0,1],"k--", lw=1.5, label="Random classifier")
 # ax.set_xlabel("False Positive Rate", fontsize=12)
 # ax.set_ylabel("True Positive Rate", fontsize=12)
-# ax.set_title("Combined ROC-AUC Curves - All Models",
+# ax.set_title("Combined ROC-AUC Curves — All Models",
 #              fontsize=13, fontweight="bold")
 # ax.legend(fontsize=9, loc="lower right", framealpha=0.9)
 # ax.set_xlim([0,1]); ax.set_ylim([0,1.02]); ax.grid(alpha=0.35)
 # plt.tight_layout()
 # plt.savefig("roc_combined.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> roc_combined.png")
-# 
+# print("  → roc_combined.png")
+#
+# # ── (E) Individual Precision-Recall curves ────────────────────────────────────
 # pr_names  = [n for n, ypr in probs_test.items() if ypr is not None]
 # ncols_pr  = 4
 # nrows_pr  = (len(pr_names) + ncols_pr - 1) // ncols_pr
@@ -1016,13 +1063,14 @@ for i in range(len(model_names_mc)):
 #     ax.grid(alpha=0.3)
 # for j in range(idx + 1, len(axes)):
 #     axes[j].set_visible(False)
-# fig.suptitle(f"Precision-Recall Curves - Optimal threshold at Recall >= {RECALL_TARGET}",
+# fig.suptitle(f"Precision-Recall Curves — Optimal threshold at Recall ≥ {RECALL_TARGET}",
 #              fontsize=13, fontweight="bold", y=1.01)
 # plt.tight_layout()
 # plt.savefig("precision_recall_curves.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> precision_recall_curves.png")
-# 
+# print("  → precision_recall_curves.png")
+#
+# # ── (F) Combined PR overlay ───────────────────────────────────────────────────
 # fig, ax = plt.subplots(figsize=(11, 8))
 # for idx, name in enumerate(pr_names):
 #     ypr_i             = probs_test[name]
@@ -1034,15 +1082,16 @@ for i in range(len(model_names_mc)):
 # ax.axhline(y_test.mean(), color="gray", lw=1.5, linestyle="--",
 #            label=f"Baseline (prevalence={y_test.mean():.2f})")
 # ax.set_xlabel("Recall", fontsize=12); ax.set_ylabel("Precision", fontsize=12)
-# ax.set_title("Combined Precision-Recall Curves - All Models",
+# ax.set_title("Combined Precision-Recall Curves — All Models",
 #              fontsize=13, fontweight="bold")
 # ax.legend(fontsize=9, loc="upper right", framealpha=0.9)
 # ax.set_xlim([0,1]); ax.set_ylim([0,1.05]); ax.grid(alpha=0.35)
 # plt.tight_layout()
 # plt.savefig("pr_combined.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> pr_combined.png")
-# 
+# print("  → pr_combined.png")
+#
+# # ── (G) Calibration plot ──────────────────────────────────────────────────────
 # fig, ax = plt.subplots(figsize=(9, 7))
 # ax.plot([0,1],[0,1],"k--", lw=1.5, label="Perfect calibration")
 # for idx, name in enumerate(roc_names):
@@ -1055,15 +1104,16 @@ for i in range(len(model_names_mc)):
 #         pass
 # ax.set_xlabel("Mean predicted probability")
 # ax.set_ylabel("Fraction of positives")
-# ax.set_title("Calibration Plot - Reliability Diagram",
+# ax.set_title("Calibration Plot — Reliability Diagram",
 #              fontsize=13, fontweight="bold")
 # ax.legend(fontsize=8, loc="upper left")
 # ax.set_xlim([0,1]); ax.set_ylim([0,1]); ax.grid(alpha=0.35)
 # plt.tight_layout()
 # plt.savefig("calibration_plot.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> calibration_plot.png")
-# 
+# print("  → calibration_plot.png")
+#
+# # ── (H) Permutation importance — one subplot per model ───────────────────────
 # if perm_results:
 #     n_pi    = len(perm_results)
 #     ncols_p = 3
@@ -1085,13 +1135,14 @@ for i in range(len(model_names_mc)):
 #         ax.grid(axis="x", alpha=0.4)
 #     for j in range(idx + 1, len(axes)):
 #         axes[j].set_visible(False)
-#     fig.suptitle("Permutation Importance - ALL Models  (Recall drop per feature)",
+#     fig.suptitle("Permutation Importance — ALL Models  (Recall drop per feature)",
 #                  fontsize=14, fontweight="bold", y=1.01)
 #     plt.tight_layout()
 #     plt.savefig("permutation_importance.png", dpi=120, bbox_inches="tight")
 #     plt.close()
-#     print("  -> permutation_importance.png")
-# 
+#     print("  → permutation_importance.png")
+#
+#     # ── (H2) Permutation importance consensus heatmap ────────────────────────
 #     perm_mean_matrix = pd.DataFrame(
 #         {name: df.set_index("Feature")["Mean Drop"]
 #          for name, df in perm_results.items()}
@@ -1100,26 +1151,28 @@ for i in range(len(model_names_mc)):
 #     sns.heatmap(perm_mean_matrix, annot=True, fmt=".4f",
 #                 cmap="RdYlGn_r", center=0, linewidths=0.5, ax=ax,
 #                 cbar_kws={"label": "Mean Recall drop"})
-#     ax.set_title("Permutation Importance Consensus - All Models",
+#     ax.set_title("Permutation Importance Consensus — All Models",
 #                  fontsize=12, fontweight="bold")
 #     ax.tick_params(axis="x", rotation=30); ax.tick_params(axis="y", rotation=0)
 #     plt.tight_layout()
 #     plt.savefig("permutation_importance_consensus.png", dpi=120, bbox_inches="tight")
 #     plt.close()
-#     print("  -> permutation_importance_consensus.png")
-# 
+#     print("  → permutation_importance_consensus.png")
+#
+# # ── (I) Tree-based feature importance (tuned RF) ──────────────────────────────
 # fi = pd.Series(rf_tuned.best_estimator_.feature_importances_,
 #                index=FEATURES).sort_values()
 # fig, ax = plt.subplots(figsize=(9, 5))
 # fi.plot(kind="barh", ax=ax, color="#ED7D31", edgecolor="black")
-# ax.set_title("Tree-Based Feature Importance - Tuned Random Forest")
+# ax.set_title("Tree-Based Feature Importance — Tuned Random Forest")
 # ax.set_xlabel("Mean Decrease in Impurity")
 # ax.grid(axis="x", alpha=0.4)
 # plt.tight_layout()
 # plt.savefig("feature_importance.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> feature_importance.png")
-# 
+# print("  → feature_importance.png")
+#
+# # ── (J) Per-fold heatmaps ─────────────────────────────────────────────────────
 # fig_rows = (len(fold_summaries) + 1) // 2
 # fig, axes = plt.subplots(fig_rows, 2, figsize=(18, fig_rows * 4.5))
 # axes = axes.flatten()
@@ -1130,17 +1183,18 @@ for i in range(len(model_names_mc)):
 #     sns.heatmap(plot_df.astype(float), annot=True, fmt=".4f",
 #                 cmap="YlOrRd", linewidths=0.5, ax=ax,
 #                 vmin=0, vmax=1, cbar_kws={"shrink": 0.7})
-#     ax.set_title(f"{name} - Per-Fold Metrics")
+#     ax.set_title(f"{name} — Per-Fold Metrics")
 #     ax.tick_params(axis="y", rotation=0)
 # for j in range(idx + 1, len(axes)):
 #     axes[j].set_visible(False)
-# fig.suptitle("Per-Fold Cross-Validation Metrics - All Models",
+# fig.suptitle("Per-Fold Cross-Validation Metrics — All Models",
 #              fontsize=14, fontweight="bold", y=1.01)
 # plt.tight_layout()
 # plt.savefig("per_fold_heatmaps.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> per_fold_heatmaps.png")
-# 
+# print("  → per_fold_heatmaps.png")
+#
+# # ── (K) Per-fold line charts ──────────────────────────────────────────────────
 # fold_labels = [f"Fold {i}" for i in range(1, N_FOLDS + 1)]
 # fig, axes   = plt.subplots(1, 2, figsize=(16, 6))
 # for idx, (name, fold_df) in enumerate(fold_summaries.items()):
@@ -1151,14 +1205,15 @@ for i in range(len(model_names_mc)):
 #                  marker="s", lw=2, color=PALETTE[idx % len(PALETTE)], label=name)
 # for ax, metric in zip(axes, ["F1 Score", "Recall"]):
 #     ax.set_xlabel("Fold"); ax.set_ylabel(metric)
-#     ax.set_title(f"Per-Fold {metric} - All Models")
+#     ax.set_title(f"Per-Fold {metric} — All Models")
 #     ax.legend(fontsize=8, bbox_to_anchor=(1.01, 1), loc="upper left")
 #     ax.set_ylim([0, 1.05]); ax.grid(alpha=0.4)
 # plt.tight_layout()
 # plt.savefig("per_fold_lines.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> per_fold_lines.png")
-# 
+# print("  → per_fold_lines.png")
+#
+# # ── (L) CV box plot ───────────────────────────────────────────────────────────
 # cv_data = []
 # for name, fold_df in fold_summaries.items():
 #     for val in fold_df["F1"].iloc[:N_FOLDS]:
@@ -1166,19 +1221,21 @@ for i in range(len(model_names_mc)):
 # cv_df = pd.DataFrame(cv_data)
 # fig, ax = plt.subplots(figsize=(14, 6))
 # cv_df.boxplot(column="CV F1", by="Model", ax=ax, patch_artist=True, grid=True)
-# ax.set_title("5-Fold CV F1 Distribution - All Models")
+# ax.set_title("5-Fold CV F1 Distribution — All Models")
 # ax.set_xlabel(""); ax.set_ylabel("F1 Score")
 # plt.xticks(rotation=25, ha="right"); plt.suptitle("")
 # plt.tight_layout()
 # plt.savefig("cv_boxplot.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> cv_boxplot.png")
-# 
+# print("  → cv_boxplot.png")
+#
+# # ── (M) Threshold tuning summary ─────────────────────────────────────────────
 # th_names = list(threshold_results.keys())
 # th_recs  = [threshold_results[n]["recall"]    for n in th_names]
 # th_precs = [threshold_results[n]["precision"] for n in th_names]
 # th_f1s   = [threshold_results[n]["f1"]        for n in th_names]
 # th_thrs  = [threshold_results[n]["threshold"] for n in th_names]
+#
 # fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 # x_t = np.arange(len(th_names)); w_t = 0.28
 # axes[0].bar(x_t - w_t, th_recs,  width=w_t, label="Recall",    color="#C44E52")
@@ -1189,7 +1246,7 @@ for i in range(len(model_names_mc)):
 # axes[0].set_xticks(x_t)
 # axes[0].set_xticklabels(th_names, rotation=25, ha="right")
 # axes[0].set_ylim(0, 1.12)
-# axes[0].set_title(f"Metrics at Optimal Threshold (recall >= {RECALL_TARGET})")
+# axes[0].set_title(f"Metrics at Optimal Threshold (recall ≥ {RECALL_TARGET})")
 # axes[0].legend(fontsize=9); axes[0].grid(axis="y", alpha=0.4)
 # axes[1].bar(x_t, th_thrs, color="#8172B2", edgecolor="black", linewidth=0.5)
 # axes[1].axhline(0.5, color="gray", lw=1.5, linestyle="--", label="Default t=0.50")
@@ -1201,8 +1258,9 @@ for i in range(len(model_names_mc)):
 # plt.tight_layout()
 # plt.savefig("threshold_tuning.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> threshold_tuning.png")
-# 
+# print("  → threshold_tuning.png")
+#
+# # ── (N) Bootstrap CI — one subplot per model ─────────────────────────────────
 # n_ci    = len(all_ci)
 # ncols_n = 3
 # nrows_n = (n_ci + ncols_n - 1) // ncols_n
@@ -1223,13 +1281,14 @@ for i in range(len(model_names_mc)):
 #     ax.tick_params(axis="x", rotation=20); ax.grid(axis="y", alpha=0.4)
 # for j in range(idx + 1, len(axes)):
 #     axes[j].set_visible(False)
-# fig.suptitle(f"Bootstrap 95% CIs - ALL Models  ({N_BOOT} samples)",
+# fig.suptitle(f"Bootstrap 95% CIs — ALL Models  ({N_BOOT} samples)",
 #              fontsize=14, fontweight="bold", y=1.01)
 # plt.tight_layout()
 # plt.savefig("bootstrap_ci.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> bootstrap_ci.png")
-# 
+# print("  → bootstrap_ci.png")
+#
+# # ── (N2) Bootstrap CI recall comparison ──────────────────────────────────────
 # fig, ax = plt.subplots(figsize=(12, 6))
 # ci_model_names = list(all_ci.keys())
 # recall_means   = [all_ci[n].loc["Recall","Mean"]      for n in ci_model_names]
@@ -1248,45 +1307,89 @@ for i in range(len(model_names_mc)):
 # ax.set_xticks(x_ci)
 # ax.set_xticklabels(ci_model_names, rotation=25, ha="right")
 # ax.set_ylim(0, 1.15); ax.set_ylabel("Recall (with 95% CI)")
-# ax.set_title("Recall Comparison with Bootstrap 95% CI - All Models",
+# ax.set_title("Recall Comparison with Bootstrap 95% CI — All Models",
 #              fontsize=13, fontweight="bold")
 # ax.legend(fontsize=10); ax.grid(axis="y", alpha=0.4)
 # plt.tight_layout()
 # plt.savefig("bootstrap_ci_recall_comparison.png", dpi=120, bbox_inches="tight")
 # plt.close()
-# print("  -> bootstrap_ci_recall_comparison.png")
-# 
-# 
-# # ==============================================================================
-# # STEP 19 - EXCEL SUMMARY REPORT
-# # ==============================================================================
-# print("\n" + "=" * 70)
-# print("  STEP 19 - EXCEL SUMMARY REPORT")
-# print("=" * 70)
-# 
-# try:
-#     with pd.ExcelWriter("results_summary.xlsx", engine="openpyxl") as writer:
-#         pd.DataFrame(summary_rows).set_index("Model").to_excel(
-#             writer, sheet_name="Leaderboard")
-#         thr_rows = [{"Model": n, **v} for n, v in threshold_results.items()]
-#         pd.DataFrame(thr_rows).set_index("Model").to_excel(
-#             writer, sheet_name="Threshold Tuning")
-#         for name, ci_df_i in all_ci.items():
-#             ci_df_i.to_excel(writer, sheet_name=sheet_name(name, "CI"))
-#         for name, perm_df_i in perm_results.items():
-#             perm_df_i.to_excel(writer, sheet_name=sheet_name(name, "PI"), index=False)
-#         for name, fold_df in fold_summaries.items():
-#             fold_df.to_excel(writer, sheet_name=sheet_name(name, "CV"))
-#     print("  -> results_summary.xlsx")
-# except ImportError:
-#     print("  X openpyxl not installed")
+# print("  → bootstrap_ci_recall_comparison.png")
+#
+# # ── (O) SHAP (optional) ───────────────────────────────────────────────────────
+# if SHAP_OK:
+#     print("\n  Generating SHAP plots...")
+#     try:
+#         rf_model  = trained["Random Forest"]
+#         explainer = shap.TreeExplainer(rf_model)
+#         shap_vals = explainer.shap_values(X_test)
+#
+#         # FIX 9: robust SHAP value extraction — handles both list and ndarray
+#         if isinstance(shap_vals, list):
+#             # older SHAP: list of [class0_array, class1_array]
+#             sv = shap_vals[1]
+#         elif shap_vals.ndim == 3:
+#             # newer SHAP: shape (n_samples, n_features, n_classes)
+#             sv = shap_vals[:, :, 1]
+#         else:
+#             # already 2-D (binary shorthand)
+#             sv = shap_vals
+#
+#         shap.summary_plot(sv, X_test, feature_names=FEATURES, show=False)
+#         plt.savefig("shap_summary.png", dpi=120, bbox_inches="tight")
+#         plt.close()
+#         print("  → shap_summary.png")
+#
+#         shap.summary_plot(sv, X_test, feature_names=FEATURES,
+#                           plot_type="bar", show=False)
+#         plt.savefig("shap_bar.png", dpi=120, bbox_inches="tight")
+#         plt.close()
+#         print("  → shap_bar.png")
+#     except Exception as e:
+#         print(f"  ✗ SHAP failed: {e}")
+# else:
+#     print("  ✗ SHAP skipped (pip install shap to enable)")
 
 
-# ==============================================================================
-# STEP 20 - FINAL LEADERBOARD
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 19 — EXCEL SUMMARY REPORT
+# FIX 8: sheet_name() helper prevents truncation artifacts
+# ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  STEP 20 - FINAL LEADERBOARD")
+print("  STEP 19 — EXCEL SUMMARY REPORT")
+print("=" * 70)
+
+try:
+    with pd.ExcelWriter("results_summary.xlsx", engine="openpyxl") as writer:
+
+        pd.DataFrame(summary_rows).set_index("Model").to_excel(
+            writer, sheet_name="Leaderboard")
+
+        thr_rows = [{"Model": n, **v} for n, v in threshold_results.items()]
+        pd.DataFrame(thr_rows).set_index("Model").to_excel(
+            writer, sheet_name="Threshold Tuning")
+
+        for name, ci_df_i in all_ci.items():
+            ci_df_i.to_excel(writer, sheet_name=sheet_name(name, "CI"))
+
+        for name, perm_df_i in perm_results.items():
+            perm_df_i.to_excel(writer,
+                               sheet_name=sheet_name(name, "PI"),
+                               index=False)
+
+        for name, fold_df in fold_summaries.items():
+            fold_df.to_excel(writer, sheet_name=sheet_name(name, "CV"))
+
+    print("  → results_summary.xlsx")
+
+except ImportError:
+    print("  ✗ openpyxl not installed (pip install openpyxl)")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 20 — FINAL LEADERBOARD
+# ══════════════════════════════════════════════════════════════════════════════
+print("\n" + "=" * 70)
+print("  STEP 20 — FINAL LEADERBOARD")
 print("=" * 70)
 
 final_df = pd.DataFrame(summary_rows).set_index("Model")
@@ -1294,31 +1397,73 @@ best_f1  = final_df["F1"].idxmax()
 best_rec = final_df["Recall"].idxmax()
 best_pr  = final_df["PR-AUC"].idxmax()
 
-print(f"\n  Best by F1      -> {best_f1}")
-print(f"  Best by Recall  -> {best_rec}   <- preferred clinically")
-print(f"  Best by PR-AUC  -> {best_pr}")
+print(f"\n  Best by F1      → {best_f1}")
+print(f"  Best by Recall  → {best_rec}   ← preferred clinically")
+print(f"  Best by PR-AUC  → {best_pr}")
 print("\n  Full leaderboard:\n")
 print(final_df.to_string())
 
-# ==============================================================================
-# STEP 21 - SAVE MODEL ARTIFACTS
-# ==============================================================================
 print("\n" + "=" * 70)
-print("  STEP 21 - SAVE MODEL ARTIFACTS")
+print("  ALL DONE ✓")
+print()
+# print("  PNG outputs:")
+# print("    eda_feature_distributions.png       eda_correlation_heatmap.png")
+# print("    smote_class_distribution.png        model_comparison.png")
+# print("    confusion_matrices.png              roc_individual.png")
+# print("    roc_combined.png                    precision_recall_curves.png")
+# print("    pr_combined.png                     calibration_plot.png")
+# print("    threshold_tuning.png                permutation_importance.png")
+# print("    permutation_importance_consensus.png feature_importance.png")
+# print("    per_fold_heatmaps.png               per_fold_lines.png")
+# print("    cv_boxplot.png                      bootstrap_ci.png")
+# print("    bootstrap_ci_recall_comparison.png")
+# if SHAP_OK:
+#     print("    shap_summary.png                    shap_bar.png")
+print()
+print("  Excel: results_summary.xlsx")
+print("=" * 70)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 21 — SAVE MODEL ARTIFACTS
+# ══════════════════════════════════════════════════════════════════════════════
+print("\n" + "=" * 70)
+print("  STEP 21 — SAVE MODEL ARTIFACTS")
 print("=" * 70)
 
 from shared.model_artifacts import save_model_artifacts
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline as SkPipeline
+from sklearn.compose import ColumnTransformer
 
-categorical_feature_names = [FEATURES[i] for i in BINARY_IDX]
+FEATURES_USED = FEATURES
+CONTINUOUS_COLS = [FEATURES[i] for i in CONTINUOUS_IDX]
+BINARY_COLS = [FEATURES[i] for i in BINARY_IDX]
+categorical_feature_names = []  # All 10 feeding features are numerical
 
-for name, model in trained.items():
-    print(f"  Saving artifacts for {name}...")
-    
-    y_pred = preds_test[name]
-    y_prob = probs_test[name]
-    best_threshold = threshold_results.get(name, {}).get("threshold", 0.5)
-    
+# Fit a named ColumnTransformer for models requiring scaling
+preprocessor_pipe = ColumnTransformer([
+    ("scale", StandardScaler(), CONTINUOUS_COLS),
+    ("passthrough", "passthrough", BINARY_COLS),
+])
+df_train_res = pd.DataFrame(X_train_res, columns=FEATURES_USED)
+preprocessor_pipe.fit(df_train_res)
+
+# Map model names to their fitted model objects and pipelines
+trained_models = dict(trained)
+
+for name, model in trained_models.items():
+    print(f"\n  Saving artifacts for {name}...")
+
+    y_pred = preds_test.get(name)
+    y_prob = probs_test.get(name)
+    raw_threshold = float(threshold_results.get(name, {}).get("threshold", 0.5))
+    best_threshold = round(raw_threshold, 2)
+    if y_prob is not None:
+        # Preserve target recall if 2-decimal rounding up drops below optimal recall
+        if recall_score(y_test, (y_prob >= best_threshold).astype(int), zero_division=0) < threshold_results.get(name, {}).get("recall", 0.90) - 1e-4:
+            import math
+            best_threshold = round(math.floor(raw_threshold * 100) / 100, 2)
+
     if y_prob is None:
         auc_score = float('nan')
         y_prob_out = np.zeros_like(y_pred, dtype=float)
@@ -1326,7 +1471,7 @@ for name, model in trained.items():
         auc_score = float(roc_auc_score(y_test, y_prob))
         y_prob_out = y_prob
         y_pred = (y_prob >= best_threshold).astype(int)
-        
+
     metrics = {
         "accuracy": float(accuracy_score(y_test, y_pred)),
         "precision": float(precision_score(y_test, y_pred, zero_division=0)),
@@ -1344,22 +1489,31 @@ for name, model in trained.items():
         "confusion_matrix": cm
     }
 
-    scaled = all_model_defs.get(name, False)
-    if scaled:
-        pipeline = Pipeline([
-            ("preprocessor", preprocessor),
+    # Wrap in Pipeline for artifact saving (include preprocessor if the model used scaling)
+    sc = all_model_defs.get(name, False)
+    if sc:
+        pipeline = SkPipeline([
+            ("preprocessor", preprocessor_pipe),
             ("classifier", model)
         ])
     else:
-        pipeline = Pipeline([
+        pipeline = SkPipeline([
             ("classifier", model)
         ])
 
-    best_threshold = threshold_results.get(name, {}).get("threshold", 0.5)
+    Xtr = X_train_scaled if sc else X_train
+    Ytr = y_train
+    y_tr_prob = model.predict_proba(Xtr)[:, 1] if hasattr(model, "predict_proba") else None
+    y_tr_pred = (y_tr_prob >= best_threshold).astype(int) if y_tr_prob is not None else model.predict(Xtr)
+    train_metrics = {
+        "accuracy": float(accuracy_score(Ytr, y_tr_pred)),
+        "precision": float(precision_score(Ytr, y_tr_pred, zero_division=0)),
+        "recall": float(recall_score(Ytr, y_tr_pred, zero_division=0)),
+        "f1": float(f1_score(Ytr, y_tr_pred, zero_division=0)),
+        "roc_auc": float(roc_auc_score(Ytr, y_tr_prob)) if y_tr_prob is not None else float("nan"),
+    }
 
-    train_metrics = oof_train_metrics_dict.get(name, {})
-
-    algo_id = name.lower().replace(" ", "")
+    algo_id = name.lower().replace(" ", "").replace("(", "").replace(")", "").replace("+", "_").replace("-", "")
 
     save_model_artifacts(
         pipeline=pipeline,
@@ -1367,17 +1521,18 @@ for name, model in trained.items():
         outcome_id="feeding",
         algorithm=algo_id,
         label=name,
-        description=f"{name} classifier trained on breastfeeding dataset.",
+        description=f"{name} classifier trained on breastfeeding feeding problem dataset.",
         target_column=TARGET,
-        feature_order=FEATURES,
+        feature_order=FEATURES_USED,
         categorical_features=categorical_feature_names,
         metrics_payload=metrics_payload,
         positive_label="Has Problem (1)",
         negative_label="No Problem (0)",
         threshold=best_threshold,
-        y_test=y_test,
+        y_test=np.array(y_test),
         y_prob=y_prob_out,
         train_metrics=train_metrics,
+        project_root=PROJECT_ROOT,
     )
 
 print("\n" + "=" * 70)

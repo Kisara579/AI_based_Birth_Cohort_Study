@@ -283,7 +283,7 @@ export default function ResultsModel() {
           message="Please run a prediction first. This page expects form inputs from the Predict screen."
         />
         <div className="resultsActionRow">
-          <Link to={`/predict/${outcome.id}`}>
+          <Link to={`/predict/${outcome.id}`} replace>
             <Button variant="primary">Go to Predict</Button>
           </Link>
           <Link to="/">
@@ -339,7 +339,7 @@ export default function ResultsModel() {
         <ErrorBanner title="Prediction unavailable" message={predErr} />
 
         <div className="resultsActionRow">
-          <Link to={`/predict/${outcome.id}`}>
+          <Link to={`/predict/${outcome.id}`} state={{ formValues }} replace>
             <Button variant="secondary">Edit Inputs</Button>
           </Link>
 
@@ -376,9 +376,14 @@ export default function ResultsModel() {
           Overview
         </a>
         <span className="breadcrumbSep">›</span>
-        <a href={`/predict/${outcome.id}`} className="breadcrumbLink">
+        <Link
+          to={`/predict/${outcome.id}`}
+          state={{ formValues }}
+          replace
+          className="breadcrumbLink"
+        >
           Predict
-        </a>
+        </Link>
         <span className="breadcrumbSep">›</span>
         <span className="breadcrumbCurrent">Results</span>
       </nav>
@@ -392,7 +397,7 @@ export default function ResultsModel() {
           </p>
         </div>
         <div className="resultsHeaderActions">
-          <Link to={`/predict/${outcome.id}`}>
+          <Link to={`/predict/${outcome.id}`} state={{ formValues }} replace>
             <Button variant="secondary">Edit Inputs</Button>
           </Link>
           <Link to="/">

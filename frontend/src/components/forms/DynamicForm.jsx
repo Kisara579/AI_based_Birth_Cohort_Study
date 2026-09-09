@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FormSection from "./FormSection.jsx";
 import Button from "../common/Button.jsx";
 import "./DynamicForm.css";
@@ -56,7 +56,7 @@ function normalizeValues(schema, values) {
   return out;
 }
 
-export default function DynamicForm({ schema, onSubmit }) {
+export default function DynamicForm({ schema, onSubmit, initialValues }) {
   const allFields = useMemo(() => {
     const fields = [];
     for (const s of schema.sections) fields.push(...s.fields);
@@ -65,9 +65,33 @@ export default function DynamicForm({ schema, onSubmit }) {
 
   const [values, setValues] = useState(() => {
     const init = {};
-    for (const f of allFields) init[f.name] = "";
+    for (const f of allFields) {
+      init[f.name] =
+        initialValues &&
+        initialValues[f.name] !== undefined &&
+        initialValues[f.name] !== null
+          ? String(initialValues[f.name])
+          : "";
+    }
     return init;
   });
+
+  useEffect(() => {
+    if (initialValues) {
+      setValues((prev) => {
+        const next = { ...prev };
+        for (const f of allFields) {
+          if (
+            initialValues[f.name] !== undefined &&
+            initialValues[f.name] !== null
+          ) {
+            next[f.name] = String(initialValues[f.name]);
+          }
+        }
+        return next;
+      });
+    }
+  }, [initialValues, allFields]);
 
   const [errors, setErrors] = useState({});
 

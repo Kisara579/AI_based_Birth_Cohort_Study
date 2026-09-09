@@ -1,6 +1,11 @@
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -326,64 +331,64 @@ print(f"  Missing values: {df_model.isna().sum().sum()}")
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 4 — EDA
 # ══════════════════════════════════════════════════════════════════════════════
-import math
-
-n_features = len(FEATURES)
-ncols = 3
-nrows = math.ceil(n_features / ncols)
-
-fig, axes = plt.subplots(nrows, ncols, figsize=(16, 4 * nrows))
-axes = axes.flatten()
-
-fig.suptitle(
-    "EDA — Feature Distributions by Feeding Problem Status",
-    fontsize=14,
-    fontweight="bold"
-)
-
-for i, col in enumerate(FEATURES):
-
-    ax = axes[i]
-
-    if df_model[col].nunique() <= 5:
-
-        ct = df_model.groupby([col, TARGET]).size().unstack(fill_value=0)
-
-        ct.plot(
-            kind="bar",
-            ax=ax,
-            color=["#5B9BD5", "#ED7D31"],
-            edgecolor="black",
-            width=0.7
-        )
-
-        ax.tick_params(axis="x", rotation=0)
-        ax.legend(["No Problem", "Has Problem"], fontsize=8)
-
-    else:
-
-        for label, grp in df_model.groupby(TARGET):
-
-            ax.hist(
-                grp[col].dropna(),
-                bins=25,
-                alpha=0.6,
-                label="No Problem" if label == 0 else "Has Problem",
-                color="#5B9BD5" if label == 0 else "#ED7D31"
-            )
-
-        ax.legend(fontsize=8)
-
-    ax.set_title(col, fontsize=10)
-    ax.grid(axis="y", alpha=0.3)
-
-# Hide unused axes
-for j in range(len(FEATURES), len(axes)):
-    axes[j].set_visible(False)
-
-plt.tight_layout()
-plt.savefig("eda_feature_distributions.png", dpi=120, bbox_inches="tight")
-plt.close()
+# import math
+# 
+# n_features = len(FEATURES)
+# ncols = 3
+# nrows = math.ceil(n_features / ncols)
+# 
+# fig, axes = plt.subplots(nrows, ncols, figsize=(16, 4 * nrows))
+# axes = axes.flatten()
+# 
+# fig.suptitle(
+#     "EDA — Feature Distributions by Feeding Problem Status",
+#     fontsize=14,
+#     fontweight="bold"
+# )
+# 
+# for i, col in enumerate(FEATURES):
+# 
+#     ax = axes[i]
+# 
+#     if df_model[col].nunique() <= 5:
+# 
+#         ct = df_model.groupby([col, TARGET]).size().unstack(fill_value=0)
+# 
+#         ct.plot(
+#             kind="bar",
+#             ax=ax,
+#             color=["#5B9BD5", "#ED7D31"],
+#             edgecolor="black",
+#             width=0.7
+#         )
+# 
+#         ax.tick_params(axis="x", rotation=0)
+#         ax.legend(["No Problem", "Has Problem"], fontsize=8)
+# 
+#     else:
+# 
+#         for label, grp in df_model.groupby(TARGET):
+# 
+#             ax.hist(
+#                 grp[col].dropna(),
+#                 bins=25,
+#                 alpha=0.6,
+#                 label="No Problem" if label == 0 else "Has Problem",
+#                 color="#5B9BD5" if label == 0 else "#ED7D31"
+#             )
+# 
+#         ax.legend(fontsize=8)
+# 
+#     ax.set_title(col, fontsize=10)
+#     ax.grid(axis="y", alpha=0.3)
+# 
+# # Hide unused axes
+# for j in range(len(FEATURES), len(axes)):
+#     axes[j].set_visible(False)
+# 
+# plt.tight_layout()
+# plt.savefig("eda_feature_distributions.png", dpi=120, bbox_inches="tight")
+# plt.close()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 5 — TRAIN / TEST SPLIT (80/20 stratified)
@@ -451,43 +456,44 @@ preprocessor = ColumnTransformer([
 
 X_train_res_s = preprocessor.fit_transform(X_train_res)   # fit on SMOTE train
 X_test_scaled = preprocessor.transform(X_test)             # same transform for test
+X_train_scaled = preprocessor.transform(X_train)
 
 print(f"  ColumnTransformer fit on SMOTE train → scales continuous, "
       f"passes binary as-is ✓")
 
 
 # ── SMOTE class-distribution visualisation ───────────────────────────────────
-before_counts = np.bincount(y_train)
-after_counts  = np.bincount(y_train_res)
-labels        = ["Class 0\n(No problem)", "Class 1\n(Has problem)"]
-
-fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-fig.suptitle("SMOTE: Class Distribution Before and After",
-             fontsize=13, fontweight="bold")
-
-for ax, counts, title, color in zip(
-        axes,
-        [before_counts, after_counts],
-        ["Before SMOTE", "After SMOTE"],
-        [["#5B9BD5","#ED7D31"], ["#5B9BD5","#1D9E75"]]):
-    bars = ax.bar(labels, counts, color=color, edgecolor="black", width=0.5)
-    ax.set_title(title, fontsize=11, fontweight="bold")
-    ax.set_ylabel("Count")
-    ax.set_ylim(0, max(after_counts) * 1.18)
-    ax.spines[["top","right"]].set_visible(False)
-    for bar, cnt in zip(bars, counts):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 5,
-                str(cnt), ha="center", va="bottom", fontweight="bold")
-
-n_synthetic = after_counts[1] - before_counts[1]
-axes[1].text(0.97, 0.95, f"+{n_synthetic} synthetic samples",
-             transform=axes[1].transAxes, ha="right", va="top",
-             fontsize=9, color="#1D9E75",
-             bbox=dict(boxstyle="round,pad=0.3", fc="#e8f8f1", ec="#1D9E75"))
-plt.tight_layout()
-plt.savefig("smote_class_distribution.png", dpi=150, bbox_inches="tight")
-plt.close()                    # FIX 6: removed plt.show() — Agg backend
-print("  → smote_class_distribution.png")
+# before_counts = np.bincount(y_train)
+# after_counts  = np.bincount(y_train_res)
+# labels        = ["Class 0\n(No problem)", "Class 1\n(Has problem)"]
+# 
+# fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# fig.suptitle("SMOTE: Class Distribution Before and After",
+#              fontsize=13, fontweight="bold")
+# 
+# for ax, counts, title, color in zip(
+#         axes,
+#         [before_counts, after_counts],
+#         ["Before SMOTE", "After SMOTE"],
+#         [["#5B9BD5","#ED7D31"], ["#5B9BD5","#1D9E75"]]):
+#     bars = ax.bar(labels, counts, color=color, edgecolor="black", width=0.5)
+#     ax.set_title(title, fontsize=11, fontweight="bold")
+#     ax.set_ylabel("Count")
+#     ax.set_ylim(0, max(after_counts) * 1.18)
+#     ax.spines[["top","right"]].set_visible(False)
+#     for bar, cnt in zip(bars, counts):
+#         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 5,
+#                 str(cnt), ha="center", va="bottom", fontweight="bold")
+# 
+# n_synthetic = after_counts[1] - before_counts[1]
+# axes[1].text(0.97, 0.95, f"+{n_synthetic} synthetic samples",
+#              transform=axes[1].transAxes, ha="right", va="top",
+#              fontsize=9, color="#1D9E75",
+#              bbox=dict(boxstyle="round,pad=0.3", fc="#e8f8f1", ec="#1D9E75"))
+# plt.tight_layout()
+# plt.savefig("smote_class_distribution.png", dpi=150, bbox_inches="tight")
+# plt.close()                    # FIX 6: removed plt.show() — Agg backend
+# print("  → smote_class_distribution.png")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -664,6 +670,20 @@ for line in classification_report(
         digits=4).splitlines():
     print("    " + line)
 
+trained["RF Tuned"]    = rf_tuned.best_estimator_
+probs_test["RF Tuned"] = y_prob_tuned
+preds_test["RF Tuned"] = y_pred_tuned
+
+summary_rows.append({
+    "Model"    : "RF Tuned",
+    "Accuracy" : accuracy_score(y_test, y_pred_tuned),
+    "Precision": precision_score(y_test, y_pred_tuned, zero_division=0),
+    "Recall"   : recall_score(y_test, y_pred_tuned, zero_division=0),
+    "F1"       : f1_score(y_test, y_pred_tuned, zero_division=0),
+    "ROC-AUC"  : roc_auc_score(y_test, y_prob_tuned),
+    "PR-AUC"   : average_precision_score(y_test, y_prob_tuned),
+})
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 11 — ENSEMBLE MODELS
@@ -791,7 +811,7 @@ summary_rows.append({
 all_model_defs = (
     {n: s for n, _, s in MODEL_DEFS} |
     {n: s for n, _, s in ensemble_defs} |
-    {"RF Calibrated": False}
+    {"RF Calibrated": False, "RF Tuned": False}
 )
 
 
@@ -917,417 +937,417 @@ for name, model in trained.items():
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 18 — ALL PLOTS
 # ══════════════════════════════════════════════════════════════════════════════
-print("\n" + "=" * 70)
-print("  STEP 18 — GENERATING ALL PLOTS")
-print("=" * 70)
-
-all_results_df = pd.DataFrame(summary_rows).set_index("Model")
-ls_cycle       = ["-","--","-.",":","-","--","-.",":","-","--","-"]
-
-# ── (A) Model comparison bar chart ───────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(16, 6))
-x = np.arange(len(all_results_df))
-w = 0.12
-met_list   = ["Accuracy","Precision","Recall","F1","ROC-AUC","PR-AUC"]
-bar_colors = ["#5B9BD5","#ED7D31","#C44E52","#70AD47","#7030A0","#937860"]
-for i, (met, col) in enumerate(zip(met_list, bar_colors)):
-    ax.bar(x + i*w, all_results_df[met], width=w, label=met,
-           color=col, edgecolor="black", linewidth=0.5)
-ax.set_xticks(x + 2.5*w)
-ax.set_xticklabels(all_results_df.index, rotation=25, ha="right")
-ax.set_ylim(0, 1.15); ax.set_ylabel("Score")
-ax.set_title("Model Comparison — All Metrics (incl. PR-AUC)")
-ax.legend(fontsize=9); ax.grid(axis="y", alpha=0.4)
-plt.tight_layout()
-plt.savefig("model_comparison.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → model_comparison.png")
-
-# ── (B) Confusion matrices ────────────────────────────────────────────────────
-n_m     = len(trained)
-ncols_c = 4
-nrows_c = (n_m + ncols_c - 1) // ncols_c
-fig, axes = plt.subplots(nrows_c, ncols_c,
-                         figsize=(ncols_c * 4.5, nrows_c * 4))
-axes = axes.flatten()
-for idx, (name, model) in enumerate(trained.items()):
-    sc  = all_model_defs.get(name, False)
-    Xte = X_test_scaled if sc else X_test
-    cm  = confusion_matrix(y_test, model.predict(Xte))
-    ConfusionMatrixDisplay(cm,
-        display_labels=["No Problem","Has Problem"]).plot(
-        ax=axes[idx], colorbar=False, cmap="Blues")
-    axes[idx].set_title(name)
-for j in range(idx + 1, len(axes)):
-    axes[j].set_visible(False)
-fig.suptitle("Confusion Matrices — All Models",
-             fontsize=14, fontweight="bold")
-plt.tight_layout()
-plt.savefig("confusion_matrices.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → confusion_matrices.png")
-
-# ── (C) Individual ROC curves ─────────────────────────────────────────────────
-roc_names = [n for n, ypr in probs_test.items() if ypr is not None]
-ncols_r   = 4
-nrows_r   = (len(roc_names) + ncols_r - 1) // ncols_r
-fig, axes = plt.subplots(nrows_r, ncols_r,
-                         figsize=(ncols_r * 5, nrows_r * 4.5))
-axes = axes.flatten()
-for idx, name in enumerate(roc_names):
-    ypr_i       = probs_test[name]
-    fpr, tpr, _ = roc_curve(y_test, ypr_i)
-    auc_val     = roc_auc_score(y_test, ypr_i)
-    ax          = axes[idx]
-    ax.plot(fpr, tpr, color=PALETTE[idx % len(PALETTE)], lw=2.5,
-            label=f"AUC = {auc_val:.4f}")
-    ax.fill_between(fpr, tpr, alpha=0.10, color=PALETTE[idx % len(PALETTE)])
-    ax.plot([0,1],[0,1],"k--", lw=1.2, label="Random")
-    ax.set_xlabel("FPR", fontsize=9); ax.set_ylabel("TPR", fontsize=9)
-    ax.set_title(f"{name}\nAUC = {auc_val:.4f}")
-    ax.legend(fontsize=8, loc="lower right")
-    ax.set_xlim([0,1]); ax.set_ylim([0,1.02]); ax.grid(alpha=0.3)
-for j in range(idx + 1, len(axes)):
-    axes[j].set_visible(False)
-fig.suptitle("Individual ROC-AUC Curves", fontsize=14, fontweight="bold", y=1.01)
-plt.tight_layout()
-plt.savefig("roc_individual.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → roc_individual.png")
-
-# ── (D) Combined ROC overlay ──────────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(11, 8))
-for idx, name in enumerate(roc_names):
-    ypr_i       = probs_test[name]
-    fpr, tpr, _ = roc_curve(y_test, ypr_i)
-    auc_val     = roc_auc_score(y_test, ypr_i)
-    ax.plot(fpr, tpr, lw=2, color=PALETTE[idx % len(PALETTE)],
-            linestyle=ls_cycle[idx % len(ls_cycle)],
-            label=f"{name}  (AUC={auc_val:.4f})")
-ax.plot([0,1],[0,1],"k--", lw=1.5, label="Random classifier")
-ax.set_xlabel("False Positive Rate", fontsize=12)
-ax.set_ylabel("True Positive Rate", fontsize=12)
-ax.set_title("Combined ROC-AUC Curves — All Models",
-             fontsize=13, fontweight="bold")
-ax.legend(fontsize=9, loc="lower right", framealpha=0.9)
-ax.set_xlim([0,1]); ax.set_ylim([0,1.02]); ax.grid(alpha=0.35)
-plt.tight_layout()
-plt.savefig("roc_combined.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → roc_combined.png")
-
-# ── (E) Individual Precision-Recall curves ────────────────────────────────────
-pr_names  = [n for n, ypr in probs_test.items() if ypr is not None]
-ncols_pr  = 4
-nrows_pr  = (len(pr_names) + ncols_pr - 1) // ncols_pr
-fig, axes = plt.subplots(nrows_pr, ncols_pr,
-                         figsize=(ncols_pr * 5, nrows_pr * 4.5))
-axes = axes.flatten()
-for idx, name in enumerate(pr_names):
-    ypr_i              = probs_test[name]
-    prec_arr, rec_arr, _ = precision_recall_curve(y_test, ypr_i)
-    ap_val             = average_precision_score(y_test, ypr_i)
-    t_res              = threshold_results.get(name, {})
-    ax                 = axes[idx]
-    ax.plot(rec_arr, prec_arr, color=PALETTE[idx % len(PALETTE)], lw=2.5,
-            label=f"AP = {ap_val:.4f}")
-    if t_res:
-        ax.scatter([t_res["recall"]], [t_res["precision"]],
-                   color="red", s=90, zorder=5,
-                   label=f"t={t_res['threshold']:.2f}")
-    ax.axhline(y_test.mean(), color="gray", lw=1, linestyle="--",
-               alpha=0.6, label="Baseline")
-    ax.set_xlabel("Recall", fontsize=9); ax.set_ylabel("Precision", fontsize=9)
-    ax.set_title(f"{name}\nAP = {ap_val:.4f}")
-    ax.legend(fontsize=8); ax.set_xlim([0,1]); ax.set_ylim([0,1.05])
-    ax.grid(alpha=0.3)
-for j in range(idx + 1, len(axes)):
-    axes[j].set_visible(False)
-fig.suptitle(f"Precision-Recall Curves — Optimal threshold at Recall ≥ {RECALL_TARGET}",
-             fontsize=13, fontweight="bold", y=1.01)
-plt.tight_layout()
-plt.savefig("precision_recall_curves.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → precision_recall_curves.png")
-
-# ── (F) Combined PR overlay ───────────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(11, 8))
-for idx, name in enumerate(pr_names):
-    ypr_i             = probs_test[name]
-    prec_a, rec_a, _  = precision_recall_curve(y_test, ypr_i)
-    ap_val            = average_precision_score(y_test, ypr_i)
-    ax.plot(rec_a, prec_a, lw=2, color=PALETTE[idx % len(PALETTE)],
-            linestyle=ls_cycle[idx % len(ls_cycle)],
-            label=f"{name}  (AP={ap_val:.4f})")
-ax.axhline(y_test.mean(), color="gray", lw=1.5, linestyle="--",
-           label=f"Baseline (prevalence={y_test.mean():.2f})")
-ax.set_xlabel("Recall", fontsize=12); ax.set_ylabel("Precision", fontsize=12)
-ax.set_title("Combined Precision-Recall Curves — All Models",
-             fontsize=13, fontweight="bold")
-ax.legend(fontsize=9, loc="upper right", framealpha=0.9)
-ax.set_xlim([0,1]); ax.set_ylim([0,1.05]); ax.grid(alpha=0.35)
-plt.tight_layout()
-plt.savefig("pr_combined.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → pr_combined.png")
-
-# ── (G) Calibration plot ──────────────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(9, 7))
-ax.plot([0,1],[0,1],"k--", lw=1.5, label="Perfect calibration")
-for idx, name in enumerate(roc_names):
-    try:
-        frac_pos, mean_pred = calibration_curve(
-            y_test, probs_test[name], n_bins=8)
-        ax.plot(mean_pred, frac_pos, marker="o", lw=2,
-                color=PALETTE[idx % len(PALETTE)], label=name)
-    except Exception:
-        pass
-ax.set_xlabel("Mean predicted probability")
-ax.set_ylabel("Fraction of positives")
-ax.set_title("Calibration Plot — Reliability Diagram",
-             fontsize=13, fontweight="bold")
-ax.legend(fontsize=8, loc="upper left")
-ax.set_xlim([0,1]); ax.set_ylim([0,1]); ax.grid(alpha=0.35)
-plt.tight_layout()
-plt.savefig("calibration_plot.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → calibration_plot.png")
-
-# ── (H) Permutation importance — one subplot per model ───────────────────────
-if perm_results:
-    n_pi    = len(perm_results)
-    ncols_p = 3
-    nrows_p = (n_pi + ncols_p - 1) // ncols_p
-    fig, axes = plt.subplots(nrows_p, ncols_p,
-                             figsize=(ncols_p * 6, nrows_p * 4.5))
-    axes = axes.flatten()
-    for idx, (name, perm_df_i) in enumerate(perm_results.items()):
-        ax          = axes[idx]
-        perm_sorted = perm_df_i.sort_values("Mean Drop")
-        ax.barh(perm_sorted["Feature"], perm_sorted["Mean Drop"],
-                xerr=perm_sorted["Std"],
-                color=PALETTE[idx % len(PALETTE)],
-                edgecolor="black", linewidth=0.5,
-                error_kw={"elinewidth": 1.2, "capsize": 4})
-        ax.set_title(name)
-        ax.set_xlabel("Mean Recall drop when permuted")
-        ax.axvline(0, color="gray", lw=0.8, linestyle="--")
-        ax.grid(axis="x", alpha=0.4)
-    for j in range(idx + 1, len(axes)):
-        axes[j].set_visible(False)
-    fig.suptitle("Permutation Importance — ALL Models  (Recall drop per feature)",
-                 fontsize=14, fontweight="bold", y=1.01)
-    plt.tight_layout()
-    plt.savefig("permutation_importance.png", dpi=120, bbox_inches="tight")
-    plt.close()
-    print("  → permutation_importance.png")
-
-    # ── (H2) Permutation importance consensus heatmap ────────────────────────
-    perm_mean_matrix = pd.DataFrame(
-        {name: df.set_index("Feature")["Mean Drop"]
-         for name, df in perm_results.items()}
-    )
-    fig, ax = plt.subplots(figsize=(max(10, len(perm_results) * 1.5), 6))
-    sns.heatmap(perm_mean_matrix, annot=True, fmt=".4f",
-                cmap="RdYlGn_r", center=0, linewidths=0.5, ax=ax,
-                cbar_kws={"label": "Mean Recall drop"})
-    ax.set_title("Permutation Importance Consensus — All Models",
-                 fontsize=12, fontweight="bold")
-    ax.tick_params(axis="x", rotation=30); ax.tick_params(axis="y", rotation=0)
-    plt.tight_layout()
-    plt.savefig("permutation_importance_consensus.png", dpi=120, bbox_inches="tight")
-    plt.close()
-    print("  → permutation_importance_consensus.png")
-
-# ── (I) Tree-based feature importance (tuned RF) ──────────────────────────────
-fi = pd.Series(rf_tuned.best_estimator_.feature_importances_,
-               index=FEATURES).sort_values()
-fig, ax = plt.subplots(figsize=(9, 5))
-fi.plot(kind="barh", ax=ax, color="#ED7D31", edgecolor="black")
-ax.set_title("Tree-Based Feature Importance — Tuned Random Forest")
-ax.set_xlabel("Mean Decrease in Impurity")
-ax.grid(axis="x", alpha=0.4)
-plt.tight_layout()
-plt.savefig("feature_importance.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → feature_importance.png")
-
-# ── (J) Per-fold heatmaps ─────────────────────────────────────────────────────
-fig_rows = (len(fold_summaries) + 1) // 2
-fig, axes = plt.subplots(fig_rows, 2, figsize=(18, fig_rows * 4.5))
-axes = axes.flatten()
-for idx, (name, fold_df) in enumerate(fold_summaries.items()):
-    ax = axes[idx]
-    plot_df = fold_df.copy()
-    plot_df.index = [str(i) for i in plot_df.index]
-    sns.heatmap(plot_df.astype(float), annot=True, fmt=".4f",
-                cmap="YlOrRd", linewidths=0.5, ax=ax,
-                vmin=0, vmax=1, cbar_kws={"shrink": 0.7})
-    ax.set_title(f"{name} — Per-Fold Metrics")
-    ax.tick_params(axis="y", rotation=0)
-for j in range(idx + 1, len(axes)):
-    axes[j].set_visible(False)
-fig.suptitle("Per-Fold Cross-Validation Metrics — All Models",
-             fontsize=14, fontweight="bold", y=1.01)
-plt.tight_layout()
-plt.savefig("per_fold_heatmaps.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → per_fold_heatmaps.png")
-
-# ── (K) Per-fold line charts ──────────────────────────────────────────────────
-fold_labels = [f"Fold {i}" for i in range(1, N_FOLDS + 1)]
-fig, axes   = plt.subplots(1, 2, figsize=(16, 6))
-for idx, (name, fold_df) in enumerate(fold_summaries.items()):
-    fold_only = fold_df.iloc[:N_FOLDS]
-    axes[0].plot(fold_labels, fold_only["F1"].values,
-                 marker="o", lw=2, color=PALETTE[idx % len(PALETTE)], label=name)
-    axes[1].plot(fold_labels, fold_only["Recall"].values,
-                 marker="s", lw=2, color=PALETTE[idx % len(PALETTE)], label=name)
-for ax, metric in zip(axes, ["F1 Score", "Recall"]):
-    ax.set_xlabel("Fold"); ax.set_ylabel(metric)
-    ax.set_title(f"Per-Fold {metric} — All Models")
-    ax.legend(fontsize=8, bbox_to_anchor=(1.01, 1), loc="upper left")
-    ax.set_ylim([0, 1.05]); ax.grid(alpha=0.4)
-plt.tight_layout()
-plt.savefig("per_fold_lines.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → per_fold_lines.png")
-
-# ── (L) CV box plot ───────────────────────────────────────────────────────────
-cv_data = []
-for name, fold_df in fold_summaries.items():
-    for val in fold_df["F1"].iloc[:N_FOLDS]:
-        cv_data.append({"Model": name, "CV F1": val})
-cv_df = pd.DataFrame(cv_data)
-fig, ax = plt.subplots(figsize=(14, 6))
-cv_df.boxplot(column="CV F1", by="Model", ax=ax, patch_artist=True, grid=True)
-ax.set_title("5-Fold CV F1 Distribution — All Models")
-ax.set_xlabel(""); ax.set_ylabel("F1 Score")
-plt.xticks(rotation=25, ha="right"); plt.suptitle("")
-plt.tight_layout()
-plt.savefig("cv_boxplot.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → cv_boxplot.png")
-
-# ── (M) Threshold tuning summary ─────────────────────────────────────────────
-th_names = list(threshold_results.keys())
-th_recs  = [threshold_results[n]["recall"]    for n in th_names]
-th_precs = [threshold_results[n]["precision"] for n in th_names]
-th_f1s   = [threshold_results[n]["f1"]        for n in th_names]
-th_thrs  = [threshold_results[n]["threshold"] for n in th_names]
-
-fig, axes = plt.subplots(1, 2, figsize=(16, 6))
-x_t = np.arange(len(th_names)); w_t = 0.28
-axes[0].bar(x_t - w_t, th_recs,  width=w_t, label="Recall",    color="#C44E52")
-axes[0].bar(x_t,        th_precs, width=w_t, label="Precision", color="#5B9BD5")
-axes[0].bar(x_t + w_t,  th_f1s,  width=w_t, label="F1",        color="#70AD47")
-axes[0].axhline(RECALL_TARGET, color="red", lw=1.5, linestyle="--",
-                label=f"Target recall={RECALL_TARGET}")
-axes[0].set_xticks(x_t)
-axes[0].set_xticklabels(th_names, rotation=25, ha="right")
-axes[0].set_ylim(0, 1.12)
-axes[0].set_title(f"Metrics at Optimal Threshold (recall ≥ {RECALL_TARGET})")
-axes[0].legend(fontsize=9); axes[0].grid(axis="y", alpha=0.4)
-axes[1].bar(x_t, th_thrs, color="#8172B2", edgecolor="black", linewidth=0.5)
-axes[1].axhline(0.5, color="gray", lw=1.5, linestyle="--", label="Default t=0.50")
-axes[1].set_xticks(x_t)
-axes[1].set_xticklabels(th_names, rotation=25, ha="right")
-axes[1].set_ylim(0, 1.05); axes[1].set_title("Optimal Threshold per Model")
-axes[1].set_ylabel("Threshold value")
-axes[1].legend(fontsize=9); axes[1].grid(axis="y", alpha=0.4)
-plt.tight_layout()
-plt.savefig("threshold_tuning.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → threshold_tuning.png")
-
-# ── (N) Bootstrap CI — one subplot per model ─────────────────────────────────
-n_ci    = len(all_ci)
-ncols_n = 3
-nrows_n = (n_ci + ncols_n - 1) // ncols_n
-fig, axes = plt.subplots(nrows_n, ncols_n,
-                         figsize=(ncols_n * 6, nrows_n * 4.5))
-axes = axes.flatten()
-for idx, (name, ci_df_i) in enumerate(all_ci.items()):
-    ax     = axes[idx]
-    mets   = ci_df_i.index.tolist()
-    means  = ci_df_i["Mean"].values
-    err_lo = means - ci_df_i["Lower 95%"].values
-    err_hi = ci_df_i["Upper 95%"].values - means
-    ax.bar(mets, means, color=PALETTE[idx % len(PALETTE)],
-           edgecolor="black", linewidth=0.5, alpha=0.85)
-    ax.errorbar(mets, means, yerr=[err_lo, err_hi],
-                fmt="none", color="black", capsize=6, linewidth=1.8)
-    ax.set_ylim(0, 1.18); ax.set_title(name); ax.set_ylabel("Score")
-    ax.tick_params(axis="x", rotation=20); ax.grid(axis="y", alpha=0.4)
-for j in range(idx + 1, len(axes)):
-    axes[j].set_visible(False)
-fig.suptitle(f"Bootstrap 95% CIs — ALL Models  ({N_BOOT} samples)",
-             fontsize=14, fontweight="bold", y=1.01)
-plt.tight_layout()
-plt.savefig("bootstrap_ci.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → bootstrap_ci.png")
-
-# ── (N2) Bootstrap CI recall comparison ──────────────────────────────────────
-fig, ax = plt.subplots(figsize=(12, 6))
-ci_model_names = list(all_ci.keys())
-recall_means   = [all_ci[n].loc["Recall","Mean"]      for n in ci_model_names]
-recall_lo      = [all_ci[n].loc["Recall","Lower 95%"] for n in ci_model_names]
-recall_hi      = [all_ci[n].loc["Recall","Upper 95%"] for n in ci_model_names]
-err_lo_r       = [m - lo for m, lo in zip(recall_means, recall_lo)]
-err_hi_r       = [hi - m for m, hi in zip(recall_means, recall_hi)]
-x_ci = np.arange(len(ci_model_names))
-ax.bar(x_ci, recall_means,
-       color=[PALETTE[i % len(PALETTE)] for i in range(len(ci_model_names))],
-       edgecolor="black", linewidth=0.5, alpha=0.85)
-ax.errorbar(x_ci, recall_means, yerr=[err_lo_r, err_hi_r],
-            fmt="none", color="black", capsize=7, linewidth=2)
-ax.axhline(RECALL_TARGET, color="red", lw=1.5, linestyle="--",
-           label=f"Clinical target recall = {RECALL_TARGET}")
-ax.set_xticks(x_ci)
-ax.set_xticklabels(ci_model_names, rotation=25, ha="right")
-ax.set_ylim(0, 1.15); ax.set_ylabel("Recall (with 95% CI)")
-ax.set_title("Recall Comparison with Bootstrap 95% CI — All Models",
-             fontsize=13, fontweight="bold")
-ax.legend(fontsize=10); ax.grid(axis="y", alpha=0.4)
-plt.tight_layout()
-plt.savefig("bootstrap_ci_recall_comparison.png", dpi=120, bbox_inches="tight")
-plt.close()
-print("  → bootstrap_ci_recall_comparison.png")
-
-# ── (O) SHAP (optional) ───────────────────────────────────────────────────────
-if SHAP_OK:
-    print("\n  Generating SHAP plots...")
-    try:
-        rf_model  = trained["Random Forest"]
-        explainer = shap.TreeExplainer(rf_model)
-        shap_vals = explainer.shap_values(X_test)
-
-        # FIX 9: robust SHAP value extraction — handles both list and ndarray
-        if isinstance(shap_vals, list):
-            # older SHAP: list of [class0_array, class1_array]
-            sv = shap_vals[1]
-        elif shap_vals.ndim == 3:
-            # newer SHAP: shape (n_samples, n_features, n_classes)
-            sv = shap_vals[:, :, 1]
-        else:
-            # already 2-D (binary shorthand)
-            sv = shap_vals
-
-        shap.summary_plot(sv, X_test, feature_names=FEATURES, show=False)
-        plt.savefig("shap_summary.png", dpi=120, bbox_inches="tight")
-        plt.close()
-        print("  → shap_summary.png")
-
-        shap.summary_plot(sv, X_test, feature_names=FEATURES,
-                          plot_type="bar", show=False)
-        plt.savefig("shap_bar.png", dpi=120, bbox_inches="tight")
-        plt.close()
-        print("  → shap_bar.png")
-    except Exception as e:
-        print(f"  ✗ SHAP failed: {e}")
-else:
-    print("  ✗ SHAP skipped (pip install shap to enable)")
+# print("\n" + "=" * 70)
+# print("  STEP 18 — GENERATING ALL PLOTS")
+# print("=" * 70)
+#
+# all_results_df = pd.DataFrame(summary_rows).set_index("Model")
+# ls_cycle       = ["-","--","-.",":","-","--","-.",":","-","--","-"]
+#
+# # ── (A) Model comparison bar chart ───────────────────────────────────────────
+# fig, ax = plt.subplots(figsize=(16, 6))
+# x = np.arange(len(all_results_df))
+# w = 0.12
+# met_list   = ["Accuracy","Precision","Recall","F1","ROC-AUC","PR-AUC"]
+# bar_colors = ["#5B9BD5","#ED7D31","#C44E52","#70AD47","#7030A0","#937860"]
+# for i, (met, col) in enumerate(zip(met_list, bar_colors)):
+#     ax.bar(x + i*w, all_results_df[met], width=w, label=met,
+#            color=col, edgecolor="black", linewidth=0.5)
+# ax.set_xticks(x + 2.5*w)
+# ax.set_xticklabels(all_results_df.index, rotation=25, ha="right")
+# ax.set_ylim(0, 1.15); ax.set_ylabel("Score")
+# ax.set_title("Model Comparison — All Metrics (incl. PR-AUC)")
+# ax.legend(fontsize=9); ax.grid(axis="y", alpha=0.4)
+# plt.tight_layout()
+# plt.savefig("model_comparison.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → model_comparison.png")
+#
+# # ── (B) Confusion matrices ────────────────────────────────────────────────────
+# n_m     = len(trained)
+# ncols_c = 4
+# nrows_c = (n_m + ncols_c - 1) // ncols_c
+# fig, axes = plt.subplots(nrows_c, ncols_c,
+#                          figsize=(ncols_c * 4.5, nrows_c * 4))
+# axes = axes.flatten()
+# for idx, (name, model) in enumerate(trained.items()):
+#     sc  = all_model_defs.get(name, False)
+#     Xte = X_test_scaled if sc else X_test
+#     cm  = confusion_matrix(y_test, model.predict(Xte))
+#     ConfusionMatrixDisplay(cm,
+#         display_labels=["No Problem","Has Problem"]).plot(
+#         ax=axes[idx], colorbar=False, cmap="Blues")
+#     axes[idx].set_title(name)
+# for j in range(idx + 1, len(axes)):
+#     axes[j].set_visible(False)
+# fig.suptitle("Confusion Matrices — All Models",
+#              fontsize=14, fontweight="bold")
+# plt.tight_layout()
+# plt.savefig("confusion_matrices.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → confusion_matrices.png")
+#
+# # ── (C) Individual ROC curves ─────────────────────────────────────────────────
+# roc_names = [n for n, ypr in probs_test.items() if ypr is not None]
+# ncols_r   = 4
+# nrows_r   = (len(roc_names) + ncols_r - 1) // ncols_r
+# fig, axes = plt.subplots(nrows_r, ncols_r,
+#                          figsize=(ncols_r * 5, nrows_r * 4.5))
+# axes = axes.flatten()
+# for idx, name in enumerate(roc_names):
+#     ypr_i       = probs_test[name]
+#     fpr, tpr, _ = roc_curve(y_test, ypr_i)
+#     auc_val     = roc_auc_score(y_test, ypr_i)
+#     ax          = axes[idx]
+#     ax.plot(fpr, tpr, color=PALETTE[idx % len(PALETTE)], lw=2.5,
+#             label=f"AUC = {auc_val:.4f}")
+#     ax.fill_between(fpr, tpr, alpha=0.10, color=PALETTE[idx % len(PALETTE)])
+#     ax.plot([0,1],[0,1],"k--", lw=1.2, label="Random")
+#     ax.set_xlabel("FPR", fontsize=9); ax.set_ylabel("TPR", fontsize=9)
+#     ax.set_title(f"{name}\nAUC = {auc_val:.4f}")
+#     ax.legend(fontsize=8, loc="lower right")
+#     ax.set_xlim([0,1]); ax.set_ylim([0,1.02]); ax.grid(alpha=0.3)
+# for j in range(idx + 1, len(axes)):
+#     axes[j].set_visible(False)
+# fig.suptitle("Individual ROC-AUC Curves", fontsize=14, fontweight="bold", y=1.01)
+# plt.tight_layout()
+# plt.savefig("roc_individual.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → roc_individual.png")
+#
+# # ── (D) Combined ROC overlay ──────────────────────────────────────────────────
+# fig, ax = plt.subplots(figsize=(11, 8))
+# for idx, name in enumerate(roc_names):
+#     ypr_i       = probs_test[name]
+#     fpr, tpr, _ = roc_curve(y_test, ypr_i)
+#     auc_val     = roc_auc_score(y_test, ypr_i)
+#     ax.plot(fpr, tpr, lw=2, color=PALETTE[idx % len(PALETTE)],
+#             linestyle=ls_cycle[idx % len(ls_cycle)],
+#             label=f"{name}  (AUC={auc_val:.4f})")
+# ax.plot([0,1],[0,1],"k--", lw=1.5, label="Random classifier")
+# ax.set_xlabel("False Positive Rate", fontsize=12)
+# ax.set_ylabel("True Positive Rate", fontsize=12)
+# ax.set_title("Combined ROC-AUC Curves — All Models",
+#              fontsize=13, fontweight="bold")
+# ax.legend(fontsize=9, loc="lower right", framealpha=0.9)
+# ax.set_xlim([0,1]); ax.set_ylim([0,1.02]); ax.grid(alpha=0.35)
+# plt.tight_layout()
+# plt.savefig("roc_combined.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → roc_combined.png")
+#
+# # ── (E) Individual Precision-Recall curves ────────────────────────────────────
+# pr_names  = [n for n, ypr in probs_test.items() if ypr is not None]
+# ncols_pr  = 4
+# nrows_pr  = (len(pr_names) + ncols_pr - 1) // ncols_pr
+# fig, axes = plt.subplots(nrows_pr, ncols_pr,
+#                          figsize=(ncols_pr * 5, nrows_pr * 4.5))
+# axes = axes.flatten()
+# for idx, name in enumerate(pr_names):
+#     ypr_i              = probs_test[name]
+#     prec_arr, rec_arr, _ = precision_recall_curve(y_test, ypr_i)
+#     ap_val             = average_precision_score(y_test, ypr_i)
+#     t_res              = threshold_results.get(name, {})
+#     ax                 = axes[idx]
+#     ax.plot(rec_arr, prec_arr, color=PALETTE[idx % len(PALETTE)], lw=2.5,
+#             label=f"AP = {ap_val:.4f}")
+#     if t_res:
+#         ax.scatter([t_res["recall"]], [t_res["precision"]],
+#                    color="red", s=90, zorder=5,
+#                    label=f"t={t_res['threshold']:.2f}")
+#     ax.axhline(y_test.mean(), color="gray", lw=1, linestyle="--",
+#                alpha=0.6, label="Baseline")
+#     ax.set_xlabel("Recall", fontsize=9); ax.set_ylabel("Precision", fontsize=9)
+#     ax.set_title(f"{name}\nAP = {ap_val:.4f}")
+#     ax.legend(fontsize=8); ax.set_xlim([0,1]); ax.set_ylim([0,1.05])
+#     ax.grid(alpha=0.3)
+# for j in range(idx + 1, len(axes)):
+#     axes[j].set_visible(False)
+# fig.suptitle(f"Precision-Recall Curves — Optimal threshold at Recall ≥ {RECALL_TARGET}",
+#              fontsize=13, fontweight="bold", y=1.01)
+# plt.tight_layout()
+# plt.savefig("precision_recall_curves.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → precision_recall_curves.png")
+#
+# # ── (F) Combined PR overlay ───────────────────────────────────────────────────
+# fig, ax = plt.subplots(figsize=(11, 8))
+# for idx, name in enumerate(pr_names):
+#     ypr_i             = probs_test[name]
+#     prec_a, rec_a, _  = precision_recall_curve(y_test, ypr_i)
+#     ap_val            = average_precision_score(y_test, ypr_i)
+#     ax.plot(rec_a, prec_a, lw=2, color=PALETTE[idx % len(PALETTE)],
+#             linestyle=ls_cycle[idx % len(ls_cycle)],
+#             label=f"{name}  (AP={ap_val:.4f})")
+# ax.axhline(y_test.mean(), color="gray", lw=1.5, linestyle="--",
+#            label=f"Baseline (prevalence={y_test.mean():.2f})")
+# ax.set_xlabel("Recall", fontsize=12); ax.set_ylabel("Precision", fontsize=12)
+# ax.set_title("Combined Precision-Recall Curves — All Models",
+#              fontsize=13, fontweight="bold")
+# ax.legend(fontsize=9, loc="upper right", framealpha=0.9)
+# ax.set_xlim([0,1]); ax.set_ylim([0,1.05]); ax.grid(alpha=0.35)
+# plt.tight_layout()
+# plt.savefig("pr_combined.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → pr_combined.png")
+#
+# # ── (G) Calibration plot ──────────────────────────────────────────────────────
+# fig, ax = plt.subplots(figsize=(9, 7))
+# ax.plot([0,1],[0,1],"k--", lw=1.5, label="Perfect calibration")
+# for idx, name in enumerate(roc_names):
+#     try:
+#         frac_pos, mean_pred = calibration_curve(
+#             y_test, probs_test[name], n_bins=8)
+#         ax.plot(mean_pred, frac_pos, marker="o", lw=2,
+#                 color=PALETTE[idx % len(PALETTE)], label=name)
+#     except Exception:
+#         pass
+# ax.set_xlabel("Mean predicted probability")
+# ax.set_ylabel("Fraction of positives")
+# ax.set_title("Calibration Plot — Reliability Diagram",
+#              fontsize=13, fontweight="bold")
+# ax.legend(fontsize=8, loc="upper left")
+# ax.set_xlim([0,1]); ax.set_ylim([0,1]); ax.grid(alpha=0.35)
+# plt.tight_layout()
+# plt.savefig("calibration_plot.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → calibration_plot.png")
+#
+# # ── (H) Permutation importance — one subplot per model ───────────────────────
+# if perm_results:
+#     n_pi    = len(perm_results)
+#     ncols_p = 3
+#     nrows_p = (n_pi + ncols_p - 1) // ncols_p
+#     fig, axes = plt.subplots(nrows_p, ncols_p,
+#                              figsize=(ncols_p * 6, nrows_p * 4.5))
+#     axes = axes.flatten()
+#     for idx, (name, perm_df_i) in enumerate(perm_results.items()):
+#         ax          = axes[idx]
+#         perm_sorted = perm_df_i.sort_values("Mean Drop")
+#         ax.barh(perm_sorted["Feature"], perm_sorted["Mean Drop"],
+#                 xerr=perm_sorted["Std"],
+#                 color=PALETTE[idx % len(PALETTE)],
+#                 edgecolor="black", linewidth=0.5,
+#                 error_kw={"elinewidth": 1.2, "capsize": 4})
+#         ax.set_title(name)
+#         ax.set_xlabel("Mean Recall drop when permuted")
+#         ax.axvline(0, color="gray", lw=0.8, linestyle="--")
+#         ax.grid(axis="x", alpha=0.4)
+#     for j in range(idx + 1, len(axes)):
+#         axes[j].set_visible(False)
+#     fig.suptitle("Permutation Importance — ALL Models  (Recall drop per feature)",
+#                  fontsize=14, fontweight="bold", y=1.01)
+#     plt.tight_layout()
+#     plt.savefig("permutation_importance.png", dpi=120, bbox_inches="tight")
+#     plt.close()
+#     print("  → permutation_importance.png")
+#
+#     # ── (H2) Permutation importance consensus heatmap ────────────────────────
+#     perm_mean_matrix = pd.DataFrame(
+#         {name: df.set_index("Feature")["Mean Drop"]
+#          for name, df in perm_results.items()}
+#     )
+#     fig, ax = plt.subplots(figsize=(max(10, len(perm_results) * 1.5), 6))
+#     sns.heatmap(perm_mean_matrix, annot=True, fmt=".4f",
+#                 cmap="RdYlGn_r", center=0, linewidths=0.5, ax=ax,
+#                 cbar_kws={"label": "Mean Recall drop"})
+#     ax.set_title("Permutation Importance Consensus — All Models",
+#                  fontsize=12, fontweight="bold")
+#     ax.tick_params(axis="x", rotation=30); ax.tick_params(axis="y", rotation=0)
+#     plt.tight_layout()
+#     plt.savefig("permutation_importance_consensus.png", dpi=120, bbox_inches="tight")
+#     plt.close()
+#     print("  → permutation_importance_consensus.png")
+#
+# # ── (I) Tree-based feature importance (tuned RF) ──────────────────────────────
+# fi = pd.Series(rf_tuned.best_estimator_.feature_importances_,
+#                index=FEATURES).sort_values()
+# fig, ax = plt.subplots(figsize=(9, 5))
+# fi.plot(kind="barh", ax=ax, color="#ED7D31", edgecolor="black")
+# ax.set_title("Tree-Based Feature Importance — Tuned Random Forest")
+# ax.set_xlabel("Mean Decrease in Impurity")
+# ax.grid(axis="x", alpha=0.4)
+# plt.tight_layout()
+# plt.savefig("feature_importance.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → feature_importance.png")
+#
+# # ── (J) Per-fold heatmaps ─────────────────────────────────────────────────────
+# fig_rows = (len(fold_summaries) + 1) // 2
+# fig, axes = plt.subplots(fig_rows, 2, figsize=(18, fig_rows * 4.5))
+# axes = axes.flatten()
+# for idx, (name, fold_df) in enumerate(fold_summaries.items()):
+#     ax = axes[idx]
+#     plot_df = fold_df.copy()
+#     plot_df.index = [str(i) for i in plot_df.index]
+#     sns.heatmap(plot_df.astype(float), annot=True, fmt=".4f",
+#                 cmap="YlOrRd", linewidths=0.5, ax=ax,
+#                 vmin=0, vmax=1, cbar_kws={"shrink": 0.7})
+#     ax.set_title(f"{name} — Per-Fold Metrics")
+#     ax.tick_params(axis="y", rotation=0)
+# for j in range(idx + 1, len(axes)):
+#     axes[j].set_visible(False)
+# fig.suptitle("Per-Fold Cross-Validation Metrics — All Models",
+#              fontsize=14, fontweight="bold", y=1.01)
+# plt.tight_layout()
+# plt.savefig("per_fold_heatmaps.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → per_fold_heatmaps.png")
+#
+# # ── (K) Per-fold line charts ──────────────────────────────────────────────────
+# fold_labels = [f"Fold {i}" for i in range(1, N_FOLDS + 1)]
+# fig, axes   = plt.subplots(1, 2, figsize=(16, 6))
+# for idx, (name, fold_df) in enumerate(fold_summaries.items()):
+#     fold_only = fold_df.iloc[:N_FOLDS]
+#     axes[0].plot(fold_labels, fold_only["F1"].values,
+#                  marker="o", lw=2, color=PALETTE[idx % len(PALETTE)], label=name)
+#     axes[1].plot(fold_labels, fold_only["Recall"].values,
+#                  marker="s", lw=2, color=PALETTE[idx % len(PALETTE)], label=name)
+# for ax, metric in zip(axes, ["F1 Score", "Recall"]):
+#     ax.set_xlabel("Fold"); ax.set_ylabel(metric)
+#     ax.set_title(f"Per-Fold {metric} — All Models")
+#     ax.legend(fontsize=8, bbox_to_anchor=(1.01, 1), loc="upper left")
+#     ax.set_ylim([0, 1.05]); ax.grid(alpha=0.4)
+# plt.tight_layout()
+# plt.savefig("per_fold_lines.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → per_fold_lines.png")
+#
+# # ── (L) CV box plot ───────────────────────────────────────────────────────────
+# cv_data = []
+# for name, fold_df in fold_summaries.items():
+#     for val in fold_df["F1"].iloc[:N_FOLDS]:
+#         cv_data.append({"Model": name, "CV F1": val})
+# cv_df = pd.DataFrame(cv_data)
+# fig, ax = plt.subplots(figsize=(14, 6))
+# cv_df.boxplot(column="CV F1", by="Model", ax=ax, patch_artist=True, grid=True)
+# ax.set_title("5-Fold CV F1 Distribution — All Models")
+# ax.set_xlabel(""); ax.set_ylabel("F1 Score")
+# plt.xticks(rotation=25, ha="right"); plt.suptitle("")
+# plt.tight_layout()
+# plt.savefig("cv_boxplot.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → cv_boxplot.png")
+#
+# # ── (M) Threshold tuning summary ─────────────────────────────────────────────
+# th_names = list(threshold_results.keys())
+# th_recs  = [threshold_results[n]["recall"]    for n in th_names]
+# th_precs = [threshold_results[n]["precision"] for n in th_names]
+# th_f1s   = [threshold_results[n]["f1"]        for n in th_names]
+# th_thrs  = [threshold_results[n]["threshold"] for n in th_names]
+#
+# fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+# x_t = np.arange(len(th_names)); w_t = 0.28
+# axes[0].bar(x_t - w_t, th_recs,  width=w_t, label="Recall",    color="#C44E52")
+# axes[0].bar(x_t,        th_precs, width=w_t, label="Precision", color="#5B9BD5")
+# axes[0].bar(x_t + w_t,  th_f1s,  width=w_t, label="F1",        color="#70AD47")
+# axes[0].axhline(RECALL_TARGET, color="red", lw=1.5, linestyle="--",
+#                 label=f"Target recall={RECALL_TARGET}")
+# axes[0].set_xticks(x_t)
+# axes[0].set_xticklabels(th_names, rotation=25, ha="right")
+# axes[0].set_ylim(0, 1.12)
+# axes[0].set_title(f"Metrics at Optimal Threshold (recall ≥ {RECALL_TARGET})")
+# axes[0].legend(fontsize=9); axes[0].grid(axis="y", alpha=0.4)
+# axes[1].bar(x_t, th_thrs, color="#8172B2", edgecolor="black", linewidth=0.5)
+# axes[1].axhline(0.5, color="gray", lw=1.5, linestyle="--", label="Default t=0.50")
+# axes[1].set_xticks(x_t)
+# axes[1].set_xticklabels(th_names, rotation=25, ha="right")
+# axes[1].set_ylim(0, 1.05); axes[1].set_title("Optimal Threshold per Model")
+# axes[1].set_ylabel("Threshold value")
+# axes[1].legend(fontsize=9); axes[1].grid(axis="y", alpha=0.4)
+# plt.tight_layout()
+# plt.savefig("threshold_tuning.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → threshold_tuning.png")
+#
+# # ── (N) Bootstrap CI — one subplot per model ─────────────────────────────────
+# n_ci    = len(all_ci)
+# ncols_n = 3
+# nrows_n = (n_ci + ncols_n - 1) // ncols_n
+# fig, axes = plt.subplots(nrows_n, ncols_n,
+#                          figsize=(ncols_n * 6, nrows_n * 4.5))
+# axes = axes.flatten()
+# for idx, (name, ci_df_i) in enumerate(all_ci.items()):
+#     ax     = axes[idx]
+#     mets   = ci_df_i.index.tolist()
+#     means  = ci_df_i["Mean"].values
+#     err_lo = means - ci_df_i["Lower 95%"].values
+#     err_hi = ci_df_i["Upper 95%"].values - means
+#     ax.bar(mets, means, color=PALETTE[idx % len(PALETTE)],
+#            edgecolor="black", linewidth=0.5, alpha=0.85)
+#     ax.errorbar(mets, means, yerr=[err_lo, err_hi],
+#                 fmt="none", color="black", capsize=6, linewidth=1.8)
+#     ax.set_ylim(0, 1.18); ax.set_title(name); ax.set_ylabel("Score")
+#     ax.tick_params(axis="x", rotation=20); ax.grid(axis="y", alpha=0.4)
+# for j in range(idx + 1, len(axes)):
+#     axes[j].set_visible(False)
+# fig.suptitle(f"Bootstrap 95% CIs — ALL Models  ({N_BOOT} samples)",
+#              fontsize=14, fontweight="bold", y=1.01)
+# plt.tight_layout()
+# plt.savefig("bootstrap_ci.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → bootstrap_ci.png")
+#
+# # ── (N2) Bootstrap CI recall comparison ──────────────────────────────────────
+# fig, ax = plt.subplots(figsize=(12, 6))
+# ci_model_names = list(all_ci.keys())
+# recall_means   = [all_ci[n].loc["Recall","Mean"]      for n in ci_model_names]
+# recall_lo      = [all_ci[n].loc["Recall","Lower 95%"] for n in ci_model_names]
+# recall_hi      = [all_ci[n].loc["Recall","Upper 95%"] for n in ci_model_names]
+# err_lo_r       = [m - lo for m, lo in zip(recall_means, recall_lo)]
+# err_hi_r       = [hi - m for m, hi in zip(recall_means, recall_hi)]
+# x_ci = np.arange(len(ci_model_names))
+# ax.bar(x_ci, recall_means,
+#        color=[PALETTE[i % len(PALETTE)] for i in range(len(ci_model_names))],
+#        edgecolor="black", linewidth=0.5, alpha=0.85)
+# ax.errorbar(x_ci, recall_means, yerr=[err_lo_r, err_hi_r],
+#             fmt="none", color="black", capsize=7, linewidth=2)
+# ax.axhline(RECALL_TARGET, color="red", lw=1.5, linestyle="--",
+#            label=f"Clinical target recall = {RECALL_TARGET}")
+# ax.set_xticks(x_ci)
+# ax.set_xticklabels(ci_model_names, rotation=25, ha="right")
+# ax.set_ylim(0, 1.15); ax.set_ylabel("Recall (with 95% CI)")
+# ax.set_title("Recall Comparison with Bootstrap 95% CI — All Models",
+#              fontsize=13, fontweight="bold")
+# ax.legend(fontsize=10); ax.grid(axis="y", alpha=0.4)
+# plt.tight_layout()
+# plt.savefig("bootstrap_ci_recall_comparison.png", dpi=120, bbox_inches="tight")
+# plt.close()
+# print("  → bootstrap_ci_recall_comparison.png")
+#
+# # ── (O) SHAP (optional) ───────────────────────────────────────────────────────
+# if SHAP_OK:
+#     print("\n  Generating SHAP plots...")
+#     try:
+#         rf_model  = trained["Random Forest"]
+#         explainer = shap.TreeExplainer(rf_model)
+#         shap_vals = explainer.shap_values(X_test)
+#
+#         # FIX 9: robust SHAP value extraction — handles both list and ndarray
+#         if isinstance(shap_vals, list):
+#             # older SHAP: list of [class0_array, class1_array]
+#             sv = shap_vals[1]
+#         elif shap_vals.ndim == 3:
+#             # newer SHAP: shape (n_samples, n_features, n_classes)
+#             sv = shap_vals[:, :, 1]
+#         else:
+#             # already 2-D (binary shorthand)
+#             sv = shap_vals
+#
+#         shap.summary_plot(sv, X_test, feature_names=FEATURES, show=False)
+#         plt.savefig("shap_summary.png", dpi=120, bbox_inches="tight")
+#         plt.close()
+#         print("  → shap_summary.png")
+#
+#         shap.summary_plot(sv, X_test, feature_names=FEATURES,
+#                           plot_type="bar", show=False)
+#         plt.savefig("shap_bar.png", dpi=120, bbox_inches="tight")
+#         plt.close()
+#         print("  → shap_bar.png")
+#     except Exception as e:
+#         print(f"  ✗ SHAP failed: {e}")
+# else:
+#     print("  ✗ SHAP skipped (pip install shap to enable)")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1386,19 +1406,135 @@ print(final_df.to_string())
 print("\n" + "=" * 70)
 print("  ALL DONE ✓")
 print()
-print("  PNG outputs:")
-print("    eda_feature_distributions.png       eda_correlation_heatmap.png")
-print("    smote_class_distribution.png        model_comparison.png")
-print("    confusion_matrices.png              roc_individual.png")
-print("    roc_combined.png                    precision_recall_curves.png")
-print("    pr_combined.png                     calibration_plot.png")
-print("    threshold_tuning.png                permutation_importance.png")
-print("    permutation_importance_consensus.png feature_importance.png")
-print("    per_fold_heatmaps.png               per_fold_lines.png")
-print("    cv_boxplot.png                      bootstrap_ci.png")
-print("    bootstrap_ci_recall_comparison.png")
-if SHAP_OK:
-    print("    shap_summary.png                    shap_bar.png")
+# print("  PNG outputs:")
+# print("    eda_feature_distributions.png       eda_correlation_heatmap.png")
+# print("    smote_class_distribution.png        model_comparison.png")
+# print("    confusion_matrices.png              roc_individual.png")
+# print("    roc_combined.png                    precision_recall_curves.png")
+# print("    pr_combined.png                     calibration_plot.png")
+# print("    threshold_tuning.png                permutation_importance.png")
+# print("    permutation_importance_consensus.png feature_importance.png")
+# print("    per_fold_heatmaps.png               per_fold_lines.png")
+# print("    cv_boxplot.png                      bootstrap_ci.png")
+# print("    bootstrap_ci_recall_comparison.png")
+# if SHAP_OK:
+#     print("    shap_summary.png                    shap_bar.png")
 print()
 print("  Excel: results_summary.xlsx")
+print("=" * 70)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 21 — SAVE MODEL ARTIFACTS
+# ══════════════════════════════════════════════════════════════════════════════
+print("\n" + "=" * 70)
+print("  STEP 21 — SAVE MODEL ARTIFACTS")
+print("=" * 70)
+
+from shared.model_artifacts import save_model_artifacts
+from sklearn.pipeline import Pipeline as SkPipeline
+from sklearn.compose import ColumnTransformer
+
+FEATURES_USED = FEATURES
+CONTINUOUS_COLS = [FEATURES[i] for i in CONTINUOUS_IDX]
+BINARY_COLS = [FEATURES[i] for i in BINARY_IDX]
+categorical_feature_names = []  # All 10 feeding features are numerical
+
+# Fit a named ColumnTransformer for models requiring scaling
+preprocessor_pipe = ColumnTransformer([
+    ("scale", StandardScaler(), CONTINUOUS_COLS),
+    ("passthrough", "passthrough", BINARY_COLS),
+])
+df_train_res = pd.DataFrame(X_train_res, columns=FEATURES_USED)
+preprocessor_pipe.fit(df_train_res)
+
+# Map model names to their fitted model objects and pipelines
+trained_models = dict(trained)
+
+for name, model in trained_models.items():
+    print(f"\n  Saving artifacts for {name}...")
+
+    y_pred = preds_test.get(name)
+    y_prob = probs_test.get(name)
+    raw_threshold = float(threshold_results.get(name, {}).get("threshold", 0.5))
+    best_threshold = round(raw_threshold, 2)
+    if y_prob is not None:
+        # Preserve target recall if 2-decimal rounding up drops below optimal recall
+        if recall_score(y_test, (y_prob >= best_threshold).astype(int), zero_division=0) < threshold_results.get(name, {}).get("recall", 0.90) - 1e-4:
+            import math
+            best_threshold = round(math.floor(raw_threshold * 100) / 100, 2)
+
+    if y_prob is None:
+        auc_score = float('nan')
+        y_prob_out = np.zeros_like(y_pred, dtype=float)
+    else:
+        auc_score = float(roc_auc_score(y_test, y_prob))
+        y_prob_out = y_prob
+        y_pred = (y_prob >= best_threshold).astype(int)
+
+    metrics = {
+        "accuracy": float(accuracy_score(y_test, y_pred)),
+        "precision": float(precision_score(y_test, y_pred, zero_division=0)),
+        "recall": float(recall_score(y_test, y_pred, zero_division=0)),
+        "f1": float(f1_score(y_test, y_pred, zero_division=0)),
+        "roc_auc": auc_score
+    }
+
+    report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
+    cm = confusion_matrix(y_test, y_pred).tolist()
+
+    metrics_payload = {
+        "metrics": metrics,
+        "classification_report": report,
+        "confusion_matrix": cm
+    }
+
+    # Wrap in Pipeline for artifact saving (include preprocessor if the model used scaling)
+    sc = all_model_defs.get(name, False)
+    if sc:
+        pipeline = SkPipeline([
+            ("preprocessor", preprocessor_pipe),
+            ("classifier", model)
+        ])
+    else:
+        pipeline = SkPipeline([
+            ("classifier", model)
+        ])
+
+    Xtr = X_train_scaled if sc else X_train
+    Ytr = y_train
+    y_tr_prob = model.predict_proba(Xtr)[:, 1] if hasattr(model, "predict_proba") else None
+    y_tr_pred = (y_tr_prob >= best_threshold).astype(int) if y_tr_prob is not None else model.predict(Xtr)
+    train_metrics = {
+        "accuracy": float(accuracy_score(Ytr, y_tr_pred)),
+        "precision": float(precision_score(Ytr, y_tr_pred, zero_division=0)),
+        "recall": float(recall_score(Ytr, y_tr_pred, zero_division=0)),
+        "f1": float(f1_score(Ytr, y_tr_pred, zero_division=0)),
+        "roc_auc": float(roc_auc_score(Ytr, y_tr_prob)) if y_tr_prob is not None else float("nan"),
+    }
+
+    algo_id = name.lower().replace(" ", "").replace("(", "").replace(")", "").replace("+", "_").replace("-", "")
+
+    save_model_artifacts(
+        pipeline=pipeline,
+        outcome="feeding",
+        outcome_id="feeding",
+        algorithm=algo_id,
+        label=name,
+        description=f"{name} classifier trained on breastfeeding feeding problem dataset.",
+        target_column=TARGET,
+        feature_order=FEATURES_USED,
+        categorical_features=categorical_feature_names,
+        metrics_payload=metrics_payload,
+        positive_label="Has Problem (1)",
+        negative_label="No Problem (0)",
+        threshold=best_threshold,
+        y_test=np.array(y_test),
+        y_prob=y_prob_out,
+        train_metrics=train_metrics,
+        project_root=PROJECT_ROOT,
+    )
+
+print("\n" + "=" * 70)
+print("  ALL DONE OK")
 print("=" * 70)

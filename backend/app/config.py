@@ -21,7 +21,8 @@ OUTCOME_FOLDER: dict[str, str] = {
     "nicu":"nicu",
     "iol":"iol",
     "c_section":"c_section",
-    "iugr":"iugr"
+    "iugr":"iugr",
+    "gdm":"gdm"
 }
 
 

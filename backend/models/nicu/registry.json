@@ -1,9 +1,9 @@
 {
   "outcome": "nicu",
   "outcome_id": "nicu",
-  "selection_mode": "auto",
+  "selection_mode": "manual",
   "selection_metric": "recall",
-  "active_model": "logisticregression",
+  "active_model": "xgboost",
   "models": [
     {
       "algorithm": "logisticregression",
@@ -76,29 +76,18 @@
       "critical",
       "danger"
     ],
-    "evaluated_models": 8,
-    "blocked_models": [
-      {
-        "algorithm": "stackingxgb_lgbm_rf_gb",
-        "severity": "critical",
-        "status": "Severe Overfitting"
-      },
-      {
-        "algorithm": "softvotinglr_dt_rf_gb_svm_knn_xgb_lgbm",
-        "severity": "critical",
-        "status": "Severe Overfitting"
-      }
-    ],
+    "evaluated_models": 10,
+    "blocked_models": [],
     "selected": {
-      "algorithm": "logisticregression",
+      "algorithm": "decisiontree",
       "selection_metric": "recall",
       "selection_metric_value": 1.0,
       "f1": 0.135198,
-      "roc_auc": 0.873687,
+      "roc_auc": 0.503052,
       "precision": 0.0725,
       "accuracy": 0.0725,
-      "severity": "warning",
-      "status": "Possible Underfitting/Split Instability"
+      "severity": "good",
+      "status": "Well Generalized"
     }
   }
 }

@@ -351,11 +351,8 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                             {"value": 6, "label": "Postgraduate University"},
                             {"value": 99, "label": "Unknown / Prefer not to say"}
                         ]},
-                        {"name": "child_birthweight_kgs", "label": "Child birthweight (kg)", "type": "number", "min": 0.5, "max": 6.0, "required": True, "placeholder": "e.g., 3.2"},
-                        {"name": "child_medical_complications", "label": "Child medical complications at birth", "type": "select", "required": True, "options": [
-                            {"value": 2, "label": "No"},
-                            {"value": 1, "label": "Yes"}
-                        ]},
+                        {"name": "child_birthweight_kgs", "label": "Child birthweight (kg)", "type": "number", "min": 0.5, "max": 6.0, "step": 0.01, "required": True, "placeholder": "e.g., 3.2"},
+                        {"name": "child_gest_age_weeks", "label": "Gestational age (weeks)", "type": "number", "min": 24, "max": 45, "step": 0.1, "required": True, "placeholder": "e.g., 39"},
                         {"name": "delivery_method", "label": "Delivery method", "type": "select", "required": True, "options": [
                             {"value": 1, "label": "Spontaneous Vaginal"},
                             {"value": 2, "label": "Planned Cesarean"},
@@ -364,15 +361,26 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
                             {"value": 5, "label": "Other"},
                             {"value": 99, "label": "Unknown"}
                         ]},
-                        {"name": "breastfeeding_duration_months", "label": "Breastfeeding duration (months)", "type": "number", "min": 0, "max": 82, "required": True, "placeholder": "e.g., 6"},
-                        {"name": "MH_postnatal_depression", "label": "Maternal postnatal depression", "type": "select", "required": True, "options": [
-                            {"value": 0, "label": "No"},
+                        {"name": "child_medical_complications", "label": "Child medical complications at birth", "type": "select", "required": True, "options": [
+                            {"value": 2, "label": "No"},
                             {"value": 1, "label": "Yes"}
                         ]},
-                        {"name": "MH_postnatal_anxiety", "label": "Maternal postnatal anxiety", "type": "select", "required": True, "options": [
-                            {"value": 0, "label": "No"},
-                            {"value": 1, "label": "Yes"}
-                        ]}
+                        {"name": "breastfeeding_intention", "label": "Breastfeeding intention", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Exclusive Breastfeeding"},
+                            {"value": 2, "label": "Combination Feeding"},
+                            {"value": 3, "label": "Formula Feeding"},
+                            {"value": 99, "label": "Undecided / Unknown"}
+                        ]},
+                        {"name": "breastfeeding_knowledge", "label": "Breastfeeding knowledge", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Yes / Adequate"},
+                            {"value": 2, "label": "No / Limited"},
+                            {"value": 99, "label": "Unknown"}
+                        ]},
+                        {"name": "breastfeeding_support", "label": "Breastfeeding support available", "type": "select", "required": True, "options": [
+                            {"value": 1, "label": "Yes"},
+                            {"value": 2, "label": "No"}
+                        ]},
+                        {"name": "breastfeeding_initiation_time", "label": "Breastfeeding initiation time (hours after birth)", "type": "number", "min": 0, "max": 168, "step": 0.5, "required": True, "placeholder": "e.g., 1"}
                     ]
                 }
             ]}

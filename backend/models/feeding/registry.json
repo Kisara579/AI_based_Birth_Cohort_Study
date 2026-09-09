@@ -3,84 +3,78 @@
   "outcome_id": "feeding",
   "selection_mode": "auto",
   "selection_metric": "recall",
-  "active_model": "gradientboosting",
+  "active_model": "logisticregression",
   "models": [
     {
       "algorithm": "logisticregression",
       "label": "Logistic Regression",
-      "description": "Logistic Regression classifier trained on breastfeeding dataset.",
+      "description": "Logistic Regression classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "decisiontree",
       "label": "Decision Tree",
-      "description": "Decision Tree classifier trained on breastfeeding dataset.",
+      "description": "Decision Tree classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "randomforest",
       "label": "Random Forest",
-      "description": "Random Forest classifier trained on breastfeeding dataset.",
+      "description": "Random Forest classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "gradientboosting",
       "label": "Gradient Boosting",
-      "description": "Gradient Boosting classifier trained on breastfeeding dataset.",
+      "description": "Gradient Boosting classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "svm",
       "label": "SVM",
-      "description": "SVM classifier trained on breastfeeding dataset.",
+      "description": "SVM classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "knn",
       "label": "KNN",
-      "description": "KNN classifier trained on breastfeeding dataset.",
+      "description": "KNN classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "balancedbagging",
       "label": "Balanced Bagging",
-      "description": "Balanced Bagging classifier trained on breastfeeding dataset.",
+      "description": "Balanced Bagging classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
-      "algorithm": "votingensemble",
-      "label": "Voting Ensemble",
-      "description": "Voting Ensemble classifier trained on breastfeeding dataset.",
-      "trained": true
-    },
-    {
-      "algorithm": "stackingensemble",
-      "label": "Stacking Ensemble",
-      "description": "Stacking Ensemble classifier trained on breastfeeding dataset.",
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "rftuned",
       "label": "RF Tuned",
-      "description": "RF Tuned classifier trained on breastfeeding dataset.",
+      "description": "RF Tuned classifier trained on breastfeeding feeding problem dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "votingensemble",
+      "label": "Voting Ensemble",
+      "description": "Voting Ensemble classifier trained on breastfeeding feeding problem dataset.",
+      "trained": true
+    },
+    {
+      "algorithm": "stackingensemble",
+      "label": "Stacking Ensemble",
+      "description": "Stacking Ensemble classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     },
     {
       "algorithm": "rfcalibrated",
       "label": "RF Calibrated",
-      "description": "RF Calibrated classifier trained on breastfeeding dataset.",
-      "trained": true
-    },
-    {
-      "algorithm": "voting(rf+gb+dt)",
-      "label": "Voting (RF+GB+DT)",
-      "description": "Voting (RF+GB+DT) classifier trained on breastfeeding dataset.",
-      "trained": true
-    },
-    {
-      "algorithm": "stacking(rf+gb+dt)",
-      "label": "Stacking (RF+GB+DT)",
-      "description": "Stacking (RF+GB+DT) classifier trained on breastfeeding dataset.",
+      "description": "RF Calibrated classifier trained on breastfeeding feeding problem dataset.",
       "trained": true
     }
   ],
@@ -94,16 +88,72 @@
       "critical",
       "danger"
     ],
-    "evaluated_models": 13,
-    "blocked_models": [],
+    "evaluated_models": 1,
+    "blocked_models": [
+      {
+        "algorithm": "decisiontree",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "randomforest",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "gradientboosting",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "svm",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "knn",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "balancedbagging",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "xgboost",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "rftuned",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "votingensemble",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "stackingensemble",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "rfcalibrated",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      }
+    ],
     "selected": {
-      "algorithm": "gradientboosting",
+      "algorithm": "logisticregression",
       "selection_metric": "recall",
-      "selection_metric_value": 1.0,
-      "f1": 0.978399,
-      "roc_auc": 0.489381,
-      "precision": 0.957711,
-      "accuracy": 0.957711,
+      "selection_metric_value": 0.946875,
+      "f1": 0.87069,
+      "roc_auc": 0.576486,
+      "precision": 0.805851,
+      "accuracy": 0.776119,
       "severity": "good",
       "status": "Well Generalized"
     }

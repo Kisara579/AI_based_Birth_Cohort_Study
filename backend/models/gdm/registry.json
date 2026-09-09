@@ -1,0 +1,69 @@
+{
+  "outcome": "gdm",
+  "outcome_id": "gdm",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": "knn",
+  "models": [
+    {
+      "algorithm": "decision_tree",
+      "label": "Decision Tree",
+      "description": "Decision Tree classifier with SMOTE for predicting Gestational Diabetes Mellitus.",
+      "trained": true
+    },
+    {
+      "algorithm": "knn",
+      "label": "K-Nearest Neighbors",
+      "description": "K-Nearest Neighbors (KNN) classifier with SMOTE and StandardScaler for predicting Gestational Diabetes Mellitus.",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression classifier with SMOTE and StandardScaler for predicting Gestational Diabetes Mellitus.",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Random Forest classifier with SMOTE for predicting Gestational Diabetes Mellitus.",
+      "trained": true
+    },
+    {
+      "algorithm": "svm",
+      "label": "Support Vector Machine",
+      "description": "Support Vector Machine (SVM) classifier with SMOTE and StandardScaler for predicting Gestational Diabetes Mellitus.",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost classifier with SMOTE for predicting Gestational Diabetes Mellitus.",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 6,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "knn",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.976676,
+      "f1": 0.963682,
+      "roc_auc": 0.989965,
+      "precision": 0.951029,
+      "accuracy": 0.971348,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
+}

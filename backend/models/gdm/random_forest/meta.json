@@ -1,0 +1,19 @@
+{
+  "outcome": "gdm",
+  "outcome_id": "gdm",
+  "algorithm": "random_forest",
+  "target_column": "Class Label(GDM /Non GDM)",
+  "positive_label": "GDM (1)",
+  "negative_label": "Non-GDM (0)",
+  "feature_order": [
+    "Age",
+    "No of Pregnancy",
+    "BMI",
+    "Family History",
+    "Large Child or Birth Default",
+    "PCOS",
+    "Sedentary Lifestyle"
+  ],
+  "categorical_features": [],
+  "threshold": 0.5
+}

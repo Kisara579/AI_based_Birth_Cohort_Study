@@ -348,6 +348,7 @@ def evaluate(name, fitted_model, X_te, y_te, threshold):
         "Brier"    : round(brier_score_loss(y_te, probs), 4),
         "y_pred"   : y_pred,
         "y_prob"   : probs,
+        "raw_threshold": float(threshold),
     }
 
 
@@ -1064,8 +1065,7 @@ trained_models = {
 }
 
 FEATURES_USED = FEATURES_EXT
-BINARY_IDX_NICU = list(range(len(FEATURES_USED)))  # all features are binary/integer
-categorical_feature_names = [FEATURES_USED[i] for i in BINARY_IDX_NICU]
+categorical_feature_names = []  # all features are numeric binary/integer (0/1 and risk score)
 
 for name, model in trained_models.items():
     print(f"  Saving artifacts for {name}...")
@@ -1073,15 +1073,22 @@ for name, model in trained_models.items():
     res = results[name]
     y_pred = res["y_pred"]
     y_prob = res["y_prob"]
-    best_threshold = res["Threshold"]
+    raw_thresh = res.get("raw_threshold", res["Threshold"])
     
+    # Determine the optimal threshold for saving that matches y_pred
+    t_save = round(raw_thresh, 2)
+    if y_prob is not None and not np.array_equal((y_prob >= t_save).astype(int), y_pred):
+        t_save = float(np.floor(raw_thresh * 100) / 100)
+        if not np.array_equal((y_prob >= t_save).astype(int), y_pred):
+            t_save = float(raw_thresh)
+
     if y_prob is None:
         auc_score = float('nan')
         y_prob_out = np.zeros_like(y_pred, dtype=float)
     else:
         auc_score = float(roc_auc_score(y_test, y_prob))
         y_prob_out = y_prob
-        y_pred = (y_prob >= best_threshold).astype(int)
+        # IMPORTANT: y_pred is already the true final model output from evaluate()
         
     metrics = {
         "accuracy": float(accuracy_score(y_test, y_pred)),
@@ -1105,7 +1112,23 @@ for name, model in trained_models.items():
         ("classifier", model)
     ])
 
+    # Compute train metrics aligned with the operational threshold
     train_metrics = oof_train_metrics_dict.get(name, {})
+    try:
+        if hasattr(model, "predict_proba"):
+            p_tr = model.predict_proba(X_train_raw)[:, 1]
+        else:
+            p_tr = model.decision_function(X_train_raw)
+        pred_tr = (p_tr >= raw_thresh).astype(int)
+        train_metrics = {
+            "accuracy": float(accuracy_score(y_train_raw, pred_tr)),
+            "precision": float(precision_score(y_train_raw, pred_tr, zero_division=0)),
+            "recall": float(recall_score(y_train_raw, pred_tr, zero_division=0)),
+            "f1": float(f1_score(y_train_raw, pred_tr, zero_division=0)),
+            "roc_auc": float(roc_auc_score(y_train_raw, p_tr)),
+        }
+    except Exception:
+        pass
 
     algo_id = name.lower().replace(" ", "").replace("(", "").replace(")", "").replace("+", "_")
 
@@ -1122,7 +1145,7 @@ for name, model in trained_models.items():
         metrics_payload=metrics_payload,
         positive_label="NICU (1)",
         negative_label="No NICU (0)",
-        threshold=best_threshold,
+        threshold=t_save,
         y_test=np.array(y_test),
         y_prob=y_prob_out,
         train_metrics=train_metrics,

@@ -1,0 +1,123 @@
+{
+  "outcome": "iugr",
+  "outcome_id": "iugr",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": "logistic_regression",
+  "models": [
+    {
+      "algorithm": "gradient_boosting",
+      "label": "Gradient Boosting",
+      "description": "Gradient Boosting classifier with SMOTE for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "knn",
+      "label": "K-Nearest Neighbors",
+      "description": "K-Nearest Neighbors (KNN) classifier with SMOTE and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "logistic_regression",
+      "label": "Logistic Regression",
+      "description": "Logistic Regression classifier with class_weight='balanced' and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Random Forest classifier with SMOTE oversampling and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "svm",
+      "label": "Support Vector Machine",
+      "description": "Support Vector Machine (SVM) classifier with class_weight='balanced' and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost classifier with SMOTE oversampling and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "soft_voting_ensemble (Logistic Regression + Random Forest + XGBoost)",
+      "label": "Soft Voting Ensemble(LR+RF+XGB)",
+      "description": "Soft Voting Ensemble combining Logistic Regression, Random Forest, and XGBoost with SMOTE and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    },
+    {
+      "algorithm": "stacking_ensemble(LR+RF)",
+      "label": "Stacking Ensemble(LR+RF)",
+      "description": "Stacking Ensemble combining Logistic Regression and Random Forest with Logistic Regression meta-learner, SMOTE and StandardScaler for predicting Intrauterine Growth Restriction (IUGR).",
+      "trained": true
+    }
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 0,
+    "blocked_models": [
+      {
+        "algorithm": "gradient_boosting",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "knn",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "logistic_regression",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "random_forest",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "svm",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "xgboost",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "soft_voting_ensemble (Logistic Regression + Random Forest + XGBoost)",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      },
+      {
+        "algorithm": "stacking_ensemble(LR+RF)",
+        "severity": "critical",
+        "status": "Severe Overfitting"
+      }
+    ],
+    "selected": {
+      "algorithm": "logistic_regression",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.628571,
+      "f1": 0.453608,
+      "roc_auc": 0.703013,
+      "precision": 0.354839,
+      "accuracy": 0.708791,
+      "severity": "critical",
+      "status": "Severe Overfitting",
+      "note": "Selected via fallback (all models have overfitting severity flags)"
+    }
+  }
+}

@@ -136,6 +136,167 @@ def _engineer_gdm_features(values: Dict[str, Any]) -> Dict[str, Any]:
     return v
 
 
+def _engineer_pph_features(values: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ensure PPH input features match the column names and encodings expected by the pipeline:
+      - 'Prepreg_weight_kg', 'Height_cm', 'Prepreg_BMI', 'Hb_note_at_booking',
+        'History_of_GDM_or_T2DM', 'PPH_outcome'
+    """
+    v = dict(values)
+
+    key_aliases = {
+        "prepreg_weight_kg": "Prepreg_weight_kg",
+        "weight": "Prepreg_weight_kg",
+        "weight_kg": "Prepreg_weight_kg",
+        "height_cm": "Height_cm",
+        "height": "Height_cm",
+        "prepreg_bmi": "Prepreg_BMI",
+        "bmi": "Prepreg_BMI",
+        "hb_note_at_booking": "Hb_note_at_booking",
+        "hb": "Hb_note_at_booking",
+        "hemoglobin": "Hb_note_at_booking",
+        "history_of_gdm_or_t2dm": "History_of_GDM_or_T2DM",
+        "gdm_history": "History_of_GDM_or_T2DM",
+        "diabetes_history": "History_of_GDM_or_T2DM",
+        "pph_outcome": "PPH_outcome",
+        "previous_pph": "PPH_outcome",
+    }
+    for alias, target in key_aliases.items():
+        if alias in v and target not in v:
+            v[target] = v[alias]
+
+    if "Prepreg_BMI" not in v or v["Prepreg_BMI"] is None or v["Prepreg_BMI"] == "":
+        if "Prepreg_weight_kg" in v and "Height_cm" in v:
+            try:
+                wt = float(v["Prepreg_weight_kg"])
+                ht_m = float(v["Height_cm"]) / 100.0
+                if ht_m > 0:
+                    v["Prepreg_BMI"] = round(wt / (ht_m ** 2), 1)
+            except (ValueError, TypeError, ZeroDivisionError):
+                pass
+
+    if "Hb_note_at_booking" in v:
+        hb_val = v["Hb_note_at_booking"]
+        try:
+            hb_num = float(hb_val)
+            if hb_num < 9.0:
+                v["Hb_note_at_booking"] = f"Hb: {hb_num:.1f} g/dL - Severe anaemia"
+            elif hb_num < 11.0:
+                v["Hb_note_at_booking"] = f"Hb: {hb_num:.1f} g/dL - Anaemia"
+            elif hb_num <= 13.0:
+                v["Hb_note_at_booking"] = f"Hb: {hb_num:.1f} g/dL - Normal"
+            else:
+                v["Hb_note_at_booking"] = f"Hb: {hb_num:.1f} g/dL - High"
+        except (ValueError, TypeError):
+            if isinstance(hb_val, str):
+                cleaned = hb_val.strip()
+                if cleaned.lower() == "normal":
+                    v["Hb_note_at_booking"] = "Hb: 12.0 g/dL - Normal"
+                elif cleaned.lower() in ("anaemia", "anemia"):
+                    v["Hb_note_at_booking"] = "Hb: 10.5 g/dL - Anaemia"
+                elif cleaned.lower() in ("severe anaemia", "severe anemia"):
+                    v["Hb_note_at_booking"] = "Hb: 8.5 g/dL - Severe anaemia"
+                elif cleaned.lower() == "high":
+                    v["Hb_note_at_booking"] = "Hb: 13.5 g/dL - High"
+                else:
+                    v["Hb_note_at_booking"] = cleaned
+
+    if "History_of_GDM_or_T2DM" in v:
+        gdm_val = v["History_of_GDM_or_T2DM"]
+        if isinstance(gdm_val, (int, float)):
+            v["History_of_GDM_or_T2DM"] = "yes" if int(gdm_val) == 1 else "no"
+        elif isinstance(gdm_val, str):
+            gdm_clean = gdm_val.strip().lower()
+            if gdm_clean in ("1", "yes", "true"):
+                v["History_of_GDM_or_T2DM"] = "yes"
+            elif gdm_clean in ("0", "no", "false"):
+                v["History_of_GDM_or_T2DM"] = "no"
+            elif gdm_clean in ("unknown", "2"):
+                v["History_of_GDM_or_T2DM"] = "unknown"
+
+    if "PPH_outcome" in v:
+        pph_val = v["PPH_outcome"]
+        if isinstance(pph_val, (int, float)):
+            v["PPH_outcome"] = "yes" if int(pph_val) == 1 else "no"
+        elif isinstance(pph_val, str):
+            pph_clean = pph_val.strip().lower()
+            if pph_clean in ("1", "yes", "true"):
+                v["PPH_outcome"] = "yes"
+            elif pph_clean in ("0", "no", "false"):
+                v["PPH_outcome"] = "no"
+
+    return v
+
+
+def _engineer_preeclampsia_features(values: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ensure Preeclampsia input features match numerical encoding and expected columns:
+      - 'previous_pih', 'pre_preg_weight', 'height_cm', 'booking_bmi',
+        'family_hbp', 'age_years', 'age_over_35', 'prenatal_smoking'
+    """
+    v = dict(values)
+
+    key_aliases = {
+        "Previous_PIH_Preeclampsia": "previous_pih",
+        "pih_history": "previous_pih",
+        "pre_pregnancy_weight": "pre_preg_weight",
+        "Prepreg_weight_kg": "pre_preg_weight",
+        "weight": "pre_preg_weight",
+        "Height_cm": "height_cm",
+        "height": "height_cm",
+        "Booking_BMI": "booking_bmi",
+        "bmi": "booking_bmi",
+        "pre_pregnancy_bmi": "booking_bmi",
+        "Family_history_high_BP": "family_hbp",
+        "family_history_hbp": "family_hbp",
+        "high_bp_family": "family_hbp",
+        "Age_years": "age_years",
+        "age": "age_years",
+        "Age_more_than_35": "age_over_35",
+        "age_gt_35": "age_over_35",
+        "Prenatal_smoking": "prenatal_smoking",
+        "smoking": "prenatal_smoking",
+    }
+    for alias, target in key_aliases.items():
+        if alias in v and target not in v:
+            v[target] = v[alias]
+
+    if "booking_bmi" not in v or v["booking_bmi"] is None or v["booking_bmi"] == "":
+        if "pre_preg_weight" in v and "height_cm" in v:
+            try:
+                wt = float(v["pre_preg_weight"])
+                ht_m = float(v["height_cm"]) / 100.0
+                if ht_m > 0:
+                    v["booking_bmi"] = round(wt / (ht_m ** 2), 1)
+            except (ValueError, TypeError, ZeroDivisionError):
+                pass
+
+    if ("age_over_35" not in v or v["age_over_35"] is None or v["age_over_35"] == "") and "age_years" in v:
+        try:
+            v["age_over_35"] = 1 if float(v["age_years"]) > 35 else 0
+        except (ValueError, TypeError):
+            v["age_over_35"] = 0
+
+    binary_cols = ["previous_pih", "family_hbp", "age_over_35", "prenatal_smoking"]
+    for col in binary_cols:
+        if col in v and v[col] is not None:
+            val = v[col]
+            if isinstance(val, str):
+                v[col] = 1 if val.strip().lower() in ("1", "yes", "true") else 0
+            elif isinstance(val, (int, float)):
+                v[col] = int(val)
+
+    numeric_cols = ["pre_preg_weight", "height_cm", "booking_bmi", "age_years"]
+    for col in numeric_cols:
+        if col in v and v[col] is not None:
+            try:
+                v[col] = float(v[col])
+            except (ValueError, TypeError):
+                pass
+
+    return v
+
+
 OUTCOMES: Dict[str, Dict[str, Any]] = {
     "pph": {
         "id": "pph",
@@ -143,7 +304,79 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "PPH",
         "description": "Predict risk of heavy bleeding after delivery.",
         "model_key": "pph",
-        "schema": {"title": "PPH Inputs", "sections": []}
+        "feature_engineer": _engineer_pph_features,
+        "schema": {
+            "title": "Postpartum Haemorrhage Inputs",
+            "sections": [
+                {
+                    "fields": [
+                        {
+                            "name": "Prepreg_weight_kg",
+                            "label": "Pre-pregnancy Weight (kg)",
+                            "type": "number",
+                            "min": 35.0,
+                            "max": 140.0,
+                            "step": 0.1,
+                            "required": True,
+                            "placeholder": "e.g., 59.1"
+                        },
+                        {
+                            "name": "Height_cm",
+                            "label": "Maternal Height (cm)",
+                            "type": "number",
+                            "min": 135.0,
+                            "max": 195.0,
+                            "step": 0.5,
+                            "required": True,
+                            "placeholder": "e.g., 154.6"
+                        },
+                        {
+                            "name": "Prepreg_BMI",
+                            "label": "Pre-pregnancy BMI",
+                            "type": "number",
+                            "min": 12.0,
+                            "max": 50.0,
+                            "step": 0.1,
+                            "required": True,
+                            "placeholder": "e.g., 24.7"
+                        },
+                        {
+                            "name": "Hb_note_at_booking",
+                            "label": "Hemoglobin Status at Booking",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": "Hb: 12.0 g/dL - Normal", "label": "Normal (≥ 11.0 g/dL)"},
+                                {"value": "Hb: 10.5 g/dL - Anaemia", "label": "Mild/Moderate Anaemia (9.0 - 10.9 g/dL)"},
+                                {"value": "Hb: 8.5 g/dL - Severe anaemia", "label": "Severe Anaemia (< 9.0 g/dL)"},
+                                {"value": "Hb: 13.5 g/dL - High", "label": "High (> 13.0 g/dL)"}
+                            ]
+                        },
+                        {
+                            "name": "History_of_GDM_or_T2DM",
+                            "label": "History of GDM or Type 2 Diabetes",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": "no", "label": "No"},
+                                {"value": "yes", "label": "Yes"},
+                                {"value": "unknown", "label": "Unknown"}
+                            ]
+                        },
+                        {
+                            "name": "PPH_outcome",
+                            "label": "PPH in Previous Pregnancy",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": "no", "label": "No / Primigravida"},
+                                {"value": "yes", "label": "Yes"}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
     },
 
     "preeclampsia": {
@@ -152,7 +385,96 @@ OUTCOMES: Dict[str, Dict[str, Any]] = {
         "short": "PE",
         "description": "Predict risk of hypertensive disorder during pregnancy.",
         "model_key": "preeclampsia",
-        "schema": {"title": "Preeclampsia Inputs", "sections": []}
+        "feature_engineer": _engineer_preeclampsia_features,
+        "schema": {
+            "title": "Preeclampsia Inputs",
+            "sections": [
+                {
+                    "fields": [
+                        {
+                            "name": "previous_pih",
+                            "label": "History of PIH / Preeclampsia",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": 0, "label": "No"},
+                                {"value": 1, "label": "Yes"}
+                            ]
+                        },
+                        {
+                            "name": "pre_preg_weight",
+                            "label": "Pre-pregnancy Weight (kg)",
+                            "type": "number",
+                            "min": 35.0,
+                            "max": 140.0,
+                            "step": 0.1,
+                            "required": True,
+                            "placeholder": "e.g., 59.2"
+                        },
+                        {
+                            "name": "height_cm",
+                            "label": "Maternal Height (cm)",
+                            "type": "number",
+                            "min": 135.0,
+                            "max": 195.0,
+                            "step": 0.5,
+                            "required": True,
+                            "placeholder": "e.g., 154.5"
+                        },
+                        {
+                            "name": "booking_bmi",
+                            "label": "Booking BMI",
+                            "type": "number",
+                            "min": 12.0,
+                            "max": 50.0,
+                            "step": 0.1,
+                            "required": True,
+                            "placeholder": "e.g., 24.7"
+                        },
+                        {
+                            "name": "family_hbp",
+                            "label": "Family History of High Blood Pressure",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": 0, "label": "No"},
+                                {"value": 1, "label": "Yes"}
+                            ]
+                        },
+                        {
+                            "name": "age_years",
+                            "label": "Maternal Age (years)",
+                            "type": "number",
+                            "min": 15,
+                            "max": 50,
+                            "step": 1,
+                            "required": True,
+                            "placeholder": "e.g., 29"
+                        },
+                        {
+                            "name": "age_over_35",
+                            "label": "Age > 35 Years",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": 0, "label": "No (≤ 35 years)"},
+                                {"value": 1, "label": "Yes (> 35 years)"}
+                            ]
+                        },
+                        {
+                            "name": "prenatal_smoking",
+                            "label": "Prenatal Smoking",
+                            "type": "select",
+                            "required": True,
+                            "options": [
+                                {"value": 0, "label": "No"},
+                                {"value": 1, "label": "Yes"}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
     },
 
     "iugr": {

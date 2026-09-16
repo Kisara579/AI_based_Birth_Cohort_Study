@@ -22,8 +22,11 @@ OUTCOME_FOLDER: dict[str, str] = {
     "iol":"iol",
     "c_section":"c_section",
     "iugr":"iugr",
-    "gdm":"gdm"
+    "gdm":"gdm",
+    "pph": "pph",
+    "preeclampsia": "preeclampsia"
 }
+
 
 
 def model_paths(model_key: str, algorithm: str | None = None):

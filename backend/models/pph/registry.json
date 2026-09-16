@@ -1,0 +1,15 @@
+{
+  "outcome": "pph",
+  "outcome_id": "pph",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": null,
+  "models": [
+    {
+      "algorithm": "random_forest",
+      "label": "Random Forest",
+      "description": "Random Forest model for predicting Postpartum Haemorrhage.",
+      "trained": true
+    }
+  ]
+}

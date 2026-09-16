@@ -1,0 +1,22 @@
+{
+  "outcome": "pph",
+  "outcome_id": "pph",
+  "algorithm": "random_forest",
+  "target_column": "History_of_PPH",
+  "positive_label": "Yes (1)",
+  "negative_label": "No (0)",
+  "feature_order": [
+    "Prepreg_weight_kg",
+    "Height_cm",
+    "Prepreg_BMI",
+    "Hb_note_at_booking",
+    "History_of_GDM_or_T2DM",
+    "PPH_outcome"
+  ],
+  "categorical_features": [
+    "Hb_note_at_booking",
+    "History_of_GDM_or_T2DM",
+    "PPH_outcome"
+  ],
+  "threshold": 0.5
+}

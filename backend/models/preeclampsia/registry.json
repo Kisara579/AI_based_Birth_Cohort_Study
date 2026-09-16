@@ -1,0 +1,15 @@
+{
+  "outcome": "preeclampsia",
+  "outcome_id": "preeclampsia",
+  "selection_mode": "auto",
+  "selection_metric": "recall",
+  "active_model": null,
+  "models": [
+    {
+      "algorithm": "xgboost",
+      "label": "XGBoost",
+      "description": "XGBoost model for predicting Preeclampsia.",
+      "trained": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "outcome": "preeclampsia",
+  "outcome_id": "preeclampsia",
+  "algorithm": "xgboost",
+  "target_column": "Preeclampsia",
+  "positive_label": "Preeclampsia (1)",
+  "negative_label": "Normal (0)",
+  "feature_order": [
+    "previous_pih",
+    "pre_preg_weight",
+    "height_cm",
+    "booking_bmi",
+    "family_hbp",
+    "age_years",
+    "age_over_35",
+    "prenatal_smoking"
+  ],
+  "categorical_features": [],
+  "threshold": 0.5
+}

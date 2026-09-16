@@ -3,7 +3,7 @@
   "outcome_id": "preeclampsia",
   "selection_mode": "auto",
   "selection_metric": "recall",
-  "active_model": null,
+  "active_model": "xgboost",
   "models": [
     {
       "algorithm": "xgboost",
@@ -11,5 +11,29 @@
       "description": "XGBoost model for predicting Preeclampsia.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 1,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "xgboost",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.85,
+      "f1": 0.781609,
+      "roc_auc": 0.867596,
+      "precision": 0.723404,
+      "accuracy": 0.936667,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

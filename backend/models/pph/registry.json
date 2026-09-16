@@ -3,7 +3,7 @@
   "outcome_id": "pph",
   "selection_mode": "auto",
   "selection_metric": "recall",
-  "active_model": null,
+  "active_model": "random_forest",
   "models": [
     {
       "algorithm": "random_forest",
@@ -11,5 +11,29 @@
       "description": "Random Forest model for predicting Postpartum Haemorrhage.",
       "trained": true
     }
-  ]
+  ],
+  "selection_details": {
+    "method": "clinical_priority_hierarchy_with_safety_gate",
+    "severity_priority": [
+      "good",
+      "warning"
+    ],
+    "blocked_severities": [
+      "critical",
+      "danger"
+    ],
+    "evaluated_models": 1,
+    "blocked_models": [],
+    "selected": {
+      "algorithm": "random_forest",
+      "selection_metric": "recall",
+      "selection_metric_value": 0.805556,
+      "f1": 0.763158,
+      "roc_auc": 0.854167,
+      "precision": 0.725,
+      "accuracy": 0.94,
+      "severity": "good",
+      "status": "Well Generalized"
+    }
+  }
 }

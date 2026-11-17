@@ -91,7 +91,7 @@ def models(outcome_id: str):
     if model_key is None:
         raise HTTPException(status_code=404, detail="Unknown outcome")
 
-    select_best_model(model_key)
+    active_model = select_best_model(model_key)
 
     outcome_folder = OUTCOME_FOLDER.get(model_key, model_key)
     reg_path = MODELS_DIR / outcome_folder / "registry.json"
@@ -104,6 +104,6 @@ def models(outcome_id: str):
 
     registry = json.loads(reg_path.read_text(encoding="utf-8"))
     return {
-        "active_model": registry.get("active_model"),
+        "active_model": active_model,
         "models": registry.get("models", [])
     }

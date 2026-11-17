@@ -957,6 +957,10 @@ def select_best_model(outcome: str):
         if best_model is None:
             raise RuntimeError("No valid trained model found")
 
+    # LBW requests can run with read-only model artifacts.
+    if outcome == "lbw":
+        return best_model
+
     # update registry
     registry["active_model"] = best_model
     registry["selection_metric"] = "recall"

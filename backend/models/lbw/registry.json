@@ -1,9 +1,8 @@
 {
   "outcome": "lbw",
   "outcome_id": "lbw",
-  "selection_mode": "auto",
-  "selection_metric": "recall",
-  "active_model": "xgboost",
+  "selection_mode": "manual",
+  "active_model": "lr_svm_lgbm_soft_voting",
   "models": [
     {
       "algorithm": "catboost",
@@ -65,29 +64,5 @@
       "description": "XGBoost classifier for low birth weight prediction with SMOTE resampling.",
       "trained": true
     }
-  ],
-  "selection_details": {
-    "method": "clinical_priority_hierarchy_with_safety_gate",
-    "severity_priority": [
-      "good",
-      "warning"
-    ],
-    "blocked_severities": [
-      "critical",
-      "danger"
-    ],
-    "evaluated_models": 10,
-    "blocked_models": [],
-    "selected": {
-      "algorithm": "xgboost",
-      "selection_metric": "recall",
-      "selection_metric_value": 0.576014,
-      "f1": 0.578419,
-      "roc_auc": 0.89238,
-      "precision": 0.580844,
-      "accuracy": 0.936272,
-      "severity": "good",
-      "status": "Well Generalized"
-    }
-  }
+  ]
 }

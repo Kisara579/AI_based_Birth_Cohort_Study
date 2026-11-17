@@ -24,7 +24,6 @@
     "PRETERM",
     "UTERINE",
     "HYPER_ECLAMP",
-    "HYPER_CHRONIC",
     "DIABETES_HYPER",
     "PRETERM_CERVIX",
     "MEDICAL_RISK_SCORE",
@@ -34,5 +33,5 @@
     "CIG_DRINK_COMBO"
   ],
   "categorical_features": [],
-  "threshold": 0.72
+  "threshold": 0.7
 }
